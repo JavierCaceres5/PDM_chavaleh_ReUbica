@@ -43,7 +43,7 @@ fun LoginScreen(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 20.dp).padding(top = 35.dp).padding(25.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(20.dp))
@@ -68,18 +68,18 @@ fun LoginScreen(navController: NavHostController) {
         Text(
             text = buildAnnotatedString {
                 append("Accede fácilmente a negocios locales,\nproductos y servicios cerca de vos, ")
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
                     append("todo desde tu celular")
                 }
             },
             color = Color(0xFF5A3C1D),
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             fontFamily = abel,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         Text(
             text = "Correo electrónico",
@@ -109,7 +109,7 @@ fun LoginScreen(navController: NavHostController) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -159,7 +159,7 @@ fun LoginScreen(navController: NavHostController) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         Button(
             onClick = {},
@@ -169,7 +169,7 @@ fun LoginScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(horizontal = 40.dp)
         ) {
-            Text("Iniciar sesión", fontFamily = abel, color = Color.White)
+            Text("Iniciar sesión", fontFamily = abel, color = Color.White, fontSize = 18.sp)
         }
 
         Spacer(modifier = Modifier.height(30.dp))

@@ -98,7 +98,7 @@ fun WelcomeScreen(navController: NavHostController) {
         ) {
             Text(
                 text = "Conectamos negocios locales contigo",
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF5A3C1D),
                 fontSize = 18.sp,
                 fontFamily = abel,
@@ -110,7 +110,8 @@ fun WelcomeScreen(navController: NavHostController) {
                 color = Color(0xFF5A3C1D),
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
-                fontFamily = abel
+                fontFamily = abel,
+                modifier = Modifier.padding(18.dp)
             )
             Spacer(modifier = Modifier.height(25.dp))
             Button(
@@ -119,7 +120,7 @@ fun WelcomeScreen(navController: NavHostController) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = "Empecemos", color = Color.White, fontFamily = abel)
+                Text(text = "Empecemos", color = Color.White, fontFamily = abel, fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.height(15.dp))
 
@@ -131,7 +132,7 @@ fun WelcomeScreen(navController: NavHostController) {
                     SpanStyle(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF5A3C1D),
-                        fontSize = 14.sp,
+                        fontSize = 16.sp,
                         fontFamily = abel
                     ),
                     start,
