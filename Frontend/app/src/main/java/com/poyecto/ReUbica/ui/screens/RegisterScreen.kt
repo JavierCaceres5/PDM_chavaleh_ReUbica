@@ -26,7 +26,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.proyecto.ReUbica.R
+import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.LoginScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.mainNavigation
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
@@ -172,12 +176,12 @@ fun RegisterScreen(navController: NavHostController) {
             }
 
             Button(
-                onClick = {},
+                onClick = {navController.navigate(mainNavigation)},
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C), contentColor = Color.White),
                 modifier = Modifier.padding(10.dp).width(175.dp).padding(top = 15.dp),
                 shape = RectangleShape
             ) {
-                Text(text = "Registrarme", fontFamily = abel)
+                Text(text = "Registrarme", fontFamily = abel, fontSize = 16.sp)
             }
         }
     }

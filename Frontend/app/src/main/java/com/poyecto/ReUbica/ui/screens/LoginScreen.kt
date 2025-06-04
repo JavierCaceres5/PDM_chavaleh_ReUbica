@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.R
+import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.mainNavigation
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
@@ -162,7 +164,7 @@ fun LoginScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(28.dp))
 
         Button(
-            onClick = {},
+            onClick = {navController.navigate(mainNavigation)},
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
