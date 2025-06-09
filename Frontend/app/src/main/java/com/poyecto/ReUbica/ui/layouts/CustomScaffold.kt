@@ -89,7 +89,7 @@ fun CustomScaffold(){
 
             ) {
                 composable<HomeScreenNavigation>{
-                    HomeScreen(navController)
+                    HomeScreen(navController = navController)
                 }
 
                 composable<FavoritesScreenNavigation>{
