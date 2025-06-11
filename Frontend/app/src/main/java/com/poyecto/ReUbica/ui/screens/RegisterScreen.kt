@@ -34,6 +34,7 @@ import com.proyecto.ReUbica.ui.navigations.mainNavigation
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
+
     val abel = FontFamily(Font(R.font.abelregular))
 
     var name by remember { mutableStateOf("") }
@@ -178,7 +179,7 @@ fun RegisterScreen(navController: NavHostController) {
             Button(
                 onClick = {navController.navigate(mainNavigation)},
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C), contentColor = Color.White),
-                modifier = Modifier.padding(10.dp).width(175.dp).padding(top = 15.dp),
+                modifier = Modifier.padding(10.dp).width(175.dp).padding(top = 15.dp, bottom = 20.dp),
                 shape = RectangleShape
             ) {
                 Text(text = "Registrarme", fontFamily = abel, fontSize = 16.sp)

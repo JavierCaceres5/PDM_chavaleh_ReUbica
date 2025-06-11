@@ -18,18 +18,37 @@ import kotlin.toString
 @Composable
 fun BottomBar(
     navItems: List<navItem>, selectedItem: String = "nowplaying", onItemSelected: (String) -> Unit
-){
+) {
+
     Column {
+
         HorizontalDivider(color = Color(0xFFBDBDBD), thickness = 1.dp)
+
         NavigationBar(
             containerColor = Color.White
-        ){
+        ) {
             navItems.forEach { item ->
+
+                val selected = selectedItem == item.route
+
                 NavigationBarItem(
-                    selected = selectedItem == item.route,
+                    selected = selected,
                     onClick = { onItemSelected(item.route.toString()) },
-                    icon = { Icon(item.icon, contentDescription = item.title, modifier = Modifier.size(25.dp), tint = Color.Black) },
-                    label = { Text(item.title, fontWeight = FontWeight.Bold, color = Color.Black) },
+                    icon = {
+                        Icon(
+                            item.icon,
+                            contentDescription = item.title,
+                            modifier = Modifier.size(25.dp),
+                            tint = if (selected) Color.Black else Color.Gray
+                        )
+                    },
+                    label = {
+                        Text(
+                            item.title,
+                            fontWeight = FontWeight.Bold,
+                            color = if (selected) Color.Black else Color.Gray
+                        )
+                    },
                     alwaysShowLabel = true,
                     colors = NavigationBarItemDefaults.colors(
                         indicatorColor = Color.Transparent,
