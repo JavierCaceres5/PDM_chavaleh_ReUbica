@@ -42,6 +42,16 @@ android {
 
 dependencies {
 
+    //Google
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
+    //Supabase
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.auth.kt)
+    implementation(libs.ktor.client.okhttp)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -57,6 +67,13 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.appcompat)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.kotlinx.serialization.json.v160)
+    implementation(libs.postgrest.kt)
+    implementation(libs.coil.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
