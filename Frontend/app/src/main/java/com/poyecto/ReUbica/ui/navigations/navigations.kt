@@ -25,3 +25,21 @@ object FavoritesScreenNavigation
 
 @Serializable
 object mainNavigation
+
+@Serializable
+object PersonalDataNavigation
+
+@Serializable
+object NotificationsNavigation
+
+@Serializable
+object RegisterLocalNavigation
+
+@Serializable
+object LegalInformationNavigation
+
+@Serializable
+object TerminosYCondicionesNavigation
+
+@Serializable
+object PoliticaDePrivacidadNavigation

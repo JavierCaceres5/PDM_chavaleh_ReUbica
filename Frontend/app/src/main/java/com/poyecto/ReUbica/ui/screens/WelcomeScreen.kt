@@ -32,15 +32,15 @@ fun WelcomeScreen(navController: NavHostController) {
     val scrollState = rememberScrollState()
 
     val images = listOf(
-        R.drawable.selectos,
-        R.drawable.starbucks,
-        R.drawable.wendys,
-        R.drawable.pollocampero,
         R.drawable.reubica,
-        R.drawable.kfc,
-        R.drawable.bk,
-        R.drawable.mc,
-        R.drawable.dollarcity
+        R.drawable.reubica,
+        R.drawable.reubica,
+        R.drawable.reubica,
+        R.drawable.reubica,
+        R.drawable.reubica,
+        R.drawable.reubica,
+        R.drawable.reubica,
+        R.drawable.reubica
     )
 
     Column(
@@ -82,7 +82,7 @@ fun WelcomeScreen(navController: NavHostController) {
                                     Image(
                                         painter = painterResource(id = imageRes),
                                         contentDescription = null,
-                                        modifier = Modifier.fillMaxSize(0.6f)
+                                        modifier = Modifier.fillMaxSize(0.9f)
                                     )
                                 }
                             }

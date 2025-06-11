@@ -47,5 +47,6 @@ fun MainNavigation(){
         composable<mainNavigation> {
             CustomScaffold()
         }
+
     }
 }
