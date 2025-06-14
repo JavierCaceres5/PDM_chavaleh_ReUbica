@@ -115,7 +115,7 @@ fun CustomScaffold(){
 
 
                 composable<SearchScreenNavigation>{
-                    SearchScreen(navController)
+                    SearchScreen(favoritosViewModel = favoritosViewModel)
                 }
 
                 composable<ProfileScreenNavigation>{

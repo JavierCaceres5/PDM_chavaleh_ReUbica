@@ -232,8 +232,4 @@ fun SeccionRestaurantes(
 }
 
 
-data class CategoriaItem(
-    val icon: ImageVector,
-    val label: String,
-    val onClick: () -> Unit
-)
+
