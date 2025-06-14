@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -31,6 +32,7 @@ import com.poyecto.ReUbica.ui.screens.ProfileScreen
 import com.poyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocal
 import com.poyecto.ReUbica.ui.screens.SearchScreen
 import com.poyecto.ReUbica.ui.screens.TerminosYcondiciones
+import com.poyecto.ReUbica.ui.viewmodel.FavoritosViewModel
 import com.proyecto.ReUbica.ui.navigations.FavoritesScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.LegalInformationNavigation
@@ -51,6 +53,7 @@ data class navItem(
 @Composable
 fun CustomScaffold(){
 
+    val favoritosViewModel: FavoritosViewModel = viewModel()
     val navController = rememberNavController()
     var title by rememberSaveable { mutableStateOf("Home") }
     var selectedItem by rememberSaveable { mutableStateOf("nowplaying") }
@@ -102,16 +105,17 @@ fun CustomScaffold(){
                 Modifier.padding(innerPadding)
 
             ) {
-                composable<HomeScreenNavigation>{
-                    HomeScreen(navController = navController)
+                composable<HomeScreenNavigation> {
+                    HomeScreen(navController = navController, favoritosViewModel = favoritosViewModel)
                 }
 
-                composable<FavoritesScreenNavigation>{
-                    FavoriteScreen(navController)
+                composable<FavoritesScreenNavigation> {
+                    FavoriteScreen(favoritosViewModel = favoritosViewModel)
                 }
+
 
                 composable<SearchScreenNavigation>{
-                    SearchScreen(navController)
+                    SearchScreen(favoritosViewModel = favoritosViewModel)
                 }
 
                 composable<ProfileScreenNavigation>{
