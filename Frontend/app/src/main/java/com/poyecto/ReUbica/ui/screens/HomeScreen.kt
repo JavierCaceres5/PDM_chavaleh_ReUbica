@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,25 +20,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.poyecto.ReUbica.ui.Components.RestaurantCard
+import com.poyecto.ReUbica.ui.viewmodel.FavoritosViewModel
 import com.proyecto.ReUbica.R
 
-data class CategoriaItem(
-    val icon: ImageVector,
-    val label: String,
-    val onClick: () -> Unit
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavHostController, favoritosViewModel: FavoritosViewModel = viewModel()) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val textFieldState = remember { TextFieldState() }
-    var searchResults by remember { mutableStateOf(listOf<String>()) }
+    var searchQuery by remember { mutableStateOf("") }
 
     val categorias1 = listOf(
         CategoriaItem(Icons.Filled.LocalOffer, "Ropa") {},
@@ -55,59 +52,52 @@ fun HomeScreen(navController: NavHostController) {
 
     val destacados = listOf(
         Triple("El Panalito", "Chinameca", "Alimentos"),
-        Triple("Solemare", "Santa Ana", "Artesanías")
+        Triple("Solemare", "Santa Ana", "Artesanías"),
+        Triple("Pizza Ranch", "San Miguel", "Comida"),
+        Triple("Arte Maya", "Ahuachapán", "Artesanías")
     )
 
-    fun onSearch(query: String) {}
+    val resultadosFiltrados = destacados.filter {
+        searchQuery.isBlank() ||
+                it.first.contains(searchQuery, ignoreCase = true) ||
+                it.second.contains(searchQuery, ignoreCase = true) ||
+                it.third.contains(searchQuery, ignoreCase = true)
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // SearchBar
-        SearchBar(
+        //  Search Bar Custom
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            colors = SearchBarDefaults.colors(containerColor = Color(0xFFF7F8EF)),
-            inputField = {
-                SearchBarDefaults.InputField(
-                    query = textFieldState.text.toString(),
-                    onQueryChange = {
-                        textFieldState.edit { replace(0, length, it) }
-                        expanded = true
-                    },
-                    onSearch = {
-                        onSearch(textFieldState.text.toString())
-                        expanded = false
-                    },
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it },
-                    placeholder = {
-                        Text("Locales, platos y productos", color = Color.Black, fontSize = 14.sp)
-                    },
-                    leadingIcon = {
-                        Box(
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .background(Color(0xFFDFF2E1), RoundedCornerShape(50))
-                                .padding(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = Color.Black
-                            )
-                        }
-                    }
+                .padding(16.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Color(0xFFF7F8EF))
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.Black
                 )
-            },
-            expanded = expanded,
-            onExpandedChange = { expanded = it },
-        ) {}
+                Spacer(modifier = Modifier.width(8.dp))
+                BasicTextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                    },
 
-        //  Categorías
+                    singleLine = true,
+                    textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             Text("Categorías", fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
             Spacer(modifier = Modifier.height(16.dp))
@@ -127,7 +117,6 @@ fun HomeScreen(navController: NavHostController) {
             }
         }
 
-        // Anuncio
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -158,16 +147,16 @@ fun HomeScreen(navController: NavHostController) {
             )
         }
 
-        // Mejores Restaurantes
         SeccionRestaurantes(
             titulo = "Los mejores restaurantes",
-            destacados = destacados
+            destacados = resultadosFiltrados,
+            favoritosViewModel = favoritosViewModel
         )
 
-        // Según tus preferencias
         SeccionRestaurantes(
             titulo = "Según tus preferencias",
-            destacados = destacados
+            destacados = resultadosFiltrados,
+            favoritosViewModel = favoritosViewModel
         )
     }
 }
@@ -200,7 +189,11 @@ fun CategoriaBox(categoria: CategoriaItem, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SeccionRestaurantes(titulo: String, destacados: List<Triple<String, String, String>>) {
+fun SeccionRestaurantes(
+    titulo: String,
+    destacados: List<Triple<String, String, String>>,
+    favoritosViewModel: FavoritosViewModel
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -218,15 +211,29 @@ fun SeccionRestaurantes(titulo: String, destacados: List<Triple<String, String, 
     ) {
         items(destacados.size) { index ->
             val (nombre, departamento, categoria) = destacados[index]
+            val isFavorito = favoritosViewModel.isFavorito(nombre)
             RestaurantCard(
                 nombre = nombre,
                 departamento = departamento,
                 categoria = categoria,
                 imagenRes = R.drawable.reubica,
-                isFavorito = false,
-                onFavoritoClick = {},
+                isFavorito = isFavorito,
+                onFavoritoClick = {
+                    favoritosViewModel.toggleFavorito(
+                        nombre = nombre,
+                        departamento = departamento,
+                        categoria = categoria
+                    )
+                },
                 onVerTiendaClick = {}
             )
         }
     }
 }
+
+
+data class CategoriaItem(
+    val icon: ImageVector,
+    val label: String,
+    val onClick: () -> Unit
+)
