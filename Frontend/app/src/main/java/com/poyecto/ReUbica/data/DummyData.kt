@@ -2,7 +2,7 @@ package com.poyecto.ReUbica.data
 
 import com.google.android.gms.maps.model.LatLng
 
-val dummyBusiness = Business(
+val dummyBusiness = Comercio(
     name = "Solemare",
     description = "Diseños únicos, hechos a mano con amor...",
     hours = "Horario 2–5 pm",
