@@ -46,8 +46,9 @@ import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
-import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.clickable
+
 
 
 @Composable
@@ -67,10 +68,12 @@ fun RegisterLocalScreen2Content(
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
 
     var horario by remember { mutableStateOf("") }
-    var direccion by remember { mutableStateOf("") }
+    var direccionInput by remember { mutableStateOf(TextFieldValue("")) }
+    var direccionConfirmada by remember { mutableStateOf("") }
 
-    var showMap by remember { mutableStateOf(false) } // mapa oculto al inicio
-    var showRedes by remember { mutableStateOf(false) } // redes sociales ocultas al inicio
+
+    var showMap by remember { mutableStateOf(false) }
+    var showRedes by remember { mutableStateOf(false) }
 
     var instagram by remember { mutableStateOf("") }
     var facebook by remember { mutableStateOf("") }
@@ -84,7 +87,7 @@ fun RegisterLocalScreen2Content(
     val cameraPositionState = rememberCameraPositionState()
     val markerState = remember { MarkerState(position = location) }
 
-    val camposValidos = horario.isNotBlank() && direccion.isNotBlank()
+    val camposValidos = horario.isNotBlank() && direccionInput.text.isNotBlank()
 
     Column(Modifier.fillMaxSize()) {
         StepTopBar(step = 2, title = "Datos del negocio", onBackClick = onBack)
@@ -136,87 +139,114 @@ fun RegisterLocalScreen2Content(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text("Dirección completa del local", fontFamily = poppins, fontSize = 14.sp, color = Color(0xFF5A3C1D), modifier = Modifier.fillMaxWidth())
+
             val context = LocalContext.current
             val placesClient = Places.createClient(context)
             val suggestions = remember { mutableStateListOf<AutocompletePrediction>() }
-            var expanded by remember { mutableStateOf(false) }
+            var showDropdown by remember { mutableStateOf(false) }
 
-            val launcher = rememberCoroutineScope()
+            Column(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = direccionInput,
+                    onValueChange = {
+                        direccionInput = it
+                        showDropdown = true
 
-            OutlinedTextField(
-                value = direccion,
-                onValueChange = {
-                    direccion = it
-                    expanded = true
-                    val request = FindAutocompletePredictionsRequest.builder()
-                        .setQuery(it)
-                        .setCountries("SV")
-                        .setTypeFilter(TypeFilter.ADDRESS)
-                        .build()
+                        coroutineScope.launch {
+                            val request = FindAutocompletePredictionsRequest.builder()
+                                .setQuery(it.text)
+                                .setCountries("SV")
+                                .setTypeFilter(TypeFilter.ADDRESS)
+                                .build()
 
-                    placesClient.findAutocompletePredictions(request)
-                        .addOnSuccessListener { response ->
-                            suggestions.clear()
-                            suggestions.addAll(response.autocompletePredictions)
+                            placesClient.findAutocompletePredictions(request)
+                                .addOnSuccessListener { response ->
+                                    suggestions.clear()
+                                    suggestions.addAll(response.autocompletePredictions)
+                                }
+                                .addOnFailureListener {
+                                    Log.e("Places", "Error buscando sugerencias: ${it.message}")
+                                }
                         }
-                        .addOnFailureListener {
-                            Log.e("Places", "Error buscando sugerencias: ${it.message}")
-                        }
-                },
-                placeholder = { Text("Buscar", fontFamily = abel, color = Color.Black) },
-                textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                leadingIcon = {
-                    IconButton(onClick = {
-                        if (direccion.isNotBlank()) {
-                            coroutineScope.launch {
-                                val coords = getCoordinatesFromAddress(direccion)
-                                coords?.let {
-                                    location = it
-                                    markerState.position = it
-                                    cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
+                    },
+                    placeholder = { Text("Buscar", fontFamily = abel, color = Color.Black) },
+                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                    leadingIcon = {
+                        IconButton(onClick = {
+                            if (direccionInput.text.isNotBlank()) {
+                                coroutineScope.launch {
+                                    val coords = getCoordinatesFromAddress(direccionInput.text)
+                                    coords?.let {
+                                        location = it
+                                        markerState.position = it
+                                        cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
+                                    }
                                 }
                             }
+                        }) {
+                            Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.Black)
                         }
-                    }) {
-                        Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.Black)
-                    }
-
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFDFF2E1), shape = RoundedCornerShape(8.dp)),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFDFF2E1), shape = RoundedCornerShape(8.dp)),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent
+                    ),
+                    singleLine = true
                 )
-            )
 
-            DropdownMenu(
-                expanded = expanded && suggestions.isNotEmpty(),
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-            ) {
-                suggestions.forEach { prediction ->
-                    DropdownMenuItem(
-                        text = { Text(prediction.getFullText(null).toString(), color = Color.Black) },
-                        onClick = {
-                            direccion = prediction.getFullText(null).toString()
-                            expanded = false
+                if (showDropdown && suggestions.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White, shape = RoundedCornerShape(10.dp))
+                            .border(1.dp, Color(0xFF49724C), shape = RoundedCornerShape(10.dp))
+                            .padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 8.dp)
+                            .heightIn(max = 200.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        suggestions.forEachIndexed { index, prediction ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color(0xFFDFF2E1))
+                                    .clickable {
+                                        direccionInput = TextFieldValue(prediction.getFullText(null).toString())
+                                        direccionConfirmada = prediction.getFullText(null).toString()
+                                        showDropdown = false
+                                        suggestions.clear()
 
-                            coroutineScope.launch {
-                                val coords = getCoordinatesFromAddress(direccion)
-                                coords?.let {
-                                    location = it
-                                    markerState.position = it
-                                    cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
-                                }
+                                        coroutineScope.launch {
+                                            val coords = getCoordinatesFromAddress(direccionInput.text)
+                                            coords?.let {
+                                                location = it
+                                                markerState.position = it
+                                                cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
+                                            }
+                                        }
+                                    }
+                                    .padding(vertical = 10.dp, horizontal = 14.dp)
+                            ) {
+                                Text(
+                                    text = prediction.getFullText(null).toString(),
+                                    color = Color.Black,
+                                    fontFamily = abel,
+                                    modifier = Modifier.align(Alignment.CenterStart)
+                                )
+                            }
+
+                            if (index != suggestions.lastIndex) {
+                                Spacer(modifier = Modifier.height(6.dp))
                             }
                         }
-                    )
+                    }
                 }
             }
+
 
 
             TextButton(
@@ -297,7 +327,7 @@ fun RedesSociales(iconId: Int, value: String, onValueChange: (String) -> Unit) {
 
     Column(modifier = Modifier
         .fillMaxWidth()
-        .padding(bottom = 8.dp)) // Espacio uniforme entre redes
+        .padding(bottom = 8.dp))
     {
         Row(
             modifier = Modifier

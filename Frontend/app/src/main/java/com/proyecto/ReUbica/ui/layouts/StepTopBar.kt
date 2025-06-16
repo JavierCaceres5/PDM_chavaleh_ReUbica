@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -38,26 +37,20 @@ fun StepTopBar(
             imageVector = Icons.Default.ArrowBack,
             contentDescription = "Volver",
             tint = Color(0xFF5A3C1D),
-            modifier = Modifier.clickable { onBackClick() }
+            modifier = Modifier
+                .size(24.dp)
+                .clickable { onBackClick() }
         )
 
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(20.dp))
 
-        Icon(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Logo",
-            modifier = Modifier.size(28.dp)
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             StepCircle(1, step == 1)
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             StepCircle(2, step == 2)
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
         Text(
             text = title,
@@ -72,17 +65,16 @@ fun StepTopBar(
 private fun StepCircle(step: Int, active: Boolean) {
     Box(
         modifier = Modifier
-            .size(22.dp)
+            .size(26.dp)
             .clip(CircleShape)
-            .background(
-                if (active) Color(0xFF49724C) else Color(0xFFDFF2E1)
-            ),
+            .background(if (active) Color(0xFF49724C) else Color(0xFFDFF2E1)),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = step.toString(),
+            fontFamily = FontFamily(Font(R.font.poppinsextrabold)),
             color = if (active) Color.White else Color(0xFF49724C),
-            fontSize = 12.sp
+            fontSize = 13.sp
         )
     }
 }

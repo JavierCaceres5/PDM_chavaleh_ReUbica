@@ -122,6 +122,7 @@ fun RegisterLocalScreen1Content(
                     tipoNegocio = it
                     categoria = ""
                 })
+            Spacer(modifier = Modifier.height(8.dp))
 
             Dropdown("Categoría", categoria, subcategorias, expandedCategoria,
                 onExpandedChange = { expandedCategoria = it }, onSelect = { categoria = it })
@@ -197,7 +198,7 @@ fun RegisterLocalScreen1Content(
 @Composable
 fun Text(label: String, value: String, onChange: (String) -> Unit) {
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
-    val abel = FontFamily(Font(R.font.abelregular)) // para el placeholder
+    val abel = FontFamily(Font(R.font.abelregular))
 
     Column(
         modifier = Modifier
@@ -247,19 +248,57 @@ fun Dropdown(
     onSelect: (String) -> Unit
 ) {
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
+    val abel = FontFamily(Font(R.font.abelregular))
     var textFieldSize by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
 
-    Column(modifier = Modifier.padding(bottom = 12.dp)) {
-        Text(
-            text = label,
-            fontFamily = poppins,
-            fontSize = 14.sp,
-            color = Color(0xFF5A3C1D),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 2.dp)
-        )
-        Box {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            if (expanded && options.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
+                        .background(Color.White, shape = RoundedCornerShape(10.dp))
+                        .border(1.dp, Color(0xFF49724C), shape = RoundedCornerShape(10.dp))
+                        .padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 8.dp)
+                ) {
+                    options.forEachIndexed { index, item ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFFDFF2E1))
+                                .clickable {
+                                    onSelect(item)
+                                    onExpandedChange(false)
+                                }
+                                .padding(vertical = 10.dp, horizontal = 14.dp)
+                        ) {
+                            Text(
+                                text = item.replaceFirstChar(Char::uppercase),
+                                fontFamily = abel,
+                                fontSize = 14.sp,
+                                color = Color.Black,
+                                modifier = Modifier.align(Alignment.CenterStart)
+                            )
+                        }
+
+                        if (index != options.lastIndex) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                        }
+                    }
+                }
+            }
+
+            Text(
+                text = label,
+                fontFamily = poppins,
+                fontSize = 14.sp,
+                color = Color(0xFF5A3C1D),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 2.dp)
+            )
+
             OutlinedTextField(
                 value = value.ifBlank { "--Ninguno--" }.replaceFirstChar { it.uppercase() },
                 onValueChange = {},
@@ -277,27 +316,15 @@ fun Dropdown(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xFFDFF2E1), RoundedCornerShape(8.dp))
-                    .onGloballyPositioned { textFieldSize = it.size.toSize() },
+                    .onGloballyPositioned { coordinates ->
+                        textFieldSize = coordinates.size.toSize()
+                    },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent
                 )
             )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { onExpandedChange(false) },
-                modifier = Modifier.width(with(LocalDensity.current) { textFieldSize.width.toDp() })
-            ) {
-                options.forEach {
-                    DropdownMenuItem(
-                        text = { Text(it.replaceFirstChar(Char::uppercase)) },
-                        onClick = {
-                            onSelect(it)
-                            onExpandedChange(false)
-                        }
-                    )
-                }
-            }
         }
     }
 }
+

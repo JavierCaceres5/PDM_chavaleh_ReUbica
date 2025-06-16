@@ -98,7 +98,7 @@ fun RegisterLocalScreen3Content(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Label afuera del campo
+
             Text("Nombre del producto", fontFamily = poppins, fontSize = 14.sp, color = Color(0xFF5A3C1D), modifier = Modifier.fillMaxWidth())
             ProductInputField("Nombre del producto", nombre) { nombre = it }
             Spacer(modifier = Modifier.height(12.dp))
@@ -262,7 +262,6 @@ fun RegisterLocalScreen3Content(
                 dismissButton = {
                     Button(
                         onClick = {
-                            // Revertir el conteo
                             if (contadorProductos > 0) contadorProductos--
                             showDialog = false
                         },
