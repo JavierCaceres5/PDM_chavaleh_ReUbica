@@ -21,7 +21,6 @@ lifecycleViewmodelCompose = "2.9.0"
 lifecycleViewmodelKtx = "2.9.0"
 lifecycleRuntimeKtxVersion = "2.9.0"
 appcompat = "1.7.0"
-
 bom = "3.1.1"
 credentials = "1.5.0-rc01"
 googleid = "1.1.1"
@@ -42,6 +41,8 @@ auth-kt = { module = "io.github.jan-tennert.supabase:auth-kt"}
 supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "bom" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor"}
 
+
+[libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -74,8 +75,6 @@ maps-compose = { group = "com.google.maps.android", name = "maps-compose", versi
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-
-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

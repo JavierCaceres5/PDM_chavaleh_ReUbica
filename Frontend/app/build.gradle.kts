@@ -1,10 +1,12 @@
+
 import java.util.Properties
 import java.io.FileInputStream
 
 val localProperties = Properties().apply {
     load(FileInputStream(File(rootDir, "local.properties")))
 }
-plugins {
+    plugins {
+
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -23,6 +25,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         manifestPlaceholders["MAPS_API_KEY"] = localProperties["MAPS_API_KEY"] as String
         buildConfigField("String", "MAPS_API_KEY", "\"${localProperties["MAPS_API_KEY"]}\"")
 
@@ -46,8 +49,10 @@ android {
     }
     buildFeatures {
         compose = true
+
         viewBinding = true
         buildConfig = true
+
     }
 }
 
@@ -62,8 +67,7 @@ dependencies {
     implementation(platform(libs.supabase.bom))
     implementation(libs.auth.kt)
     implementation(libs.ktor.client.okhttp)
-    //Google maps
-
+ 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -85,11 +89,13 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.kotlinx.serialization.json.v160)
     implementation( libs.material3)
+
     implementation(libs.coil.compose)
     implementation(libs.maps.compose)
     implementation(libs.play.services.maps)
     implementation(libs.places)
     implementation(libs.material)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
