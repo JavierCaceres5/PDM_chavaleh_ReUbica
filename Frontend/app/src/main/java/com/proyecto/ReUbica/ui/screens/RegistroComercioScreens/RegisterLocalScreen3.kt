@@ -28,13 +28,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.proyecto.ReUbica.R
-import com.proyecto.ReUbica.ui.layouts.CustomScaffold
 import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.BorderStroke
-import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
+
 
 @Composable
 fun RegisterLocalScreen3(navController: NavHostController) {

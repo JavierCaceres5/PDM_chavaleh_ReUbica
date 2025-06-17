@@ -1,7 +1,6 @@
 package com.proyecto.ReUbica.ui.screens.RegistroComercioScreens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,10 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.R
-import com.proyecto.ReUbica.ui.layouts.CustomScaffold
 import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
-import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
+
 
 @Composable
 fun RegisterLocalScreen4(navController: NavHostController) {

@@ -1,13 +1,11 @@
 package com.proyecto.ReUbica.ui.screens.RegistroComercioScreens
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -16,22 +14,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import com.proyecto.ReUbica.R
-import com.proyecto.ReUbica.ui.layouts.CustomScaffold
 import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +40,8 @@ import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
+import com.proyecto.ReUbica.BuildConfig
+
 
 
 
@@ -370,7 +364,7 @@ fun RedesSociales(iconId: Int, value: String, onValueChange: (String) -> Unit) {
 
 suspend fun getCoordinatesFromAddress(address: String): LatLng? = withContext(Dispatchers.IO) {
     try {
-        val apiKey = "AIzaSyAz8fzjMNnhHgoIHZuxrhIHpNo2brGAqBI"
+        val apiKey = BuildConfig.MAPS_API_KEY
         val url = "https://maps.googleapis.com/maps/api/geocode/json?address=${address.replace(" ", "+")}&components=country:SV&key=$apiKey"
         val response = URL(url).readText()
         val json = JSONObject(response)

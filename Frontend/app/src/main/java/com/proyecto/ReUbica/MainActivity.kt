@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, "AIzaSyAz8fzjMNnhHgoIHZuxrhIHpNo2brGAqBI")
+            Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
         }
         enableEdgeToEdge()
         setContent {
