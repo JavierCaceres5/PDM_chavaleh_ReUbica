@@ -43,10 +43,18 @@ object TerminosYCondicionesNavigation
 
 @Serializable
 object PoliticaDePrivacidadNavigation
-@Serializable object RegisterLocalScreen1Navigation
 
-@Serializable object RegisterLocalScreen2Navigation
+@Serializable
+object RegisterLocalScreen1Navigation
 
-@Serializable object RegisterLocalScreen3Navigation
+@Serializable
+object RegisterLocalScreen2Navigation
 
-@Serializable object RegisterLocalScreen4Navigation
+@Serializable
+object RegisterLocalScreen3Navigation
+
+@Serializable
+object RegisterLocalScreen4Navigation
+
+@Serializable
+object SessionCheckNavigation

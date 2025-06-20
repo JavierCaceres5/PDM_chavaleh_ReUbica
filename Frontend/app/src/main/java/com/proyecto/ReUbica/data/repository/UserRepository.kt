@@ -1,0 +1,21 @@
+package com.proyecto.ReUbica.data.repository
+
+import retrofit2.Response
+import com.proyecto.ReUbica.data.model.user.UserLoginRequest
+import com.proyecto.ReUbica.data.model.user.UserLoginResponse
+import com.proyecto.ReUbica.data.model.user.UserRegisterRequest
+import com.proyecto.ReUbica.network.RetrofitInstance
+
+class UserRepository {
+
+    private val api = RetrofitInstance.api
+
+    suspend fun register(request: UserRegisterRequest): Response<UserLoginResponse> {
+        return api.register(request)
+    }
+
+    suspend fun login(request: UserLoginRequest): Response<UserLoginResponse> {
+        return api.login(request)
+    }
+
+}

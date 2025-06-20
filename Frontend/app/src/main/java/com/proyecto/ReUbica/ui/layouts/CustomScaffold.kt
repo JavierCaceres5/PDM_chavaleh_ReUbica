@@ -17,22 +17,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.proyecto.ReUbica.ui.screens.FavoriteScreen
+import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
 import com.proyecto.ReUbica.ui.screens.HomeScreen
 import com.proyecto.ReUbica.ui.screens.LegalInformationScreen
 import com.proyecto.ReUbica.ui.screens.NotificationsScreen
-import com.proyecto.ReUbica.ui.screens.PersonalInformationScreen
+import com.proyecto.ReUbica.ui.screens.PersonalInformationScreen.PersonalInformationScreen
 import com.proyecto.ReUbica.ui.screens.PoliticaDePrivacidad
-import com.proyecto.ReUbica.ui.screens.ProfileScreen
+import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreen
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocal
 import com.proyecto.ReUbica.ui.screens.SearchScreen
 import com.proyecto.ReUbica.ui.screens.TerminosYcondiciones
-import com.proyecto.ReUbica.ui.viewmodel.FavoritosViewModel
+import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.ui.navigations.FavoritesScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.LegalInformationNavigation
@@ -47,10 +50,12 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
 import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
+import com.proyecto.ReUbica.ui.screens.PersonalInformationScreen.PersonalInformationViewModel
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen3
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen4
+import com.proyecto.ReUbica.ui.screens.RegisterScreen.RegisterScreenViewModel
 
 data class navItem(
     val title: String,
@@ -59,20 +64,22 @@ data class navItem(
 )
 
 @Composable
-fun CustomScaffold(){
+fun CustomScaffold(rootNavController: NavHostController){
 
-    val favoritosViewModel: FavoritosViewModel = viewModel()
     val navController = rememberNavController()
     var title by rememberSaveable { mutableStateOf("Home") }
     var selectedItem by rememberSaveable { mutableStateOf("nowplaying") }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val favoritosViewModel: FavoritosViewModel = viewModel()
+
+
     val navItems = listOf(
         navItem("Inicio", Icons.Filled.Home, "nowplaying"),
         navItem("Buscar", Icons.Default.Search, "search"),
-        navItem("Mi cuenta", Icons.Filled.AccountCircle, "account"),
-        navItem("Favoritos", Icons.Default.Favorite, "favorites")
+        navItem("Favoritos", Icons.Default.Favorite, "favorites"),
+        navItem("Mi cuenta", Icons.Filled.AccountCircle, "account")
     )
 
     fun onItemSelected(currentItem: String) {
@@ -80,15 +87,15 @@ fun CustomScaffold(){
         title = when (currentItem) {
             "nowplaying" -> "Inicio"
             "search" -> "Buscar"
-            "account" -> "Mi cuenta"
             "favorites" -> "Favoritos"
+            "account" -> "Mi cuenta"
             else -> "Inicio"
         }
         when (currentItem) {
             "nowplaying" -> navController.navigate(HomeScreenNavigation)
             "search" -> navController.navigate(SearchScreenNavigation)
-            "account" -> navController.navigate(ProfileScreenNavigation)
             "favorites" -> navController.navigate(FavoritesScreenNavigation)
+            "account" -> navController.navigate(ProfileScreenNavigation)
             else -> navController.navigate(HomeScreenNavigation)
         }
     }
@@ -113,6 +120,7 @@ fun CustomScaffold(){
                 Modifier.padding(innerPadding)
 
             ) {
+
                 composable<HomeScreenNavigation> {
                     HomeScreen(navController = navController, favoritosViewModel = favoritosViewModel)
                 }
@@ -121,13 +129,12 @@ fun CustomScaffold(){
                     FavoriteScreen(favoritosViewModel = favoritosViewModel)
                 }
 
-
                 composable<SearchScreenNavigation>{
                     SearchScreen(favoritosViewModel = favoritosViewModel)
                 }
 
                 composable<ProfileScreenNavigation>{
-                    ProfileScreen(navController)
+                    ProfileScreen(navController = navController, rootNavController = rootNavController)
                 }
 
                 composable<PersonalDataNavigation> {
