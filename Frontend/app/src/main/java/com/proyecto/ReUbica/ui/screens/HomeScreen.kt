@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.ui.Components.RestaurantCard
-import com.proyecto.ReUbica.ui.viewmodel.FavoritosViewModel
+import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.R
 
 @OptIn(ExperimentalMaterial3Api::class)

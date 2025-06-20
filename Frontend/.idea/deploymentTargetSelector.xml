@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="ReUbica.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-16T21:21:39.759072200Z">
+        <DropdownSelection timestamp="2025-06-19T21:16:48.712783700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=RFCW20CTLFP" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=RFCR100F0TH" />
             </handle>
           </Target>
         </DropdownSelection>

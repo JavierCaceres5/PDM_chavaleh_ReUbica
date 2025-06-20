@@ -58,16 +58,17 @@ android {
 }
 
 dependencies {
-    //Google
+    // Google
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
 
-    //Supabase
+    // Supabase
     implementation(platform(libs.supabase.bom))
     implementation(libs.auth.kt)
     implementation(libs.ktor.client.okhttp)
 
+    // Core AndroidX y Jetpack Compose
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -90,12 +91,20 @@ dependencies {
     implementation(libs.kotlinx.serialization.json.v160)
     implementation(libs.material3)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.datastore)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Multimedia, mapas
     implementation(libs.coil.compose)
     implementation(libs.maps.compose)
     implementation(libs.play.services.maps)
     implementation(libs.places)
     implementation(libs.material)
 
+    // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -103,4 +112,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Retrofit y Gson
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 }
