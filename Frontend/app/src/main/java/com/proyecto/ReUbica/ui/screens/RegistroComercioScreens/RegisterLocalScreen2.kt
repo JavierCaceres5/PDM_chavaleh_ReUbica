@@ -42,9 +42,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.clickable
 import com.proyecto.ReUbica.BuildConfig
 
-
-
-
 @Composable
 fun RegisterLocalScreen2(navController: NavHostController) {
     RegisterLocalScreen2Content(

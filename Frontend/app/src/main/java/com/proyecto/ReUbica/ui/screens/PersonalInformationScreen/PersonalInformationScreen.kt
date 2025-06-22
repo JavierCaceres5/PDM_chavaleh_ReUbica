@@ -1,6 +1,11 @@
 package com.proyecto.ReUbica.ui.screens.PersonalInformationScreen
 
 import android.app.Application
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,12 +18,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,9 +44,22 @@ import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.ui.Components.ListItemRow
 import com.proyecto.ReUbica.R
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
+import com.proyecto.ReUbica.data.local.UserSessionManager
+import com.proyecto.ReUbica.data.model.user.UpdateProfileRequest
 import com.proyecto.ReUbica.utils.ViewModelFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.net.URI
+import androidx.core.net.toUri
 
 @Composable
 fun PersonalInformationScreen(
@@ -51,7 +75,20 @@ fun PersonalInformationScreen(
             PersonalInformationViewModel(app)
         }
     )
+
     val session by personalInformationViewModel.userSession.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
+    var editField by remember { mutableStateOf<String?>(null) }
+    var editValue by remember { mutableStateOf("") }
+
+    val imageUri = remember { mutableStateOf<Uri?>(null) }
+
+
+    fun openEditDialog(field: String, currentValue: String) {
+        editField = field
+        editValue = currentValue
+    }
 
     Column(
         modifier = Modifier
@@ -92,15 +129,26 @@ fun PersonalInformationScreen(
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Filled.AccountCircle,
-                    contentDescription = "Profile Icon",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(120.dp)
-                )
+                if (imageUri.value != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUri.value),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = "Default Profile Icon",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(120.dp)
+                    )
+                }
 
                 IconButton(
-                    onClick = { },
+                    onClick = {  },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = (-20).dp, y = (-36).dp)
@@ -130,15 +178,18 @@ fun PersonalInformationScreen(
             )
             ListItemRow(
                 text = session?.userProfile?.firstname ?: "",
-                onClick = {},
+                onClick = {
+                    openEditDialog("firstname", session?.userProfile?.firstname ?: "")
+                },
                 icon = Icons.Filled.Edit,
             )
             ListItemRow(
                 text = session?.userProfile?.lastname ?: "",
-                onClick = {},
+                onClick = {
+                    openEditDialog("lastname", session?.userProfile?.lastname ?: "")
+                },
                 icon = Icons.Filled.Edit
             )
-
             Text(
                 text = "Correo Electrónico",
                 fontWeight = FontWeight.Bold,
@@ -148,7 +199,9 @@ fun PersonalInformationScreen(
             )
             ListItemRow(
                 text = session?.userProfile?.email ?: "",
-                onClick = {},
+                onClick = {
+                    openEditDialog("email", session?.userProfile?.email ?: "")
+                },
                 icon = Icons.Filled.Edit
             )
 
@@ -161,23 +214,67 @@ fun PersonalInformationScreen(
             )
             ListItemRow(
                 text = session?.userProfile?.phone ?: "",
-                onClick = {},
+                onClick = {
+                    openEditDialog("phone", session?.userProfile?.phone ?: "")
+                },
                 icon = Icons.Filled.Edit
             )
 
-            Row (
-                modifier = Modifier.padding(20.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C), contentColor = Color.White),
-                    modifier = Modifier.padding(10.dp),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text("Editar perfil", fontSize = 16.sp)
-                }
-            }
         }
     }
+
+    if (editField != null) {
+        AlertDialog(
+            containerColor = Color.White,
+            onDismissRequest = { editField = null },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val user = session?.userProfile ?: return@Button
+                        val updated = UpdateProfileRequest(
+                            firstname = if (editField == "firstname") editValue else user.firstname ?: "",
+                            lastname = if (editField == "lastname") editValue else user.lastname ?: "",
+                            email = if (editField == "email") editValue else user.email ?: "",
+                            phone = if (editField == "phone") editValue else user.phone ?: "",
+                            user_icon = user.user_icon
+                        )
+                        personalInformationViewModel.updateProfile(updated)
+                        editField = null
+                    },
+                    modifier = Modifier.width(130.dp),
+                    shape = RoundedCornerShape(0.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+                ) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { editField = null },
+                    modifier = Modifier.width(130.dp),
+                    shape = RoundedCornerShape(0.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E210B), contentColor = Color.White)
+                ) {
+                    Text("Cancelar")
+                }
+            },
+            title = { Text("Editar", color = Color.Black) },
+            text = {
+                OutlinedTextField(
+                    value = editValue,
+                    onValueChange = {
+                        editValue = if (editField == "firstname" || editField == "lastname") {
+                            it.filter { c -> c.isLetter() || c.isWhitespace() }
+                        } else {
+                            it
+                        }
+                    },
+                    singleLine = true,
+                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                )
+            }
+        )
+    }
+
 }

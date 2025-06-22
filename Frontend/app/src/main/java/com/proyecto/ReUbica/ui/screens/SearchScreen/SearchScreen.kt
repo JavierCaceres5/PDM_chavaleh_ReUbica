@@ -1,4 +1,4 @@
-package com.proyecto.ReUbica.ui.screens
+package com.proyecto.ReUbica.ui.screens.SearchScreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
+import com.proyecto.ReUbica.ui.screens.HomeScreen.SeccionRestaurantes
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

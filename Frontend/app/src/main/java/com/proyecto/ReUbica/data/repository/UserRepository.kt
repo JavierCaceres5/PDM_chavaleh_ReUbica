@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.data.repository
 
+import com.proyecto.ReUbica.data.model.user.UpdateProfileRequest
 import retrofit2.Response
 import com.proyecto.ReUbica.data.model.user.UserLoginRequest
 import com.proyecto.ReUbica.data.model.user.UserLoginResponse
@@ -16,6 +17,14 @@ class UserRepository {
 
     suspend fun login(request: UserLoginRequest): Response<UserLoginResponse> {
         return api.login(request)
+    }
+
+    suspend fun deleteAccount(token: String): Response<Unit> {
+        return api.deleteProfile("Bearer $token")
+    }
+
+    suspend fun updateAccount(token: String, updateData: UpdateProfileRequest): Response<Unit> {
+        return api.updateProfile("Bearer $token", updateData)
     }
 
 }
