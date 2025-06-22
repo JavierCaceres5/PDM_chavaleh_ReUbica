@@ -58,3 +58,6 @@ object RegisterLocalScreen4Navigation
 
 @Serializable
 object SessionCheckNavigation
+
+@Serializable
+object LoadingScreenNavigation

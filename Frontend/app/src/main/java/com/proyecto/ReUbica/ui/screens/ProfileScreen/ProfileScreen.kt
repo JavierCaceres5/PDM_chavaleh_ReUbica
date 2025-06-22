@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.ui.screens.ProfileScreen
 
+import android.app.Application
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,9 +42,16 @@ import com.proyecto.ReUbica.ui.navigations.NotificationsNavigation
 import com.proyecto.ReUbica.ui.navigations.PersonalDataNavigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalNavigation
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModel
 import com.proyecto.ReUbica.data.local.UserSessionManager
+import com.proyecto.ReUbica.ui.navigations.LoadingScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.LoginScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.ProfileScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.RegistroNavigation
+import com.proyecto.ReUbica.ui.screens.LoginScreen.LoginScreenViewModel
+import com.proyecto.ReUbica.utils.ViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,13 +65,34 @@ fun ProfileScreen(
      val context = LocalContext.current
      val sessionManager = remember { UserSessionManager(context) }
 
-    val showConfirmLogOut = remember { mutableStateOf(false) }
-    val showSuccessLogOut = remember { mutableStateOf(false) }
-    val showConfirmDelete = remember { mutableStateOf(false) }
-    val showSuccessDelete = remember { mutableStateOf(false) }
-    val scrollState = rememberScrollState()
+     val profileViewModel: ProfileScreenViewModel = viewModel()
 
-    Column(modifier = Modifier.verticalScroll(scrollState)) {
+     val showConfirmLogOut = remember { mutableStateOf(false) }
+     val showSuccessLogOut = remember { mutableStateOf(false) }
+     val showConfirmDelete = remember { mutableStateOf(false) }
+     val scrollState = rememberScrollState()
+
+     val loading by profileViewModel.loading.collectAsState()
+     var navigatedToLoading by remember { mutableStateOf(false) }
+
+
+     LaunchedEffect(loading) {
+         if (loading && !navigatedToLoading) {
+             navController.navigate(LoadingScreenNavigation::class.qualifiedName ?: "") {
+                 popUpTo(ProfileScreenNavigation::class.qualifiedName ?: "") { inclusive = true }
+             }
+             navigatedToLoading = true
+         } else if (!loading && navigatedToLoading) {
+             navController.navigate(ProfileScreenNavigation::class.qualifiedName ?: "") {
+                 popUpTo(LoadingScreenNavigation::class.qualifiedName ?: "") { inclusive = true }
+             }
+             navigatedToLoading = false
+         }
+     }
+
+     if (loading) return
+
+     Column(modifier = Modifier.verticalScroll(scrollState)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -188,8 +218,11 @@ fun ProfileScreen(
                 Button(
                     onClick = {
                         showConfirmDelete.value = false
-                        showSuccessDelete.value = true
-                    },
+                        profileViewModel.deleteAccount {
+                            rootNavController.navigate(RegistroNavigation) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }                    },
                     modifier = Modifier.width(130.dp),
                     shape = RoundedCornerShape(0.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E210B), contentColor = Color.White)
@@ -199,7 +232,9 @@ fun ProfileScreen(
             },
             dismissButton = {
                 Button(
-                    onClick = { showConfirmDelete.value = false },
+                    onClick = {
+                        showConfirmDelete.value = false
+                    },
                     modifier = Modifier.width(130.dp),
                     shape = RoundedCornerShape(0.dp),
                     border = BorderStroke(1.dp, Color.Black),

@@ -90,6 +90,8 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.kotlinx.serialization.json.v160)
     implementation(libs.material3)
+    implementation(libs.coil.compose.v240)
+
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)

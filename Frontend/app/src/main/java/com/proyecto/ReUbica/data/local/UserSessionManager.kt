@@ -1,13 +1,13 @@
 package com.proyecto.ReUbica.data.local
 
 import android.content.Context
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.proyecto.ReUbica.data.model.user.UserProfile
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 data class UserSession(
@@ -43,4 +43,11 @@ class UserSessionManager(private val context: Context) {
     suspend fun clearSession() {
         context.dataStore.edit { it.clear() }
     }
+
+    suspend fun getToken(): String? {
+        return context.dataStore.data
+            .map { prefs -> prefs[TOKEN_KEY] }
+            .first()
+    }
+
 }

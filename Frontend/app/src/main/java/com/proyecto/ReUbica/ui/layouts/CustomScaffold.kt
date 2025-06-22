@@ -1,24 +1,27 @@
 package com.proyecto.ReUbica.ui.layouts
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -26,19 +29,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
-import com.proyecto.ReUbica.ui.screens.HomeScreen
+import com.proyecto.ReUbica.ui.screens.HomeScreen.HomeScreen
 import com.proyecto.ReUbica.ui.screens.LegalInformationScreen
 import com.proyecto.ReUbica.ui.screens.NotificationsScreen
 import com.proyecto.ReUbica.ui.screens.PersonalInformationScreen.PersonalInformationScreen
 import com.proyecto.ReUbica.ui.screens.PoliticaDePrivacidad
 import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreen
-import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocal
-import com.proyecto.ReUbica.ui.screens.SearchScreen
+import com.proyecto.ReUbica.ui.screens.RegisterLocal
+import com.proyecto.ReUbica.ui.screens.SearchScreen.SearchScreen
 import com.proyecto.ReUbica.ui.screens.TerminosYcondiciones
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.ui.navigations.FavoritesScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.LegalInformationNavigation
+import com.proyecto.ReUbica.ui.navigations.LoadingScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.NotificationsNavigation
 import com.proyecto.ReUbica.ui.navigations.PersonalDataNavigation
 import com.proyecto.ReUbica.ui.navigations.PoliticaDePrivacidadNavigation
@@ -50,12 +54,10 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
 import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
-import com.proyecto.ReUbica.ui.screens.PersonalInformationScreen.PersonalInformationViewModel
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
-import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen3
-import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen4
-import com.proyecto.ReUbica.ui.screens.RegisterScreen.RegisterScreenViewModel
+import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
+import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen4
 
 data class navItem(
     val title: String,
@@ -74,6 +76,7 @@ fun CustomScaffold(rootNavController: NavHostController){
 
     val favoritosViewModel: FavoritosViewModel = viewModel()
 
+    val showBars = currentRoute != LoadingScreenNavigation::class.qualifiedName
 
     val navItems = listOf(
         navItem("Inicio", Icons.Filled.Home, "nowplaying"),
@@ -103,14 +106,20 @@ fun CustomScaffold(rootNavController: NavHostController){
 
     Scaffold (
         topBar = {
-            if (currentRoute != ProfileScreenNavigation::class.qualifiedName &&
+            if (showBars && currentRoute != ProfileScreenNavigation::class.qualifiedName &&
                 currentRoute !=  PersonalDataNavigation::class.qualifiedName){
                 TopBar(navController)
             }
         },
-            bottomBar = { BottomBar ( navItems = navItems,
-            selectedItem = selectedItem,
-            onItemSelected = { onItemSelected(it) }) },
+            bottomBar = {
+                if (showBars){
+                    BottomBar(
+                        navItems = navItems,
+                        selectedItem = selectedItem,
+                        onItemSelected = { onItemSelected(it) }
+                )
+            }
+        },
         containerColor = Color.White
     ) { innerPadding ->
         Column {
@@ -134,7 +143,10 @@ fun CustomScaffold(rootNavController: NavHostController){
                 }
 
                 composable<ProfileScreenNavigation>{
-                    ProfileScreen(navController = navController, rootNavController = rootNavController)
+                    ProfileScreen(
+                        navController = navController,
+                        rootNavController = rootNavController
+                    )
                 }
 
                 composable<PersonalDataNavigation> {
@@ -174,6 +186,15 @@ fun CustomScaffold(rootNavController: NavHostController){
 
                 composable<RegisterLocalScreen4Navigation> {
                     RegisterLocalScreen4(navController)
+                }
+
+                composable(LoadingScreenNavigation::class.qualifiedName ?: "") {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFF49724C))
+                    }
                 }
 
             }

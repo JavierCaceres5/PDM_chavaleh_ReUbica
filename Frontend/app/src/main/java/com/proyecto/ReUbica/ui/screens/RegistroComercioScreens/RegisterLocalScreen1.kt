@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -43,7 +44,6 @@ fun RegisterLocalScreen1(navController: NavHostController) {
         onBack = { navController.popBackStack() }
     )
 }
-
 
 @Composable
 fun RegisterLocalScreen1Content(
@@ -249,7 +249,7 @@ fun Dropdown(
 ) {
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
     val abel = FontFamily(Font(R.font.abelregular))
-    var textFieldSize by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
+    var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Column {

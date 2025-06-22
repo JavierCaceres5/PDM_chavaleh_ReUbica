@@ -255,7 +255,14 @@ fun RegisterScreen(navController: NavHostController) {
                     fontSize = 16.sp,
                     fontFamily = abel
                 )
-                customTextField(name, { name = it as String }, "Ingrese su nombre")()
+                customTextField(
+                    name,
+                    { newValue ->
+                        val input = (newValue as String).filter { it.isLetter() || it.isWhitespace() }
+                        name = input
+                    },
+                    "Ingrese su nombre"
+                )()
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
@@ -265,7 +272,15 @@ fun RegisterScreen(navController: NavHostController) {
                     fontSize = 16.sp,
                     fontFamily = abel
                 )
-                customTextField(lastName, { lastName = it as String }, "Ingrese su apellido")()
+                customTextField(
+                    lastName,
+                    { newValue ->
+                        val input = (newValue as String).filter { it.isLetter() || it.isWhitespace() }
+                        lastName = input
+                    },
+                    "Ingrese su apellido"
+                )()
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(

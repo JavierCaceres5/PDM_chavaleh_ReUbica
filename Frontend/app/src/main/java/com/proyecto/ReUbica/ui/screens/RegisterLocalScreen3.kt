@@ -1,4 +1,4 @@
-package com.proyecto.ReUbica.ui.screens.RegistroComercioScreens
+package com.proyecto.ReUbica.ui.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
