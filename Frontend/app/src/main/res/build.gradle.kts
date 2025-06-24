@@ -1,11 +1,3 @@
-import java.util.Properties
-import java.io.File
-import java.io.FileInputStream
-
-val localProperties = Properties().apply {
-    load(FileInputStream(File(rootDir, "local.properties")))
-}
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -25,10 +17,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
-        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
-        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
     }
 
     buildTypes {
@@ -40,35 +28,20 @@ android {
             )
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
     kotlinOptions {
         jvmTarget = "11"
     }
-
     buildFeatures {
         compose = true
-        viewBinding = true
-        buildConfig = true
     }
 }
 
 dependencies {
-    // Google
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
 
-    // Supabase
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.auth.kt)
-    implementation(libs.ktor.client.okhttp)
-
-    // Core AndroidX y Jetpack Compose
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -89,24 +62,7 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.kotlinx.serialization.json.v160)
-    implementation(libs.material3)
-    implementation(libs.coil.compose.v240)
-
-
-    // DataStore
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.datastore.core)
-    implementation(libs.androidx.datastore)
-    implementation(libs.kotlinx.coroutines.android)
-
-    // Multimedia, mapas
-    implementation(libs.coil.compose)
-    implementation(libs.maps.compose)
-    implementation(libs.play.services.maps)
-    implementation(libs.places)
-    implementation(libs.material)
-
-    // Test
+    implementation( libs.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -114,8 +70,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    // Retrofit y Gson
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
 }
