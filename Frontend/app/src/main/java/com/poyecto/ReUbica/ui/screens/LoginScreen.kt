@@ -25,13 +25,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.R
-import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
-import com.proyecto.ReUbica.ui.navigations.mainNavigation
+import com.proyecto.ReUbica.ui.navigations.MainNavigationRoute
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
@@ -45,54 +43,34 @@ fun LoginScreen(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(horizontal = 20.dp).padding(top = 35.dp).padding(25.dp),
+            .padding(horizontal = 20.dp, vertical = 35.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(20.dp))
 
-        Image(
-            painter = painterResource(R.drawable.logoreubica),
-            contentDescription = "Logo"
-        )
+        Image(painter = painterResource(R.drawable.logoreubica), contentDescription = "Logo")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Iniciar Sesión",
-            color = Color(0xFF5A3C1D),
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
-            fontFamily = abel
-        )
+        Text("Iniciar Sesión", fontWeight = FontWeight.Bold, fontSize = 28.sp, color = Color(0xFF5A3C1D), fontFamily = abel)
 
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = buildAnnotatedString {
+            buildAnnotatedString {
                 append("Accede fácilmente a negocios locales,\nproductos y servicios cerca de vos, ")
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
-                    append("todo desde tu celular")
-                }
+                append("todo desde tu celular")
             },
-            color = Color(0xFF5A3C1D),
             fontSize = 16.sp,
-            fontFamily = abel,
             textAlign = TextAlign.Center,
+            color = Color(0xFF5A3C1D),
+            fontFamily = abel,
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        Text(
-            text = "Correo electrónico",
-            color = Color(0xFF5A3C1D),
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            fontFamily = abel,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 10.dp)
-        )
+        Text("Correo electrónico", fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, color = Color(0xFF5A3C1D), modifier = Modifier.fillMaxWidth())
 
         TextField(
             value = email,
@@ -117,21 +95,8 @@ fun LoginScreen(navController: NavHostController) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "Contraseña",
-                color = Color(0xFF5A3C1D),
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                fontFamily = abel,
-                modifier = Modifier.padding(start = 10.dp)
-            )
-            Text(
-                text = "Olvide mi contraseña",
-                color = Color(0xFF5A3C1D),
-                fontSize = 14.sp,
-                fontFamily = abel,
-                modifier = Modifier.padding(end = 10.dp)
-            )
+            Text("Contraseña", fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, color = Color(0xFF5A3C1D))
+            Text("Olvidé mi contraseña", fontSize = 14.sp, color = Color(0xFF5A3C1D), fontFamily = abel)
         }
 
         TextField(
@@ -142,11 +107,7 @@ fun LoginScreen(navController: NavHostController) {
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        imageVector = image,
-                        contentDescription = if (passwordVisible) "Ocultar" else "Mostrar",
-                        tint = Color.Black
-                    )
+                    Icon(imageVector = image, contentDescription = null, tint = Color.Black)
                 }
             },
             shape = RectangleShape,
@@ -164,7 +125,7 @@ fun LoginScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(28.dp))
 
         Button(
-            onClick = {navController.navigate(mainNavigation)},
+            onClick = { navController.navigate(MainNavigationRoute) },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier

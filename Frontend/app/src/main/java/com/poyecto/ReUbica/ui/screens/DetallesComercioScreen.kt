@@ -30,17 +30,23 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.lazy.items
-
-
-
-
+import androidx.navigation.NavHostController
 
 @Composable
-fun DetallesComercioScreen(viewModel: BusinessViewModel = viewModel()) {
-    val business by viewModel.business.collectAsState()
+fun DetallesComercioScreen(
+    navController: NavHostController,
+    nombre: String,
+    departamento: String,
+    categoria: String,
+    businessViewModel: BusinessViewModel = viewModel()
+) {
+    val business by businessViewModel.business.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         Text(business.name, style = MaterialTheme.typography.titleLarge)
         Text(business.description, style = MaterialTheme.typography.bodyMedium)
         Text(business.hours)
@@ -51,8 +57,11 @@ fun DetallesComercioScreen(viewModel: BusinessViewModel = viewModel()) {
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(business.location, 15f)
         }
+
         GoogleMap(
-            modifier = Modifier.height(180.dp).fillMaxWidth(),
+            modifier = Modifier
+                .height(180.dp)
+                .fillMaxWidth(),
             cameraPositionState = cameraPositionState
         ) {
             Marker(state = MarkerState(business.location))
@@ -64,7 +73,6 @@ fun DetallesComercioScreen(viewModel: BusinessViewModel = viewModel()) {
             Icon(Icons.Filled.Favorite, contentDescription = null)
             Icon(Icons.Filled.Share, contentDescription = null)
             Icon(Icons.Filled.AccountCircle, contentDescription = null)
-
         }
 
         Spacer(Modifier.height(8.dp))

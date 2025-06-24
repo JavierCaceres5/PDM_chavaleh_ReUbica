@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.poyecto.ReUbica.ui.Components.RestaurantCard
 import com.poyecto.ReUbica.ui.viewmodel.FavoritosViewModel
 import com.proyecto.ReUbica.R
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
+fun SearchScreen(navController: NavHostController, favoritosViewModel: FavoritosViewModel = viewModel()) {
     var searchQuery by remember { mutableStateOf("") }
     var searchHistory by remember { mutableStateOf(listOf<String>()) }
     val coroutineScope = rememberCoroutineScope()
@@ -158,13 +159,15 @@ fun SearchScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
         SeccionRestaurantes(
             titulo = "Pueden interesarte",
             destacados = resultadosFiltrados,
-            favoritosViewModel = favoritosViewModel
+            favoritosViewModel = favoritosViewModel,
+            navController = navController
         )
 
         SeccionRestaurantes(
             titulo = "Nuevos emprendedores",
             destacados = resultadosFiltrados,
-            favoritosViewModel = favoritosViewModel
+            favoritosViewModel = favoritosViewModel,
+            navController = navController
         )
     }
 }

@@ -24,24 +24,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.ui.navigations.LoginScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.RegistroNavigation
+import com.proyecto.ReUbica.ui.navigations.MainNavigationRoute
 import com.proyecto.ReUbica.R
+import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
 
 @Composable
 fun WelcomeScreen(navController: NavHostController) {
     val abel = FontFamily(Font(R.font.abelregular))
     val scrollState = rememberScrollState()
 
-    val images = listOf(
-        R.drawable.reubica,
-        R.drawable.reubica,
-        R.drawable.reubica,
-        R.drawable.reubica,
-        R.drawable.reubica,
-        R.drawable.reubica,
-        R.drawable.reubica,
-        R.drawable.reubica,
-        R.drawable.reubica
-    )
+    val images = List(9) { R.drawable.reubica }
 
     Column(
         modifier = Modifier
@@ -116,7 +108,7 @@ fun WelcomeScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(25.dp))
             Button(
                 modifier = Modifier.width(200.dp),
-                onClick = { navController.navigate(RegistroNavigation) },
+                onClick = { navController.navigate(HomeScreenNavigation) },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -125,7 +117,7 @@ fun WelcomeScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(15.dp))
 
             val annotatedText = buildAnnotatedString {
-                append("Ya tienes una cuenta? ")
+                append("¿Ya tienes una cuenta? ")
                 val start = length
                 append("Inicia Sesión")
                 addStyle(

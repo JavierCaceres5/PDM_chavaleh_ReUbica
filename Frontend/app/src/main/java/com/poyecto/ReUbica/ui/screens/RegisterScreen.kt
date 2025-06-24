@@ -26,21 +26,17 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.proyecto.ReUbica.R
-import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
-import com.proyecto.ReUbica.ui.navigations.LoginScreenNavigation
-import com.proyecto.ReUbica.ui.navigations.mainNavigation
+import com.proyecto.ReUbica.ui.navigations.MainNavigationRoute
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
-
     val abel = FontFamily(Font(R.font.abelregular))
 
     var name by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var telephone by remember { mutableStateOf("") }
-    var email by remember {mutableStateOf("")}
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -48,21 +44,22 @@ fun RegisterScreen(navController: NavHostController) {
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = Modifier.padding(15.dp).verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ){
-        Column (
+        modifier = Modifier
+            .padding(15.dp)
+            .verticalScroll(scrollState),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 50.dp),
-            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Image(
                 painterResource(R.drawable.logoreubica),
                 contentDescription = "Logo"
             )
+
             Text(
                 text = "Regístrate",
                 color = Color(0xFF5A3C1D),
@@ -71,6 +68,7 @@ fun RegisterScreen(navController: NavHostController) {
                 fontFamily = abel,
                 modifier = Modifier.padding(top = 20.dp)
             )
+
             Text(
                 text = buildAnnotatedString {
                     append("Descubre negocios, apoya lo local y encuentra lo que necesitas, ")
@@ -82,13 +80,18 @@ fun RegisterScreen(navController: NavHostController) {
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
                 fontFamily = abel,
-                modifier = Modifier.padding(4.dp).padding(top = 20.dp)
+                modifier = Modifier.padding(top = 20.dp)
             )
-            Column (
-                modifier = Modifier.padding(top = 15.dp).padding(bottom = 20.dp)
-            ) {
 
-                fun customTextField(value: String, onValueChange: (String) -> Unit, placeholderText: String, isPassword: Boolean = false): @Composable () -> Unit {
+            Column(
+                modifier = Modifier.padding(top = 15.dp)
+            ) {
+                fun customTextField(
+                    value: String,
+                    onValueChange: (String) -> Unit,
+                    placeholderText: String,
+                    isPassword: Boolean = false
+                ): @Composable () -> Unit {
                     return {
                         TextField(
                             value = value,
@@ -120,8 +123,7 @@ fun RegisterScreen(navController: NavHostController) {
                                 focusedContainerColor = Color(0xFFDFF2E1),
                                 unfocusedContainerColor = Color(0xFFDFF2E1),
                                 focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent
+                                unfocusedIndicatorColor = Color.Transparent
                             ),
                             singleLine = true,
                             modifier = Modifier.width(300.dp)
@@ -129,32 +131,32 @@ fun RegisterScreen(navController: NavHostController) {
                     }
                 }
 
-                Text("Nombre", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, modifier = Modifier.padding(bottom = 4.dp))
+                Text("Nombre", modifier = Modifier.padding(bottom = 4.dp), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, color = Color(0xFF5A3C1D))
                 customTextField(name, { name = it }, "Ingrese su nombre")()
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text("Apellido", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, modifier = Modifier.padding(bottom = 4.dp))
+                Text("Apellido", modifier = Modifier.padding(bottom = 4.dp), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, color = Color(0xFF5A3C1D))
                 customTextField(lastName, { lastName = it }, "Ingrese su apellido")()
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text("Número de teléfono", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, modifier = Modifier.padding(bottom = 4.dp))
+                Text("Número de teléfono", modifier = Modifier.padding(bottom = 4.dp), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, color = Color(0xFF5A3C1D))
                 customTextField(telephone, { telephone = it }, "+503 0000 0000")()
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text("Correo electrónico", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, modifier = Modifier.padding(bottom = 4.dp))
+                Text("Correo electrónico", modifier = Modifier.padding(bottom = 4.dp), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, color = Color(0xFF5A3C1D))
                 customTextField(email, { email = it }, "Ingrese dirección de correo")()
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text("Contraseña", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, modifier = Modifier.padding(bottom = 4.dp))
+                Text("Contraseña", modifier = Modifier.padding(bottom = 4.dp), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, color = Color(0xFF5A3C1D))
                 customTextField(password, { password = it }, "Ingrese su contraseña", isPassword = true)()
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text("Confirmar contraseña", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, modifier = Modifier.padding(bottom = 4.dp))
+                Text("Confirmar contraseña", modifier = Modifier.padding(bottom = 4.dp), fontWeight = FontWeight.Bold, fontSize = 16.sp, fontFamily = abel, color = Color(0xFF5A3C1D))
                 customTextField(confirmPassword, { confirmPassword = it }, "Confirme la contraseña", isPassword = true)()
             }
 
@@ -162,27 +164,23 @@ fun RegisterScreen(navController: NavHostController) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                Checkbox(
-                    checked = checked,
-                    onCheckedChange = { checked = it },
-                )
+                Checkbox(checked = checked, onCheckedChange = { checked = it })
                 Text(
                     text = "Autorizo el uso de esta información para futuros canales de comunicación.",
                     color = Color(0xFF5A3C1D),
                     fontSize = 14.sp,
                     fontFamily = abel,
-                    textAlign = TextAlign.Start,
                     modifier = Modifier.padding(start = 5.dp)
                 )
             }
 
             Button(
-                onClick = {navController.navigate(mainNavigation)},
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C), contentColor = Color.White),
-                modifier = Modifier.padding(10.dp).width(175.dp).padding(top = 15.dp, bottom = 20.dp),
+                onClick = { navController.navigate(MainNavigationRoute) },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
+                modifier = Modifier.padding(top = 20.dp, bottom = 20.dp).width(175.dp),
                 shape = RectangleShape
             ) {
-                Text(text = "Registrarme", fontFamily = abel, fontSize = 16.sp)
+                Text(text = "Registrarme", fontFamily = abel, fontSize = 16.sp, color = Color.White)
             }
         }
     }

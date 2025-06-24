@@ -2,6 +2,8 @@ package com.proyecto.ReUbica.ui.navigations
 
 import kotlinx.serialization.Serializable
 
+const val MainNavigationRoute = "mainNavigation"
+
 @Serializable
 object WelcomeScreenNavigation
 
@@ -43,3 +45,7 @@ object TerminosYCondicionesNavigation
 
 @Serializable
 object PoliticaDePrivacidadNavigation
+
+@Serializable
+object DetallesComercioNavigation
+

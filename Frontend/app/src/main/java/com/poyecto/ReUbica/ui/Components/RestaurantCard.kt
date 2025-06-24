@@ -30,7 +30,7 @@ fun RestaurantCard(
     imagenRes: Int,
     isFavorito: Boolean,
     onFavoritoClick: () -> Unit,
-    onVerTiendaClick: () -> Unit,
+    onVerTiendaClick: (nombre: String, departamento: String, categoria: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -38,14 +38,10 @@ fun RestaurantCard(
             .width(200.dp)
             .wrapContentHeight(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F8EF))
-    )
-
-
-    {
+    ) {
         Column(modifier = Modifier.padding(5.dp)) {
 
-
-        /*  categoría + favorito */
+            // categoría + favorito
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -68,12 +64,8 @@ fun RestaurantCard(
                         .size(20.dp)
                         .clickable { onFavoritoClick() }
                 )
-
             }
 
-
-
-            /* Cuerpo: */
             Row(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -85,7 +77,6 @@ fun RestaurantCard(
                         .size(90.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFDFF2E1))
-
                 )
 
                 Spacer(Modifier.width(12.dp))
@@ -106,7 +97,9 @@ fun RestaurantCard(
                     Spacer(Modifier.height(8.dp))
 
                     Button(
-                        onClick = onVerTiendaClick,
+                        onClick = {
+                            onVerTiendaClick(nombre, departamento, categoria)
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)

@@ -29,6 +29,9 @@ import androidx.navigation.NavHostController
 import com.poyecto.ReUbica.ui.Components.RestaurantCard
 import com.poyecto.ReUbica.ui.viewmodel.FavoritosViewModel
 import com.proyecto.ReUbica.R
+import androidx.navigation.NavController
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -150,13 +153,15 @@ fun HomeScreen(navController: NavHostController, favoritosViewModel: FavoritosVi
         SeccionRestaurantes(
             titulo = "Los mejores restaurantes",
             destacados = resultadosFiltrados,
-            favoritosViewModel = favoritosViewModel
+            favoritosViewModel = favoritosViewModel,
+            navController = navController
         )
 
         SeccionRestaurantes(
             titulo = "Según tus preferencias",
             destacados = resultadosFiltrados,
-            favoritosViewModel = favoritosViewModel
+            favoritosViewModel = favoritosViewModel,
+            navController = navController
         )
     }
 }
@@ -192,7 +197,8 @@ fun CategoriaBox(categoria: CategoriaItem, modifier: Modifier = Modifier) {
 fun SeccionRestaurantes(
     titulo: String,
     destacados: List<Triple<String, String, String>>,
-    favoritosViewModel: FavoritosViewModel
+    favoritosViewModel: FavoritosViewModel,
+    navController: NavHostController
 ) {
     Row(
         modifier = Modifier
@@ -225,7 +231,13 @@ fun SeccionRestaurantes(
                         categoria = categoria
                     )
                 },
-                onVerTiendaClick = {}
+                onVerTiendaClick = { nombre, departamento, categoria ->
+                    val nombreEncoded = URLEncoder.encode(nombre, StandardCharsets.UTF_8.toString())
+                    val departamentoEncoded = URLEncoder.encode(departamento, StandardCharsets.UTF_8.toString())
+                    val categoriaEncoded = URLEncoder.encode(categoria, StandardCharsets.UTF_8.toString())
+
+                    navController.navigate("DetallesComercioScreen/$nombreEncoded/$departamentoEncoded/$categoriaEncoded")
+                }
             )
         }
     }

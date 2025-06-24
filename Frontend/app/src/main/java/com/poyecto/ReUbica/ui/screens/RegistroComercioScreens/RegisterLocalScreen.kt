@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.poyecto.ReUbica.ui.Components.Viñeta
 import com.proyecto.ReUbica.R
-import com.proyecto.ReUbica.ui.navigations.RegistroNavigation
 
 @Composable
 fun RegisterLocal(navController: NavHostController){

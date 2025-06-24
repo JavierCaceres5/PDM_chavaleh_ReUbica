@@ -20,10 +20,13 @@ import androidx.compose.ui.unit.sp
 import com.poyecto.ReUbica.ui.Components.RestaurantCard
 import com.poyecto.ReUbica.ui.viewmodel.FavoritosViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.proyecto.ReUbica.R
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
-fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
+fun FavoriteScreen(navController: NavController,favoritosViewModel: FavoritosViewModel = viewModel()) {
     var selectedTab by remember { mutableStateOf("Puestos") }
     var searchQuery by remember { mutableStateOf("") }
 
@@ -112,7 +115,13 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
                                     favorito.categoria
                                 )
                             },
-                            onVerTiendaClick = {}
+                            onVerTiendaClick = { nombre, departamento, categoria ->
+                                val nombreEncoded = URLEncoder.encode(nombre, StandardCharsets.UTF_8.toString())
+                                val departamentoEncoded = URLEncoder.encode(departamento, StandardCharsets.UTF_8.toString())
+                                val categoriaEncoded = URLEncoder.encode(categoria, StandardCharsets.UTF_8.toString())
+
+                                navController.navigate("DetallesComercioScreen/$nombreEncoded/$departamentoEncoded/$categoriaEncoded")
+                            }
                         )
                     }
                 }
