@@ -15,11 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.proyecto.ReUbica.ui.Components.RestaurantCard
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyecto.ReUbica.R
+import com.proyecto.ReUbica.ui.Components.RestaurantCard
+import com.proyecto.ReUbica.ui.screens.FavoriteScreen.Favorito
 
 @Composable
 fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
@@ -28,11 +30,13 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
 
     val favoritos = favoritosViewModel.favoritos
 
+    val comercios = favoritos.filterIsInstance<Favorito.Comercio>()
+    val productos = favoritos.filterIsInstance<Favorito.Producto>()
 
-    val favoritosFiltrados = if (searchQuery.isBlank()) {
-        favoritos
+    val comerciosFiltrados = if (searchQuery.isBlank()) {
+        comercios
     } else {
-        favoritos.filter {
+        comercios.filter {
             it.nombre.contains(searchQuery, ignoreCase = true) ||
                     it.departamento.contains(searchQuery, ignoreCase = true) ||
                     it.categoria.contains(searchQuery, ignoreCase = true)
@@ -88,12 +92,12 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
         Spacer(modifier = Modifier.height(16.dp))
 
         if (selectedTab == "Puestos") {
-            if (favoritosFiltrados.isEmpty()) {
+            if (comerciosFiltrados.isEmpty()) {
                 Text("Aún no tienes puestos guardados.", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(favoritosFiltrados.size) { index ->
-                        val favorito = favoritosFiltrados[index]
+                    items(comerciosFiltrados.size) { index ->
+                        val favorito = comerciosFiltrados[index]
                         RestaurantCard(
                             nombre = favorito.nombre,
                             departamento = favorito.departamento,
@@ -101,7 +105,7 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
                             imagenRes = R.drawable.reubica,
                             isFavorito = true,
                             onFavoritoClick = {
-                                favoritosViewModel.toggleFavorito(
+                                favoritosViewModel.toggleFavoritoComercio(
                                     favorito.nombre,
                                     favorito.departamento,
                                     favorito.categoria
@@ -113,14 +117,43 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
                 }
             }
         } else {
-            Text("Aún no tienes productos guardados.", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+            if (productos.isEmpty()) {
+                Text("Aún no tienes productos guardados.", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(productos.size) { index ->
+                        val producto = productos[index]
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F8EF)),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Column(Modifier.padding(16.dp)) {
+                                Text(producto.nombre, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                                Text("Precio: \$${producto.precio}", fontSize = 14.sp)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(onClick = {
+                                    favoritosViewModel.toggleFavoritoProducto(
+                                        producto.id,
+                                        producto.nombre,
+                                        producto.precio
+                                    )
+                                }) {
+                                    Text("Eliminar de favoritos")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
 fun FavoriteTab(title: String, isSelected: Boolean, onClick: () -> Unit) {
-
     val bgColor = if (isSelected) Color(0xFFDFF2E1) else Color(0xFFF7F8EF)
     val icon = if (title == "Productos") Icons.Filled.ShoppingBag else Icons.Filled.Store
 

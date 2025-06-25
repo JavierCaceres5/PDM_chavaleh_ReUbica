@@ -28,6 +28,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
 import com.proyecto.ReUbica.ui.screens.HomeScreen.HomeScreen
 import com.proyecto.ReUbica.ui.screens.LegalInformationScreen
@@ -58,6 +60,7 @@ import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScre
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
 import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen4
+import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioScreen
 
 data class navItem(
     val title: String,
@@ -139,7 +142,7 @@ fun CustomScaffold(rootNavController: NavHostController){
                 }
 
                 composable<SearchScreenNavigation>{
-                    SearchScreen(favoritosViewModel = favoritosViewModel)
+                    SearchScreen(navController = navController, favoritosViewModel = favoritosViewModel)
                 }
 
                 composable<ProfileScreenNavigation>{
@@ -196,6 +199,15 @@ fun CustomScaffold(rootNavController: NavHostController){
                         CircularProgressIndicator(color = Color(0xFF49724C))
                     }
                 }
+
+                composable<ComercioNavigation> { backStackEntry ->
+                    val navArgs = backStackEntry.toRoute<ComercioNavigation>()
+                    ComercioScreen(
+                        navController = navController,
+                        navArgs = navArgs
+                    )
+                }
+
 
             }
             Spacer(modifier = Modifier.padding(innerPadding))

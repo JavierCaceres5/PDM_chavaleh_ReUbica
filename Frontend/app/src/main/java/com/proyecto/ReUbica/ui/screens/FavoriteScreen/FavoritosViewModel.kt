@@ -3,26 +3,50 @@ package com.proyecto.ReUbica.ui.screens.FavoriteScreen
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 
-data class Favorito(
-    val nombre: String,
-    val departamento: String,
-    val categoria: String
-)
+sealed class Favorito {
+    data class Comercio(
+        val nombre: String,
+        val departamento: String,
+        val categoria: String
+    ) : Favorito()
+
+    data class Producto(
+        val id: String,
+        val nombre: String,
+        val precio: Double
+    ) : Favorito()
+}
 
 class FavoritosViewModel : ViewModel() {
     private val _favoritos = mutableStateListOf<Favorito>()
     val favoritos: List<Favorito> = _favoritos
 
-    fun toggleFavorito(nombre: String, departamento: String, categoria: String) {
-        val existe = _favoritos.any { it.nombre == nombre }
-        if (existe) {
-            _favoritos.removeAll { it.nombre == nombre }
+    // Para comercios
+    fun toggleFavoritoComercio(nombre: String, departamento: String, categoria: String) {
+        val favorito = Favorito.Comercio(nombre, departamento, categoria)
+        if (_favoritos.contains(favorito)) {
+            _favoritos.remove(favorito)
         } else {
-            _favoritos.add(Favorito(nombre, departamento, categoria))
+            _favoritos.add(favorito)
         }
     }
 
-    fun isFavorito(nombre: String): Boolean {
-        return _favoritos.any { it.nombre == nombre }
+    fun isFavoritoComercio(nombre: String): Boolean {
+        return _favoritos.any { it is Favorito.Comercio && it.nombre == nombre }
+    }
+
+    // Para productos
+    fun toggleFavoritoProducto(id: String, nombre: String, precio: Double) {
+        val favorito = Favorito.Producto(id, nombre, precio)
+        if (_favoritos.contains(favorito)) {
+            _favoritos.remove(favorito)
+        } else {
+            _favoritos.add(favorito)
+        }
+    }
+
+    fun isFavoritoProducto(id: String): Boolean {
+        return _favoritos.any { it is Favorito.Producto && it.id == id }
     }
 }
+

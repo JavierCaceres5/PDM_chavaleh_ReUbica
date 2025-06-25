@@ -1,0 +1,96 @@
+package com.proyecto.ReUbica.ui.Components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.proyecto.ReUbica.data.api.DummyProduct
+import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
+
+@Composable
+fun ProductCard(
+    product: DummyProduct,
+    favoritosViewModel: FavoritosViewModel = viewModel()
+) {
+    val isFavorito = favoritosViewModel.isFavoritoProducto(product.id.toString())
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        )
+    ) {
+        Row(modifier = Modifier.padding(8.dp)) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .background(Color.LightGray)
+            )
+
+            Spacer(Modifier.width(8.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    product.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFF5A3C1D),
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    product.description,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color(0xFF5A3C1D)
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "$${product.price}",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF5A3C1D)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Icon(
+                        imageVector = if (isFavorito) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = "Favorito",
+                        tint = Color(0xFF5A3C1D),
+                        modifier = Modifier.clickable {
+                            favoritosViewModel.toggleFavoritoProducto(
+                                id = product.id.toString(),
+                                nombre = product.name,
+                                precio = product.price
+                            )
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Calificación",
+                        tint = Color(0xFF5A3C1D)
+                    )
+                    Text(
+                        text = product.rating.toString(),
+                        color = Color(0xFF5A3C1D)
+                    )
+                }
+            }
+        }
+    }
+}
