@@ -1,37 +1,45 @@
 package com.poyecto.ReUbica.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Facebook
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Store
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.poyecto.ReUbica.ui.viewmodel.BusinessViewModel
-import androidx.compose.foundation.layout.Row
 import com.poyecto.ReUbica.ui.Components.ProductCard
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.getValue
-import androidx.compose.foundation.lazy.items
-import androidx.navigation.NavHostController
-
+import com.poyecto.ReUbica.ui.layouts.BottomBar
+import com.poyecto.ReUbica.ui.layouts.TopBar
+import com.poyecto.ReUbica.ui.layouts.navItem
+import com.poyecto.ReUbica.ui.viewmodel.BusinessViewModel
+import com.proyecto.ReUbica.ui.navigations.*
 @Composable
 fun DetallesComercioScreen(
     navController: NavHostController,
@@ -41,45 +49,115 @@ fun DetallesComercioScreen(
     businessViewModel: BusinessViewModel = viewModel()
 ) {
     val business by businessViewModel.business.collectAsState()
+    var selectedItem by rememberSaveable { mutableStateOf("nowplaying") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(business.name, style = MaterialTheme.typography.titleLarge)
-        Text(business.description, style = MaterialTheme.typography.bodyMedium)
-        Text(business.hours)
-        Text(business.locationName)
+    val navItems = listOf(
+        navItem("Inicio", Icons.Filled.Home, "nowplaying"),
+        navItem("Buscar", Icons.Default.Search, "search"),
+        navItem("Mi cuenta", Icons.Filled.AccountCircle, "account"),
+        navItem("Favoritos", Icons.Default.Favorite, "favorites")
+    )
 
-        Spacer(Modifier.height(8.dp))
-
-        val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(business.location, 15f)
+    fun onItemSelected(currentItem: String) {
+        selectedItem = currentItem
+        when (currentItem) {
+            "nowplaying" -> navController.navigate(HomeScreenNavigation)
+            "search" -> navController.navigate(SearchScreenNavigation)
+            "account" -> navController.navigate(ProfileScreenNavigation)
+            "favorites" -> navController.navigate(FavoritesScreenNavigation)
         }
+    }
 
-        GoogleMap(
+    Scaffold(
+        topBar = { TopBar(navController) },
+        bottomBar = {
+            BottomBar(
+                navItems = navItems,
+                selectedItem = selectedItem,
+                onItemSelected = { onItemSelected(it) }
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+
+        Column(
             modifier = Modifier
-                .height(180.dp)
-                .fillMaxWidth(),
-            cameraPositionState = cameraPositionState
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
         ) {
-            Marker(state = MarkerState(business.location))
-        }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFEAEAEA)),
+                    contentAlignment = Alignment.Center
+                ) {
 
-        Spacer(Modifier.height(8.dp))
+                    Icon(
+                        imageVector = Icons.Filled.Store,
+                        contentDescription = "Logo del comercio",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(Icons.Filled.Favorite, contentDescription = null)
-            Icon(Icons.Filled.Share, contentDescription = null)
-            Icon(Icons.Filled.AccountCircle, contentDescription = null)
-        }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(business.name, style = MaterialTheme.typography.titleLarge, color = Color(0xFF5A3C1D), fontWeight = FontWeight.ExtraBold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(business.description, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
 
-        Spacer(Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        LazyColumn {
-            items(business.products) { product ->
-                ProductCard(product)
+            // Fila: Horario, ubicación, redes y mapa
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f)
+                    .padding(horizontal = 5.dp)) {
+                    Row {
+                        Icon(imageVector = Icons.Default.Schedule, contentDescription = null, tint = Color.Black)
+                        Text(" ${business.hours}", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF5A3C1D))
+                    }
+
+                    Row {
+                        Icon(imageVector = Icons.Default.LocationOn, tint = Color.Black, contentDescription = null)
+                        Text("Ubicación: ${business.locationName}", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF5A3C1D))
+                    }
+
+                    Row(modifier = Modifier.padding(top = 8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        Icon(Icons.Default.Facebook, contentDescription = null)
+                        Icon(Icons.Default.Email, contentDescription = null)
+                        Icon(Icons.Filled.AccountCircle, contentDescription = null)
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                val cameraPositionState = rememberCameraPositionState {
+                    position = CameraPosition.fromLatLngZoom(business.location, 15f)
+                }
+
+                GoogleMap(
+                    modifier = Modifier
+                        .width(140.dp)
+                        .height(120.dp),
+                    cameraPositionState = cameraPositionState
+                ) {
+                    Marker(state = MarkerState(business.location))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn {
+                items(business.products) { product ->
+                    ProductCard(product)
+                }
             }
         }
     }

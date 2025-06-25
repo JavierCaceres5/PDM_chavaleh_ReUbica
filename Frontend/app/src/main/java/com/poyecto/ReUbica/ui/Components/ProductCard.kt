@@ -23,23 +23,41 @@ import androidx.compose.ui.unit.dp
 import com.poyecto.ReUbica.data.Producto
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.Icon
-
-
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.StarOutline
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontWeight
 
 
 @Composable
 fun ProductCard(product: Producto) {
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        )
+        ) {
         Row(modifier = Modifier.padding(8.dp)) {
-            Box(modifier = Modifier.size(64.dp).background(Color.LightGray))
+            Box(modifier = Modifier.size(80.dp).background(Color.LightGray))
             Spacer(Modifier.width(8.dp))
             Column {
-                Text(product.name, style = MaterialTheme.typography.titleMedium)
-                Text(product.description, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("$${product.price}")
+                Text(product.name, style = MaterialTheme.typography.titleMedium, color = Color(0xFF5A3C1D), fontWeight = FontWeight.ExtraBold)
+                Text(product.description, maxLines = 2, overflow = TextOverflow.Ellipsis, color = Color(0xFF5A3C1D))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.Star, contentDescription = null, tint = Color.Yellow)
-                    Text(product.rating.toString())
+                    Text(text = "$${product.price}",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF5A3C1D)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(imageVector = Icons.Default.MailOutline,contentDescription = "correo",modifier = Modifier,tint = Color(0xFF5A3C1D))
+                    Icon(imageVector = Icons.Default.Star, contentDescription = "Calificacion", tint = Color(0xFF5A3C1D))
+                    Text(text = product.rating.toString() , color = Color(0xFF5A3C1D))
                 }
             }
         }

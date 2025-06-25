@@ -108,7 +108,7 @@ fun WelcomeScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(25.dp))
             Button(
                 modifier = Modifier.width(200.dp),
-                onClick = { navController.navigate(HomeScreenNavigation) },
+                onClick = { navController.navigate(RegistroNavigation) },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
                 shape = RoundedCornerShape(8.dp)
             ) {

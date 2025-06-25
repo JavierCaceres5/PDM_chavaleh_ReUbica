@@ -1,7 +1,6 @@
 package com.poyecto.ReUbica.ui.layouts
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -14,8 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
-import com.poyecto.ReUbica.ui.screens.*
-import com.proyecto.ReUbica.ui.screens.*
+import com.proyecto.ReUbica.ui.navigations.*
 
 data class navItem(
     val title: String,
@@ -31,10 +29,10 @@ fun CustomScaffold(
     onItemSelected: (String) -> Unit
 ) {
     val navItems = listOf(
-        navItem("Inicio", Icons.Filled.Home, "nowplaying"),
-        navItem("Buscar", Icons.Default.Search, "search"),
-        navItem("Mi cuenta", Icons.Filled.AccountCircle, "account"),
-        navItem("Favoritos", Icons.Default.Favorite, "favorites")
+        navItem("Inicio", Icons.Filled.Home, HomeScreenNavigation.route),
+        navItem("Buscar", Icons.Default.Search, SearchScreenNavigation.route),
+        navItem("Mi cuenta", Icons.Filled.AccountCircle, ProfileScreenNavigation.route),
+        navItem("Favoritos", Icons.Default.Favorite, FavoritesScreenNavigation.route)
     )
 
     Scaffold(
@@ -43,7 +41,13 @@ fun CustomScaffold(
             BottomBar(
                 navItems = navItems,
                 selectedItem = selectedItem,
-                onItemSelected = onItemSelected
+                onItemSelected = {
+                    onItemSelected(it)
+                    navController.navigate(it) {
+                        popUpTo(HomeScreenNavigation) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
             )
         },
         containerColor = Color.White

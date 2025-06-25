@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 const val MainNavigationRoute = "mainNavigation"
 
+
 @Serializable
 object WelcomeScreenNavigation
 
@@ -14,16 +15,24 @@ object RegistroNavigation
 object LoginScreenNavigation
 
 @Serializable
-object HomeScreenNavigation
+object HomeScreenNavigation {
+    const val route = "nowplaying"
+}
 
 @Serializable
-object SearchScreenNavigation
+object SearchScreenNavigation {
+    const val route = "search"
+}
 
 @Serializable
-object ProfileScreenNavigation
+object ProfileScreenNavigation {
+    const val route = "account"
+}
 
 @Serializable
-object FavoritesScreenNavigation
+object FavoritesScreenNavigation {
+    const val route = "favorites"
+}
 
 @Serializable
 object mainNavigation
