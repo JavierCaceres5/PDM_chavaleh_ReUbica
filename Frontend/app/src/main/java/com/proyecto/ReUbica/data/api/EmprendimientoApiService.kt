@@ -3,12 +3,10 @@ package com.proyecto.ReUbica.data.api
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface EmprendimientoApiService {
 
@@ -28,4 +26,20 @@ interface EmprendimientoApiService {
         @Body request: EmprendimientoCreateRequest
     ): Response<EmprendimientoResponse>
 
+    // ✅ NUEVA FUNCIÓN MULTIPART
+    @Multipart
+    @POST("emprendimientos/registrarEmprendimiento")
+    suspend fun registrarEmprendimientoMultipart(
+        @Header("Authorization") token: String,
+        @Part("nombre") nombre: RequestBody,
+        @Part("descripcion") descripcion: RequestBody,
+        @Part("categoriasPrincipales") categoriasPrincipales: RequestBody,
+        @Part("categoriasSecundarias") categoriasSecundarias: RequestBody,
+        @Part("direccion") direccion: RequestBody,
+        @Part("emprendimientoPhone") phone: RequestBody,
+        @Part("redes_sociales") redes: RequestBody,
+        @Part("latitud") lat: RequestBody,
+        @Part("longitud") lng: RequestBody,
+        @Part logo: MultipartBody.Part? = null
+    ): Response<EmprendimientoResponse>
 }

@@ -329,11 +329,20 @@ fun RegisterLocalScreen2Content(
             }
 
             if (showRedes) {
-                RedesSociales(R.drawable.instagram, redesSociales.Instagram.toString()) { registroComercio.setRedesSociales("Instagram", it) }
-                RedesSociales(R.drawable.facebook, redesSociales.Facebook.toString()) { registroComercio.setRedesSociales("Facebook", it) }
-                RedesSociales(R.drawable.tiktok, redesSociales.TikTok.toString()) { registroComercio.setRedesSociales("TikTok", it) }
-                RedesSociales(R.drawable.x, redesSociales.Twitter.toString()) { registroComercio.setRedesSociales("Twitter", it) }
+                RedesSociales(R.drawable.instagram, redesSociales.Instagram ?: "") {
+                    registroComercio.setRedesSociales("Instagram", it)
+                }
+                RedesSociales(R.drawable.facebook, redesSociales.Facebook ?: "") {
+                    registroComercio.setRedesSociales("Facebook", it)
+                }
+                RedesSociales(R.drawable.tiktok, redesSociales.TikTok ?: "") {
+                    registroComercio.setRedesSociales("TikTok", it)
+                }
+                RedesSociales(R.drawable.x, redesSociales.Twitter ?: "") {
+                    registroComercio.setRedesSociales("Twitter", it)
+                }
             }
+
 
             Spacer(modifier = Modifier.height(20.dp))
 
