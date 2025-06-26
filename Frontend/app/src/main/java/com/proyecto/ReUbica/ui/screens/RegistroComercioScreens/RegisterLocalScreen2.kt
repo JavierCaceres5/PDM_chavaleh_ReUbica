@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -40,6 +41,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.AnnotatedString
+
+
 
 @Composable
 fun RegisterLocalScreen2(navController: NavHostController, viewModel: RegistroComercioViewModel) {
@@ -79,6 +88,11 @@ fun RegisterLocalScreen2Content(
     var showDropdown by remember { mutableStateOf(false) }
     var showMap by remember { mutableStateOf(false) }
     var showRedes by remember { mutableStateOf(false) }
+    var showValidationError by remember { mutableStateOf(false) }
+
+
+
+
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val error by registroComercio.error.collectAsState()
@@ -159,10 +173,27 @@ fun RegisterLocalScreen2Content(
 
             OutlinedTextField(
                 value = emprendimiento.emprendimientoPhone,
-                onValueChange = { registroComercio.setValues("telefono", it) },
-                placeholder = { Text("Teléfono del local", fontFamily = abel, color = Color(0xFF5A3C1D)) },
+                onValueChange = { input ->
+                    val digits = input.filter { it.isDigit() }.take(8)
+
+                    val formatted = when {
+                        digits.length > 4 -> digits.substring(0, 4) + "-" + digits.substring(4)
+                        else -> digits
+                    }
+
+                    registroComercio.setValues("telefono", formatted)
+                }
+
+                ,
+                placeholder = {
+                    Text("Teléfono del local", fontFamily = abel, color = Color(0xFF5A3C1D))
+                },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Number
+                ),
+
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
@@ -172,6 +203,7 @@ fun RegisterLocalScreen2Content(
                 shape = RoundedCornerShape(8.dp),
                 textStyle = LocalTextStyle.current.copy(color = Color.Black, fontFamily = abel)
             )
+
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -346,22 +378,63 @@ fun RegisterLocalScreen2Content(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            if (showValidationError) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .background(Color(0xFFFFE6E6), shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFD32F2F), shape = RoundedCornerShape(8.dp))
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Error,
+                        contentDescription = "Error",
+                        tint = Color(0xFFD32F2F),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Por favor, complete todos los campos antes de continuar.",
+                        color = Color(0xFFD32F2F),
+                        fontSize = 14.sp,
+                        fontFamily = abel,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+
             Button(
                 onClick = {
-                    onNext()
-                          },
+                    val telefonoValido = Regex("^\\d{4}-\\d{4}$").matches(emprendimiento.emprendimientoPhone)
+                    val direccionValida = emprendimiento.direccion.isNotBlank()
+                    val coordenadasValidas = emprendimiento.latitud != 0.0 && emprendimiento.longitud != 0.0
+
+
+                    if (!telefonoValido || !direccionValida || !coordenadasValidas) {
+                        showValidationError = true
+                    } else {
+                        showValidationError = false
+                        onNext()
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = camposValidos,
+                enabled = true,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (camposValidos) Color(0xFF49724C) else Color(0xFFDFF2E1),
-                    contentColor = if (camposValidos) Color.White else Color.Black.copy(alpha = 0.3f)
+                    containerColor = Color(0xFF49724C),
+                    contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text("Continuar a la carta de productos", fontFamily = abel)
             }
+
+
 
             Spacer(modifier = Modifier.height(16.dp))
         }

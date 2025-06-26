@@ -12,6 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Upload
@@ -27,6 +29,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,9 +74,12 @@ fun RegisterLocalScreen1Content(
     val emprendimiento by registroComercio.emprendimiento.collectAsState()
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-
     var expandedTipo by remember { mutableStateOf(false) }
     var expandedCategoria by remember { mutableStateOf(false) }
+    var showError by remember { mutableStateOf(false) }
+    var descripcionInvalida by remember { mutableStateOf(false) }
+
+
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         imageUri = it
@@ -112,10 +118,39 @@ fun RegisterLocalScreen1Content(
                 textAlign = TextAlign.Center
             )
 
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(label = "Nombre del local", value = emprendimiento.nombre, onChange = { registroComercio.setValues( "nombre", it ) })
             Text(label = "Descripción del negocio", value = emprendimiento.descripcion, onChange = { registroComercio.setValues( "descripcion", it)})
+
+            if (descripcionInvalida) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .background(Color(0xFFFFE6E6), shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFD32F2F), shape = RoundedCornerShape(8.dp))
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Error de descripción",
+                        tint = Color(0xFFD32F2F),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "La descripción no puede superar los 500 caracteres.",
+                        color = Color(0xFFD32F2F),
+                        fontSize = 14.sp,
+                        fontFamily = FontFamily(Font(R.font.abelregular)),
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
 
             Dropdown(
                 label = "Tipo de Negocio",
@@ -188,8 +223,66 @@ fun RegisterLocalScreen1Content(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            if (showError) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFFFE6E6), shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFFD32F2F), shape = RoundedCornerShape(8.dp))
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Error,
+                            contentDescription = "Error",
+                            tint = Color(0xFFD32F2F),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Por favor, complete todos los campos antes de continuar",
+                            color = Color(0xFFD32F2F),
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily(Font(R.font.abelregular)),
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier.weight(1f)
+
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+
+
             Button(
-                onClick = { onNext() },
+                onClick = {
+
+                    val descripcionValida = emprendimiento.descripcion.length <= 500
+
+                    if (
+                        emprendimiento.nombre.isBlank() ||
+                        emprendimiento.descripcion.isBlank() ||
+                        emprendimiento.categoriasPrincipales.firstOrNull().isNullOrBlank() ||
+                        emprendimiento.categoriasSecundarias.firstOrNull().isNullOrBlank()
+                    ) {
+                        showError = true
+                    } else if (!descripcionValida) {
+                        showError = false
+                        descripcionInvalida = true
+                    } else {
+                        showError = false
+                        descripcionInvalida = false
+                        onNext()
+                    }
+                },
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

@@ -26,7 +26,7 @@ interface EmprendimientoApiService {
         @Body request: EmprendimientoCreateRequest
     ): Response<EmprendimientoResponse>
 
-    // ✅ NUEVA FUNCIÓN MULTIPART
+
     @Multipart
     @POST("emprendimientos/registrarEmprendimiento")
     suspend fun registrarEmprendimientoMultipart(
