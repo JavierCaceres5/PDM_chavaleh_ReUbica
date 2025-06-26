@@ -73,3 +73,10 @@ data class ComercioNavigation(
     val longitud: Double,
     val horario: String
 )
+object ProductDetailNavigation {
+    const val route = "product_detail"
+    const val productIdArg = "productId"
+
+    fun withArgs(productId: String) = "$route/$productId"
+}
+

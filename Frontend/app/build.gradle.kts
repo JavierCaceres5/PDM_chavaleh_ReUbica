@@ -58,6 +58,7 @@ android {
 }
 
 dependencies {
+    implementation("io.coil-kt:coil-compose:2.4.0")
     // Google
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
