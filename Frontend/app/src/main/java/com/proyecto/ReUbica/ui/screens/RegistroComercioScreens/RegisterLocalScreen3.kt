@@ -33,11 +33,13 @@ import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.BorderStroke
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
 
 
 @Composable
-fun RegisterLocalScreen3(navController: NavHostController) {
+fun RegisterLocalScreen3(navController: NavHostController, viewModel: RegistroComercioViewModel) {
     RegisterLocalScreen3Content(
+        registroComercio = viewModel,
         onNext = { navController.navigate(RegisterLocalScreen4Navigation) },
         onBack = { navController.popBackStack() }
     )
@@ -45,6 +47,7 @@ fun RegisterLocalScreen3(navController: NavHostController) {
 
 @Composable
 fun RegisterLocalScreen3Content(
+    registroComercio: RegistroComercioViewModel,
     onNext: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
@@ -340,4 +343,3 @@ fun ProductInputField(
         keyboardOptions = if (isPrice) KeyboardOptions(keyboardType = KeyboardType.Number) else KeyboardOptions.Default
     )
 }
-

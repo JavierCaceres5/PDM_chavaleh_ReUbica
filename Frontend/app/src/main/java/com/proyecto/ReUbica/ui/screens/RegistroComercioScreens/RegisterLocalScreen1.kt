@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.proyecto.ReUbica.R
@@ -38,8 +39,10 @@ import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
 
 @Composable
-fun RegisterLocalScreen1(navController: NavHostController) {
+fun RegisterLocalScreen1(navController: NavHostController, viewModel: RegistroComercioViewModel) {
+
     RegisterLocalScreen1Content(
+        registroComercio = viewModel,
         onNext = { navController.navigate(RegisterLocalScreen2Navigation) },
         onBack = { navController.popBackStack() }
     )
@@ -47,27 +50,26 @@ fun RegisterLocalScreen1(navController: NavHostController) {
 
 @Composable
 fun RegisterLocalScreen1Content(
+    registroComercio: RegistroComercioViewModel,
     onNext: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
     val abel = FontFamily(Font(R.font.abelregular))
 
-    val categoriasPrincipales = listOf("ropa", "alimentos", "comida", "higiene", "artesanías", "librería", "servicios")
+    val categoriasPrincipales = listOf("Ropa", "Alimentos", "Comida", "Higiene", "Artesanías", "Librería", "Servicios")
     val categoriasSecundarias = mapOf(
-        "ropa" to listOf("Ropa de segunda mano", "Vestidos", "Accesorios", "Calzado", "Ropa variada", "Otros"),
-        "alimentos" to listOf("Frutas", "Verduras", "Lácteos", "Productos enlatados", "Snacks", "Dulces típicos", "Otros"),
-        "comida" to listOf("Pizzas", "Hamburguesas", "Comida mexicana", "Comida asiática", "Postres", "Carnes", "Pescados y mariscos", "Comida saludable", "Hot Dogs", "Cafetería", "Otros"),
-        "higiene" to listOf("Jabones", "Shampoos", "Productos dentales", "Desodorantes", "Productos femeninos", "Otros"),
-        "artesanías" to listOf("Cerámica", "Tejidos", "Joyería artesanal", "Cuadros", "Muebles", "Otros"),
-        "librería" to listOf("Libros infantiles", "Novelas", "Papelería", "Material escolar", "Revistas", "Otros"),
-        "servicios" to listOf("Reparación electrónica", "Limpieza", "Transporte", "Consultoría", "Educación", "Otros")
+        "Ropa" to listOf("Ropa de segunda mano", "Vestidos", "Accesorios", "Calzado", "Ropa variada", "Otros"),
+        "Alimentos" to listOf("Frutas", "Verduras", "Lácteos", "Productos enlatados", "Snacks", "Dulces típicos", "Otros"),
+        "Comida" to listOf("Pizzas", "Hamburguesas", "Comida mexicana", "Comida asiática", "Postres", "Carnes", "Pescados y mariscos", "Comida saludable", "Hot Dogs", "Cafetería", "Otros"),
+        "Higiene" to listOf("Jabones", "Shampoos", "Productos dentales", "Desodorantes", "Productos femeninos", "Otros"),
+        "Artesanías" to listOf("Cerámica", "Tejidos", "Joyería artesanal", "Cuadros", "Muebles", "Otros"),
+        "Librería" to listOf("Libros infantiles", "Novelas", "Papelería", "Material escolar", "Revistas", "Otros"),
+        "Servicios" to listOf("Reparación electrónica", "Limpieza", "Transporte", "Consultoría", "Educación", "Otros")
     )
 
-    var nombre by remember { mutableStateOf("") }
-    var descripcion by remember { mutableStateOf("") }
-    var tipoNegocio by remember { mutableStateOf("") }
-    var categoria by remember { mutableStateOf("") }
+    val emprendimiento by registroComercio.emprendimiento.collectAsState()
+
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     var expandedTipo by remember { mutableStateOf(false) }
@@ -78,8 +80,7 @@ fun RegisterLocalScreen1Content(
     }
 
     val scrollState = rememberScrollState()
-    val subcategorias = categoriasSecundarias[tipoNegocio] ?: emptyList()
-    val camposValidos = nombre.isNotBlank() && descripcion.isNotBlank() && tipoNegocio.isNotBlank() && categoria.isNotBlank()
+    val subcategorias = categoriasSecundarias[emprendimiento.categoriasPrincipales.firstOrNull()] ?: emptyList()
 
     Column(modifier = Modifier.fillMaxSize()) {
         StepTopBar(step = 1, title = "Datos del negocio", onBackClick = onBack)
@@ -113,20 +114,32 @@ fun RegisterLocalScreen1Content(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            Text(label = "Nombre del local", value = emprendimiento.nombre, onChange = { registroComercio.setValues( "nombre", it ) })
+            Text(label = "Descripción del negocio", value = emprendimiento.descripcion, onChange = { registroComercio.setValues( "descripcion", it)})
 
-            Text(label = "Nombre del local", value = nombre, onChange = { nombre = it })
-            Text(label = "Descripción del negocio", value = descripcion, onChange = { descripcion = it })
-
-            Dropdown("Tipo de Negocio", tipoNegocio, categoriasPrincipales, expandedTipo,
-                onExpandedChange = { expandedTipo = it }, onSelect = {
-                    tipoNegocio = it
-                    categoria = ""
-                })
+            Dropdown(
+                label = "Tipo de Negocio",
+                value = emprendimiento.categoriasPrincipales.firstOrNull() ?: "",
+                options = categoriasPrincipales,
+                expanded = expandedTipo,
+                onExpandedChange = { expandedTipo = it },
+                onSelect = { seleccion ->
+                    registroComercio.setCategoriasPrincipales(listOf(seleccion))
+                    registroComercio.setCategoriasSecundarias(emptyList())
+                }
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
-            Dropdown("Categoría", categoria, subcategorias, expandedCategoria,
-                onExpandedChange = { expandedCategoria = it }, onSelect = { categoria = it })
-
+            Dropdown(
+                label = "Categoría",
+                value = emprendimiento.categoriasSecundarias.firstOrNull() ?: "",
+                options = subcategorias,
+                expanded = expandedCategoria,
+                onExpandedChange = { expandedCategoria = it },
+                onSelect = { seleccion ->
+                    registroComercio.setCategoriasSecundarias(listOf(seleccion))
+                }
+            )
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
@@ -180,10 +193,10 @@ fun RegisterLocalScreen1Content(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = camposValidos,
+                enabled = true,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (camposValidos) Color(0xFF49724C) else Color(0xFFDFF2E1),
-                    contentColor = if (camposValidos) Color.White else Color.Black.copy(alpha = 0.3f)
+                    containerColor = Color(0xFF49724C),
+                    contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -327,4 +340,3 @@ fun Dropdown(
         }
     }
 }
-

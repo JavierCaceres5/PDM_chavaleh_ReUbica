@@ -15,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,10 +53,11 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
 import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
+import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen4
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
-import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
-import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen4
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
 
 data class navItem(
     val title: String,
@@ -68,6 +68,7 @@ data class navItem(
 @Composable
 fun CustomScaffold(rootNavController: NavHostController){
 
+    val registroComercioViewModel: RegistroComercioViewModel = viewModel()
     val navController = rememberNavController()
     var title by rememberSaveable { mutableStateOf("Home") }
     var selectedItem by rememberSaveable { mutableStateOf("nowplaying") }
@@ -173,19 +174,19 @@ fun CustomScaffold(rootNavController: NavHostController){
                     PoliticaDePrivacidad(navController)
                 }
                 composable<RegisterLocalScreen1Navigation> {
-                    RegisterLocalScreen1(navController)
+                    RegisterLocalScreen1(navController, registroComercioViewModel)
                 }
 
                 composable<RegisterLocalScreen2Navigation> {
-                    RegisterLocalScreen2(navController)
+                    RegisterLocalScreen2(navController, registroComercioViewModel)
                 }
 
                 composable<RegisterLocalScreen3Navigation> {
-                    RegisterLocalScreen3(navController)
+                    RegisterLocalScreen3(navController, registroComercioViewModel)
                 }
 
                 composable<RegisterLocalScreen4Navigation> {
-                    RegisterLocalScreen4(navController)
+                    RegisterLocalScreen4(navController, registroComercioViewModel)
                 }
 
                 composable(LoadingScreenNavigation::class.qualifiedName ?: "") {
