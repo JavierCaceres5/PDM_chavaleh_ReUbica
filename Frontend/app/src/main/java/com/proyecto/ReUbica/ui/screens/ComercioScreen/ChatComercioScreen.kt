@@ -1,10 +1,14 @@
-package com.proyecto.ReUbica.ui.screens.ComercioScreen
+       package com.proyecto.ReUbica.ui.screens.ComercioScreen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
@@ -47,7 +51,7 @@ fun ChatComercioScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(16.dp, 8.dp, 16.dp, 0.dp)
         ) {
             // Mensajes simulados
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -73,11 +77,18 @@ fun ChatComercioScreen(
                     shape = RoundedCornerShape(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = { mensaje = "" },
-                    shape = RoundedCornerShape(24.dp)
+
+                IconButton(
+                    onClick = { /* acción para enviar */ },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(Color(0xFF49724C), shape = CircleShape)
                 ) {
-                    Text("Enviar")
+                    Icon(
+                        imageVector = Icons.Filled.Send,
+                        contentDescription = "Enviar mensaje",
+                        tint = Color.White
+                    )
                 }
             }
         }
