@@ -27,6 +27,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.proyecto.ReUbica.ui.navigations.CartaProductosScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.EmprendedorProfileScreenNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
 import com.proyecto.ReUbica.ui.screens.HomeScreen.HomeScreen
 import com.proyecto.ReUbica.ui.screens.LegalInformationScreen
@@ -42,6 +44,7 @@ import com.proyecto.ReUbica.ui.navigations.FavoritesScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.LegalInformationNavigation
 import com.proyecto.ReUbica.ui.navigations.LoadingScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.LocalInformationScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.NotificationsNavigation
 import com.proyecto.ReUbica.ui.navigations.PersonalDataNavigation
 import com.proyecto.ReUbica.ui.navigations.PoliticaDePrivacidadNavigation
@@ -196,6 +199,17 @@ fun CustomScaffold(rootNavController: NavHostController){
                     ) {
                         CircularProgressIndicator(color = Color(0xFF49724C))
                     }
+                }
+                composable<EmprendedorProfileScreenNavigation> {
+                    EmprendedorProfileScreen(navController, rootNavController)
+                }
+
+                composable<LocalInformationScreenNavigation> {
+                    LocalInformationScreen(navController)
+                }
+
+                composable<CartaProductosScreenNavigation> {
+                    CartaProductosScreen(navController)
                 }
 
             }

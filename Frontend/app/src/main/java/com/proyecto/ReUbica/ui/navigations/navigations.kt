@@ -61,3 +61,12 @@ object SessionCheckNavigation
 
 @Serializable
 object LoadingScreenNavigation
+
+@Serializable
+object EmprendedorProfileScreenNavigation
+
+@Serializable
+object LocalInformationScreenNavigation
+
+@Serializable
+object CartaProductosScreenNavigation

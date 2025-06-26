@@ -60,16 +60,43 @@ fun RegisterLocalScreen1Content(
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
     val abel = FontFamily(Font(R.font.abelregular))
 
-    val categoriasPrincipales = listOf("Ropa", "Alimentos", "Comida", "Higiene", "Artesanías", "Librería", "Servicios")
-    val categoriasSecundarias = mapOf(
-        "Ropa" to listOf("Ropa de segunda mano", "Vestidos", "Accesorios", "Calzado", "Ropa variada", "Otros"),
-        "Alimentos" to listOf("Frutas", "Verduras", "Lácteos", "Productos enlatados", "Snacks", "Dulces típicos", "Otros"),
-        "Comida" to listOf("Pizzas", "Hamburguesas", "Comida mexicana", "Comida asiática", "Postres", "Carnes", "Pescados y mariscos", "Comida saludable", "Hot Dogs", "Cafetería", "Otros"),
-        "Higiene" to listOf("Jabones", "Shampoos", "Productos dentales", "Desodorantes", "Productos femeninos", "Otros"),
-        "Artesanías" to listOf("Cerámica", "Tejidos", "Joyería artesanal", "Cuadros", "Muebles", "Otros"),
-        "Librería" to listOf("Libros infantiles", "Novelas", "Papelería", "Material escolar", "Revistas", "Otros"),
-        "Servicios" to listOf("Reparación electrónica", "Limpieza", "Transporte", "Consultoría", "Educación", "Otros")
+    val categoriasPrincipales = listOf(
+        "Comida",
+        "Alimentos",
+        "Higiene",
+        "Servicios",
+        "Ropa",
+        "Libreria",
+        "Artesanias"
     )
+    val categoriasSecundarias = mapOf(
+        "Comida" to listOf(
+            "Frutas", "Verduras", "Lácteos", "Productos enlatados", "Snacks",
+            "Dulces típicos", "Carnes", "Pescados y mariscos",
+            "Comida saludable", "Comida mexicana", "Comida asiática",
+            "Hot Dogs", "Hamburguesas", "Pizzas", "Otros"
+        ),
+        "Alimentos" to listOf(
+            "Frutas", "Verduras", "Lácteos", "Productos enlatados", "Snacks",
+            "Dulces típicos", "Carnes", "Pescados y mariscos"
+        ),
+        "Higiene" to listOf(
+            "Limpieza"
+        ),
+        "Servicios" to listOf(
+            "Reparación electrónica", "Consultoría", "Transporte"
+        ),
+        "Ropa" to listOf(
+            "Ropa de segunda", "Vestidos", "Accesorios", "Calzados", "Ropa variada"
+        ),
+        "Libreria" to listOf(
+            "Libros infantiles", "Novelas", "Papelería", "Material escolar", "Revistas"
+        ),
+        "Artesanias" to listOf(
+            "Cerámica", "Tejidos", "Joyería artesanal", "Cuadros"
+        )
+    )
+
 
     val emprendimiento by registroComercio.emprendimiento.collectAsState()
 
