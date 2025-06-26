@@ -78,7 +78,7 @@ fun ComercioScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    println("Chatear con el comercio")
+                    navController.navigate("chat_comercio/${business.name}/") //${business.phone} hay que poner esto con el back  a la par del name
                 },
                 containerColor = Color(0xFF5A3C1D),
                 contentColor = Color.White
@@ -164,7 +164,8 @@ fun ComercioScreen(
 
             LazyColumn {
                 items(business.products) { product ->
-                    ProductCard(product, favoritosViewModel)
+                    ProductCard(product = product, favoritosViewModel = favoritosViewModel, navController = navController)
+
                 }
             }
         }

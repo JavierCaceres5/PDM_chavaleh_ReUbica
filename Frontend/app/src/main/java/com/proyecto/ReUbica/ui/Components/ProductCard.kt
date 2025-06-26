@@ -16,20 +16,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.data.api.DummyProduct
+import com.proyecto.ReUbica.ui.navigations.ProductDetailNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 
 @Composable
 fun ProductCard(
     product: DummyProduct,
-    favoritosViewModel: FavoritosViewModel = viewModel()
+    favoritosViewModel: FavoritosViewModel = viewModel(),
+    navController: NavHostController
 ) {
     val isFavorito = favoritosViewModel.isFavoritoProducto(product.id.toString())
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .clickable {
+                navController.navigate(ProductDetailNavigation.withArgs(product.id.toString()))
+
+            },
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         )
