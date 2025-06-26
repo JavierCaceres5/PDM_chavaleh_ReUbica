@@ -10,8 +10,9 @@ class EmprendimientoRepository {
 
     private val api = RetrofitInstance.emprendimientoApi
 
-    suspend fun createEmprendimiento(request: EmprendimientoCreateRequest): Response<EmprendimientoResponse>{
-        return api.registrarEmprendimiento(request)
+    suspend fun createEmprendimiento(token: String, request: EmprendimientoCreateRequest): Response<EmprendimientoResponse> {
+        val bearerToken = "Bearer $token"
+        return api.registrarEmprendimiento(bearerToken, request)
     }
 
     suspend fun searchByName(nombre: String): Response<List<EmprendimientoModel>> {

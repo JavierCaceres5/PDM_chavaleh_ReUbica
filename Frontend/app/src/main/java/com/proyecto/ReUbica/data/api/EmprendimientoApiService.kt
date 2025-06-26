@@ -6,8 +6,8 @@ import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface EmprendimientoApiService {
@@ -24,6 +24,7 @@ interface EmprendimientoApiService {
 
     @POST("emprendimientos/registrarEmprendimiento")
     suspend fun registrarEmprendimiento(
+        @Header("Authorization") token: String,
         @Body request: EmprendimientoCreateRequest
     ): Response<EmprendimientoResponse>
 

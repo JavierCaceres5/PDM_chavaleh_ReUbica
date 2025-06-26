@@ -1,8 +1,8 @@
 package com.proyecto.ReUbica.ui.screens.RegistroComercioScreens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,38 +13,38 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.*
-import com.proyecto.ReUbica.R
-import com.proyecto.ReUbica.ui.layouts.StepTopBar
-import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.net.URL
-import androidx.navigation.NavHostController
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.TextFieldValue
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.clickable
+import com.google.maps.android.compose.*
 import com.proyecto.ReUbica.BuildConfig
+import com.proyecto.ReUbica.R
+import com.proyecto.ReUbica.ui.layouts.StepTopBar
+import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.URL
 
 @Composable
-fun RegisterLocalScreen2(navController: NavHostController) {
+fun RegisterLocalScreen2(navController: NavHostController, viewModel: RegistroComercioViewModel) {
     RegisterLocalScreen2Content(
+        registroComercio = viewModel,
         onNext = { navController.navigate(RegisterLocalScreen3Navigation) },
         onBack = { navController.popBackStack() }
     )
@@ -52,33 +52,44 @@ fun RegisterLocalScreen2(navController: NavHostController) {
 
 @Composable
 fun RegisterLocalScreen2Content(
+    registroComercio: RegistroComercioViewModel,
     onNext: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val abel = FontFamily(Font(R.font.abelregular))
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
 
-    var horario by remember { mutableStateOf("") }
-    var direccionInput by remember { mutableStateOf(TextFieldValue("")) }
-    var direccionConfirmada by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
+    val cameraPositionState = rememberCameraPositionState()
+    val markerState = remember { MarkerState(position = LatLng(13.6929, -89.2182)) }
+    var mapLoaded by remember { mutableStateOf(false) }
 
+    val emprendimiento by registroComercio.emprendimiento.collectAsState()
+    val redesSociales = emprendimiento.redes_sociales
+
+    val camposValidos = emprendimiento.direccion.isNotBlank() &&
+            emprendimiento.latitud != 0.0 && emprendimiento.longitud != 0.0
+
+    val context = LocalContext.current
+    val placesClient = remember {
+        Places.createClient(context)
+    }
+    val suggestions = remember { mutableStateListOf<AutocompletePrediction>() }
+    var showDropdown by remember { mutableStateOf(false) }
     var showMap by remember { mutableStateOf(false) }
     var showRedes by remember { mutableStateOf(false) }
 
-    var instagram by remember { mutableStateOf("") }
-    var facebook by remember { mutableStateOf("") }
-    var tiktok by remember { mutableStateOf("") }
-    var x by remember { mutableStateOf("") }
-    var whatsapp by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope()
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val error by registroComercio.error.collectAsState()
 
-    var location by remember { mutableStateOf(LatLng(13.6929, -89.2182)) }
+    val showError = errorMessage ?: error
 
-    val cameraPositionState = rememberCameraPositionState()
-    val markerState = remember { MarkerState(position = location) }
-
-    val camposValidos = horario.isNotBlank() && direccionInput.text.isNotBlank()
+    LaunchedEffect(markerState.position, mapLoaded) {
+        if (mapLoaded) {
+            cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(markerState.position, 16f))
+        }
+    }
 
     Column(Modifier.fillMaxSize()) {
         StepTopBar(step = 2, title = "Datos del negocio", onBackClick = onBack)
@@ -92,6 +103,21 @@ fun RegisterLocalScreen2Content(
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            LaunchedEffect(emprendimiento.direccion, mapLoaded) {
+                if (emprendimiento.direccion.isNotBlank() && mapLoaded) {
+                    coroutineScope.launch {
+                        val coords = getCoordinatesFromAddress(emprendimiento.direccion)
+                        coords?.let {
+                            markerState.position = it
+                            cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
+                            registroComercio.setValues("latitud", it.latitude.toString())
+                            registroComercio.setValues("longitud", it.longitude.toString())
+                        }
+                    }
+                }
+            }
+
             Text(
                 text = "¡Continuemos con tu registro!",
                 fontFamily = poppins,
@@ -109,43 +135,64 @@ fun RegisterLocalScreen2Content(
                 textAlign = TextAlign.Center
             )
 
+            if (showError != null) {
+                Text(
+                    text = showError,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    fontFamily = abel,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(vertical = 8.dp).padding(top = 10.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Horario de atención", fontFamily = poppins, fontSize = 14.sp, color = Color(0xFF5A3C1D), modifier = Modifier.fillMaxWidth())
+            Text(
+                "Teléfono",
+                fontFamily = poppins,
+                fontSize = 14.sp,
+                color = Color(0xFF5A3C1D),
+                modifier = Modifier.fillMaxWidth()
+            )
 
             OutlinedTextField(
-                value = horario,
-                onValueChange = { horario = it },
-                placeholder = { Text("Días y hora", fontFamily = abel, color = Color.Black) },
-                textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFDFF2E1), shape = RoundedCornerShape(8.dp)),
+                value = emprendimiento.emprendimientoPhone,
+                onValueChange = { registroComercio.setValues("telefono", it) },
+                placeholder = { Text("Teléfono del local", fontFamily = abel, color = Color(0xFF5A3C1D)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
-                )
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedContainerColor = Color(0xFFDFF2E1),
+                    unfocusedContainerColor = Color(0xFFDFF2E1)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                textStyle = LocalTextStyle.current.copy(color = Color.Black, fontFamily = abel)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text("Dirección completa del local", fontFamily = poppins, fontSize = 14.sp, color = Color(0xFF5A3C1D), modifier = Modifier.fillMaxWidth())
-
-            val context = LocalContext.current
-            val placesClient = Places.createClient(context)
-            val suggestions = remember { mutableStateListOf<AutocompletePrediction>() }
-            var showDropdown by remember { mutableStateOf(false) }
+            Text(
+                "Dirección completa del local",
+                fontFamily = poppins,
+                fontSize = 14.sp,
+                color = Color(0xFF5A3C1D),
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
-                    value = direccionInput,
+                    value = emprendimiento.direccion,
                     onValueChange = {
-                        direccionInput = it
+                        registroComercio.setValues("direccion", it)
                         showDropdown = true
 
                         coroutineScope.launch {
                             val request = FindAutocompletePredictionsRequest.builder()
-                                .setQuery(it.text)
+                                .setQuery(it)
                                 .setCountries("SV")
                                 .setTypeFilter(TypeFilter.ADDRESS)
                                 .build()
@@ -155,22 +202,23 @@ fun RegisterLocalScreen2Content(
                                     suggestions.clear()
                                     suggestions.addAll(response.autocompletePredictions)
                                 }
-                                .addOnFailureListener {
-                                    Log.e("Places", "Error buscando sugerencias: ${it.message}")
-                                }
+                                .addOnFailureListener { }
                         }
                     },
                     placeholder = { Text("Buscar", fontFamily = abel, color = Color.Black) },
                     textStyle = LocalTextStyle.current.copy(color = Color.Black),
                     leadingIcon = {
                         IconButton(onClick = {
-                            if (direccionInput.text.isNotBlank()) {
+                            if (emprendimiento.direccion.isNotBlank()) {
                                 coroutineScope.launch {
-                                    val coords = getCoordinatesFromAddress(direccionInput.text)
+                                    val coords = getCoordinatesFromAddress(emprendimiento.direccion)
                                     coords?.let {
-                                        location = it
                                         markerState.position = it
-                                        cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
+                                        if (mapLoaded) {
+                                            cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
+                                        }
+                                        registroComercio.setValues("latitud", it.latitude.toString())
+                                        registroComercio.setValues("longitud", it.longitude.toString())
                                     }
                                 }
                             }
@@ -195,7 +243,7 @@ fun RegisterLocalScreen2Content(
                             .fillMaxWidth()
                             .background(Color.White, shape = RoundedCornerShape(10.dp))
                             .border(1.dp, Color(0xFF49724C), shape = RoundedCornerShape(10.dp))
-                            .padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 8.dp)
+                            .padding(4.dp)
                             .heightIn(max = 200.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
@@ -206,19 +254,23 @@ fun RegisterLocalScreen2Content(
                                     .clip(RoundedCornerShape(6.dp))
                                     .background(Color(0xFFDFF2E1))
                                     .clickable {
-                                        direccionInput = TextFieldValue(prediction.getFullText(null).toString())
-                                        direccionConfirmada = prediction.getFullText(null).toString()
+                                        val selectedAddress = prediction.getFullText(null).toString()
+                                        registroComercio.setValues("direccion", selectedAddress)
                                         showDropdown = false
                                         suggestions.clear()
 
                                         coroutineScope.launch {
-                                            val coords = getCoordinatesFromAddress(direccionInput.text)
+                                            val coords = getCoordinatesFromAddress(selectedAddress)
                                             coords?.let {
-                                                location = it
                                                 markerState.position = it
-                                                cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
+                                                if (mapLoaded) {
+                                                    cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(it, 16f))
+                                                }
+                                                registroComercio.setValues("latitud", it.latitude.toString())
+                                                registroComercio.setValues("longitud", it.longitude.toString())
                                             }
                                         }
+
                                     }
                                     .padding(vertical = 10.dp, horizontal = 14.dp)
                             ) {
@@ -229,7 +281,6 @@ fun RegisterLocalScreen2Content(
                                     modifier = Modifier.align(Alignment.CenterStart)
                                 )
                             }
-
                             if (index != suggestions.lastIndex) {
                                 Spacer(modifier = Modifier.height(6.dp))
                             }
@@ -238,15 +289,12 @@ fun RegisterLocalScreen2Content(
                 }
             }
 
-
-
             TextButton(
                 onClick = { showMap = !showMap },
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(if (showMap) "Ocultar mapa" else "Ver mapa", color = Color(0xFF013F6D))
             }
-
 
             if (showMap) {
                 Spacer(modifier = Modifier.height(10.dp))
@@ -259,16 +307,13 @@ fun RegisterLocalScreen2Content(
                 ) {
                     GoogleMap(
                         modifier = Modifier.matchParentSize(),
-                        cameraPositionState = cameraPositionState
+                        cameraPositionState = cameraPositionState,
+                        onMapLoaded = { mapLoaded = true }
                     ) {
-                        LaunchedEffect(location) {
-                            cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(location, 16f))
-                        }
                         Marker(state = markerState)
                     }
                 }
             }
-
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -284,17 +329,18 @@ fun RegisterLocalScreen2Content(
             }
 
             if (showRedes) {
-                RedesSociales(R.drawable.instagram, instagram) { instagram = it }
-                RedesSociales(R.drawable.facebook, facebook) { facebook = it }
-                RedesSociales(R.drawable.tiktok, tiktok) { tiktok = it }
-                RedesSociales(R.drawable.x, x) { x = it }
-                RedesSociales(R.drawable.whatsapp, whatsapp) { whatsapp = it }
+                RedesSociales(R.drawable.instagram, redesSociales.Instagram.toString()) { registroComercio.setRedesSociales("Instagram", it) }
+                RedesSociales(R.drawable.facebook, redesSociales.Facebook.toString()) { registroComercio.setRedesSociales("Facebook", it) }
+                RedesSociales(R.drawable.tiktok, redesSociales.TikTok.toString()) { registroComercio.setRedesSociales("TikTok", it) }
+                RedesSociales(R.drawable.x, redesSociales.Twitter.toString()) { registroComercio.setRedesSociales("Twitter", it) }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { if (camposValidos) onNext() },
+                onClick = {
+                    onNext()
+                          },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -312,6 +358,7 @@ fun RegisterLocalScreen2Content(
         }
     }
 }
+
 @Composable
 fun RedesSociales(iconId: Int, value: String, onValueChange: (String) -> Unit) {
     val abel = FontFamily(Font(R.font.abelregular))
@@ -340,7 +387,7 @@ fun RedesSociales(iconId: Int, value: String, onValueChange: (String) -> Unit) {
                 onValueChange = onValueChange,
                 placeholder = {
                     Text(
-                        text = if (iconId == R.drawable.whatsapp) "Ingrese su número telefono" else "Ingrese su usuario",
+                        text = "Ingrese su usuario",
                         fontFamily = abel,
                         color = Color.Black
                     )
@@ -358,7 +405,6 @@ fun RedesSociales(iconId: Int, value: String, onValueChange: (String) -> Unit) {
     }
 }
 
-
 suspend fun getCoordinatesFromAddress(address: String): LatLng? = withContext(Dispatchers.IO) {
     try {
         val apiKey = BuildConfig.MAPS_API_KEY
@@ -373,11 +419,9 @@ suspend fun getCoordinatesFromAddress(address: String): LatLng? = withContext(Di
                 .getJSONObject("location")
             LatLng(location.getDouble("lat"), location.getDouble("lng"))
         } else {
-            Log.e("GeocodingError", "Respuesta inválida: $response")
             null
         }
     } catch (e: Exception) {
-        Log.e("GeocodingError", "No se pudo geocodificar: ${e.message}")
         null
     }
 }
