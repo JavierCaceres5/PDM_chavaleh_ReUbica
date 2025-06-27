@@ -62,3 +62,30 @@ object SessionCheckNavigation
 @Serializable
 object LoadingScreenNavigation
 
+@Serializable
+
+data class ComercioNavigation(
+    val id: String,
+    val nombre: String,
+    val descripcion: String,
+    val categoria: String,
+    val direccion: String,
+    val latitud: Double,
+    val longitud: Double,
+    val horario: String
+)
+object ProductDetailNavigation {
+    const val route = "product_detail"
+    const val productIdArg = "productId"
+
+    fun withArgs(productId: String) = "$route/$productId"
+}
+
+@Serializable
+object EmprendedorProfileScreenNavigation
+
+@Serializable
+object LocalInformationScreenNavigation
+
+@Serializable
+object CartaProductosScreenNavigation

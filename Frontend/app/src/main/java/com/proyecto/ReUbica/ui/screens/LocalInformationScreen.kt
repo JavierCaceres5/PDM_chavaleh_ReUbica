@@ -25,11 +25,11 @@ import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.ui.Components.ListItemRow
 
 @Composable
-fun LocalInformationScreen(navController: NavHostController){
+fun LocalInformationScreen(navController: NavHostController) {
 
     val scrollState = rememberScrollState()
 
-    Column (
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
@@ -38,7 +38,7 @@ fun LocalInformationScreen(navController: NavHostController){
             modifier = Modifier
                 .fillMaxWidth()
                 .height(260.dp)
-        ){
+        ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBackIosNew,
@@ -48,7 +48,7 @@ fun LocalInformationScreen(navController: NavHostController){
                 )
             }
 
-            Column (
+            Column(
                 modifier = Modifier.padding(15.dp)
             ) {
                 Text(

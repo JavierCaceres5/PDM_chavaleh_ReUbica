@@ -90,7 +90,6 @@ fun RegisterLocalScreen2Content(
     var showRedes by remember { mutableStateOf(false) }
     var showValidationError by remember { mutableStateOf(false) }
 
-
     val phoneVisualTransformation = VisualTransformation { text ->
         val trimmed = text.text.filter { it.isDigit() }.take(8)
         val transformed = if (trimmed.length > 4) {
@@ -119,7 +118,6 @@ fun RegisterLocalScreen2Content(
 
         TransformedText(AnnotatedString(transformed), offsetMapping)
     }
-
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val error by registroComercio.error.collectAsState()
@@ -200,10 +198,18 @@ fun RegisterLocalScreen2Content(
 
             OutlinedTextField(
                 value = emprendimiento.emprendimientoPhone,
-                onValueChange = {
-                    val cleaned = it.filter { char -> char.isDigit() }.take(8)
-                    registroComercio.setValues("telefono", cleaned)
-                },
+                onValueChange = { input ->
+                    val digits = input.filter { it.isDigit() }.take(8)
+
+                    val formatted = when {
+                        digits.length > 4 -> digits.substring(0, 4) + "-" + digits.substring(4)
+                        else -> digits
+                    }
+
+                    registroComercio.setValues("telefono", formatted)
+                }
+
+                ,
                 placeholder = {
                     Text("Teléfono del local", fontFamily = abel, color = Color(0xFF5A3C1D))
                 },
@@ -213,6 +219,7 @@ fun RegisterLocalScreen2Content(
                     keyboardType = KeyboardType.Number
                 ),
                 visualTransformation = phoneVisualTransformation,
+
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
@@ -428,9 +435,11 @@ fun RegisterLocalScreen2Content(
 
             Button(
                 onClick = {
-                    val telefonoValido = emprendimiento.emprendimientoPhone.length == 8
+
+                    val telefonoValido = Regex("^\\d{4}-\\d{4}$").matches(emprendimiento.emprendimientoPhone)
                     val direccionValida = emprendimiento.direccion.isNotBlank()
                     val coordenadasValidas = emprendimiento.latitud != 0.0 && emprendimiento.longitud != 0.0
+
 
                     if (!telefonoValido || !direccionValida || !coordenadasValidas) {
                         showValidationError = true
