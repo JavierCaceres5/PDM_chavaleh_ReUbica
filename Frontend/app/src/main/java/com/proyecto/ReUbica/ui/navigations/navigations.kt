@@ -63,6 +63,7 @@ object SessionCheckNavigation
 object LoadingScreenNavigation
 
 @Serializable
+
 data class ComercioNavigation(
     val id: String,
     val nombre: String,
@@ -79,4 +80,13 @@ object ProductDetailNavigation {
 
     fun withArgs(productId: String) = "$route/$productId"
 }
+
+
+object EmprendedorProfileScreenNavigation
+
+@Serializable
+object LocalInformationScreenNavigation
+
+@Serializable
+object CartaProductosScreenNavigation
 
