@@ -27,6 +27,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import com.proyecto.ReUbica.ui.navigations.CartaProductosScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.EmprendedorProfileScreenNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
@@ -56,11 +58,21 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
 import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
+
+import com.proyecto.ReUbica.ui.screens.ComercioScreen.ChatComercioScreen
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
+import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
+import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen4
+import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioScreen
+import com.proyecto.ReUbica.ui.screens.ComercioScreen.ProductDetailScreen
+
 import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen4
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
+
 
 data class navItem(
     val title: String,
@@ -143,7 +155,7 @@ fun CustomScaffold(rootNavController: NavHostController){
                 }
 
                 composable<SearchScreenNavigation>{
-                    SearchScreen(favoritosViewModel = favoritosViewModel)
+                    SearchScreen(navController = navController, favoritosViewModel = favoritosViewModel)
                 }
 
                 composable<ProfileScreenNavigation>{
@@ -211,6 +223,28 @@ fun CustomScaffold(rootNavController: NavHostController){
                 composable<CartaProductosScreenNavigation> {
                     CartaProductosScreen(navController)
                 }
+
+                composable<ComercioNavigation> { backStackEntry ->
+                    val navArgs = backStackEntry.toRoute<ComercioNavigation>()
+                    ComercioScreen(
+                        navController = navController,
+                        navArgs = navArgs
+                    )
+                }
+                composable("product_detail/{productId}") { backStackEntry ->
+                    val productId = backStackEntry.arguments?.getString("productId") ?: ""
+                    ProductDetailScreen(productId = productId, navController = navController)
+                }
+                composable("chat_comercio/{name}/{phone}") { backStackEntry ->
+                    val name = backStackEntry.arguments?.getString("name") ?: ""
+                    val phone = backStackEntry.arguments?.getString("phone") ?: ""
+                    ChatComercioScreen(
+                        navController = navController,
+                        businessName = name,
+                        phone = phone
+                    )
+                }
+
 
             }
             Spacer(modifier = Modifier.padding(innerPadding))

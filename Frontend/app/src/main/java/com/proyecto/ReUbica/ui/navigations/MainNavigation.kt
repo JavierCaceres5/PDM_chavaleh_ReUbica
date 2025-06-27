@@ -2,14 +2,12 @@ package com.proyecto.ReUbica.ui.navigations
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.proyecto.ReUbica.ui.layouts.CustomScaffold
+import com.proyecto.ReUbica.ui.screens.ComercioScreen.ProductDetailScreen
 import com.proyecto.ReUbica.ui.screens.LoginScreen.LoginScreen
-import com.proyecto.ReUbica.ui.screens.LoginScreen.LoginScreenViewModel
 import com.proyecto.ReUbica.ui.screens.RegisterScreen.RegisterScreen
 import com.proyecto.ReUbica.ui.screens.SessionCheckScreen
 import com.proyecto.ReUbica.ui.screens.WelcomeScreen
@@ -38,5 +36,7 @@ fun MainNavigation() {
         composable<mainNavigation> {
             CustomScaffold(navController)
         }
+
+
     }
 }

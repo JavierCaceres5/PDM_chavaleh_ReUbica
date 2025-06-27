@@ -26,6 +26,7 @@ import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.ui.Components.RestaurantCard
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.R
+import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import com.proyecto.ReUbica.ui.screens.SearchScreen.CategoriaItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,13 +115,15 @@ fun HomeScreen(navController: NavHostController, favoritosViewModel: FavoritosVi
         SeccionRestaurantes(
             titulo = "Los mejores restaurantes",
             destacados = resultadosFiltrados,
-            favoritosViewModel = favoritosViewModel
+            favoritosViewModel = favoritosViewModel,
+            navController = navController
         )
 
         SeccionRestaurantes(
             titulo = "Según tus preferencias",
             destacados = resultadosFiltrados,
-            favoritosViewModel = favoritosViewModel
+            favoritosViewModel = favoritosViewModel,
+            navController = navController
         )
     }
 }
@@ -161,7 +164,8 @@ fun CategoriaBox(categoria: CategoriaItem, modifier: Modifier = Modifier) {
 fun SeccionRestaurantes(
     titulo: String,
     destacados: List<Triple<String, String, String>>,
-    favoritosViewModel: FavoritosViewModel
+    favoritosViewModel: FavoritosViewModel,
+    navController: NavHostController
 ) {
     Row(
         modifier = Modifier
@@ -181,7 +185,8 @@ fun SeccionRestaurantes(
     ) {
         items(destacados.size) { index ->
             val (nombre, departamento, categoria) = destacados[index]
-            val isFavorito = favoritosViewModel.isFavorito(nombre)
+            val isFavorito = favoritosViewModel.isFavoritoComercio(nombre)
+
             RestaurantCard(
                 nombre = nombre,
                 departamento = departamento,
@@ -189,13 +194,27 @@ fun SeccionRestaurantes(
                 imagenRes = R.drawable.reubica,
                 isFavorito = isFavorito,
                 onFavoritoClick = {
-                    favoritosViewModel.toggleFavorito(
+                    favoritosViewModel.toggleFavoritoComercio(
                         nombre = nombre,
                         departamento = departamento,
                         categoria = categoria
                     )
                 },
-                onVerTiendaClick = {}
+                onVerTiendaClick = {
+                    navController.navigate(
+                        ComercioNavigation(
+                            id = "1",
+                            nombre = nombre,
+                            descripcion = "Comercio destacado de la zona",
+                            categoria = categoria,
+                            direccion = departamento,
+                            latitud = 13.6989,
+                            longitud = -89.1914,
+                            horario = "9:00 AM - 9:00 PM"
+                        )
+                    )
+
+                }
             )
         }
     }
