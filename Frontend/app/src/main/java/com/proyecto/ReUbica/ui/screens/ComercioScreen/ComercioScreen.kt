@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Facebook
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Store
@@ -39,6 +38,7 @@ import com.proyecto.ReUbica.ui.layouts.navItem
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioViewModel
 import com.proyecto.ReUbica.ui.navigations.*
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.LocationOn
 import com.proyecto.ReUbica.data.api.DummyProduct
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 
@@ -133,7 +133,7 @@ fun ComercioScreen(
                     }
 
                     Row {
-                        Icon(imageVector = Icons.Default.LocationOn, tint = Color.Black, contentDescription = null)
+                        Icon(imageVector = Icons.Outlined.LocationOn, tint = Color.Black, contentDescription = null)
                         Text("Ubicación: ${business.locationName}", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF5A3C1D))
                     }
 

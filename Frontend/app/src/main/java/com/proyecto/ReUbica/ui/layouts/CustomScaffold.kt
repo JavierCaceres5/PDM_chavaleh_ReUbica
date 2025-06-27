@@ -15,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,6 +29,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
+import com.proyecto.ReUbica.ui.navigations.CartaProductosScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.EmprendedorProfileScreenNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
 import com.proyecto.ReUbica.ui.screens.HomeScreen.HomeScreen
 import com.proyecto.ReUbica.ui.screens.LegalInformationScreen
@@ -45,6 +46,7 @@ import com.proyecto.ReUbica.ui.navigations.FavoritesScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.LegalInformationNavigation
 import com.proyecto.ReUbica.ui.navigations.LoadingScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.LocalInformationScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.NotificationsNavigation
 import com.proyecto.ReUbica.ui.navigations.PersonalDataNavigation
 import com.proyecto.ReUbica.ui.navigations.PoliticaDePrivacidadNavigation
@@ -56,13 +58,24 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
 import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
+import com.proyecto.ReUbica.ui.screens.CartaProductosScreen
+
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ChatComercioScreen
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
-import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen4
+
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioScreen
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ProductDetailScreen
+import com.proyecto.ReUbica.ui.screens.EmprendedorProfileScreen
+import com.proyecto.ReUbica.ui.screens.LocalInformationScreen
+
+import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen4
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
+
 
 data class navItem(
     val title: String,
@@ -73,6 +86,7 @@ data class navItem(
 @Composable
 fun CustomScaffold(rootNavController: NavHostController){
 
+    val registroComercioViewModel: RegistroComercioViewModel = viewModel()
     val navController = rememberNavController()
     var title by rememberSaveable { mutableStateOf("Home") }
     var selectedItem by rememberSaveable { mutableStateOf("nowplaying") }
@@ -178,19 +192,19 @@ fun CustomScaffold(rootNavController: NavHostController){
                     PoliticaDePrivacidad(navController)
                 }
                 composable<RegisterLocalScreen1Navigation> {
-                    RegisterLocalScreen1(navController)
+                    RegisterLocalScreen1(navController, registroComercioViewModel)
                 }
 
                 composable<RegisterLocalScreen2Navigation> {
-                    RegisterLocalScreen2(navController)
+                    RegisterLocalScreen2(navController, registroComercioViewModel)
                 }
 
                 composable<RegisterLocalScreen3Navigation> {
-                    RegisterLocalScreen3(navController)
+                    RegisterLocalScreen3(navController, registroComercioViewModel)
                 }
 
                 composable<RegisterLocalScreen4Navigation> {
-                    RegisterLocalScreen4(navController)
+                    RegisterLocalScreen4(navController, registroComercioViewModel)
                 }
 
                 composable(LoadingScreenNavigation::class.qualifiedName ?: "") {
@@ -200,6 +214,17 @@ fun CustomScaffold(rootNavController: NavHostController){
                     ) {
                         CircularProgressIndicator(color = Color(0xFF49724C))
                     }
+                }
+                composable<EmprendedorProfileScreenNavigation> {
+                    EmprendedorProfileScreen(navController, rootNavController)
+                }
+
+                composable<LocalInformationScreenNavigation> {
+                    LocalInformationScreen(navController)
+                }
+
+                composable<CartaProductosScreenNavigation> {
+                    CartaProductosScreen(navController)
                 }
 
                 composable<ComercioNavigation> { backStackEntry ->
