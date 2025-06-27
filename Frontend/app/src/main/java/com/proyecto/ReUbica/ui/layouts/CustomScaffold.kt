@@ -58,6 +58,7 @@ import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScre
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
+import com.proyecto.ReUbica.ui.screens.SearchScreen.CartaProductosScreen
 
 data class navItem(
     val title: String,

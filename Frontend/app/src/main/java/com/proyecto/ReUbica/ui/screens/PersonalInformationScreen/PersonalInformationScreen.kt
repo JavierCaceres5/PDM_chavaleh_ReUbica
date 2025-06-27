@@ -77,7 +77,6 @@ fun PersonalInformationScreen(
     )
 
     val session by personalInformationViewModel.userSession.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
 
     var editField by remember { mutableStateOf<String?>(null) }
     var editValue by remember { mutableStateOf("") }

@@ -96,7 +96,7 @@ fun RegisterLocalScreen4Content(
                 precio = "$5.99"
             )
 
-            Divider(color = Color(0xFF49724C), thickness = 2.dp, modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(color = Color(0xFF49724C), thickness = 2.dp, modifier = Modifier.padding(vertical = 8.dp))
 
             ProductoItem(
                 imageRes = R.drawable.yuca,

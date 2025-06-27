@@ -2,11 +2,11 @@ package com.proyecto.ReUbica.data.model.emprendimiento
 
 import java.util.UUID
 
-data class EmprendimientoModel (
+data class EmprendimientoModel(
     val id: UUID,
     val nombre: String?,
     val descripcion: String?,
-    val categoriasSecundarias: List<String>,
+    val categoriasSecundarias: List<String>?,
     val logo: String?,
     val direccion: String?,
     val emprendimientoPhone: String?,
@@ -14,7 +14,7 @@ data class EmprendimientoModel (
     val userID: UUID,
     val latitud: Double?,
     val longitud: Double?,
-    val categoriasPrincipales: List<String>,
+    val categoriasPrincipales: List<String>?,
     val created_at: String?,
     val updated_at: String?
 )

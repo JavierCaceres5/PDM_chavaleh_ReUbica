@@ -61,3 +61,4 @@ object SessionCheckNavigation
 
 @Serializable
 object LoadingScreenNavigation
+

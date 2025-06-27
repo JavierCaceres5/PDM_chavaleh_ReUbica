@@ -96,7 +96,7 @@ fun RegisterScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .padding(15.dp)
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
     ) {
 
         IconButton(onClick = { navController.navigate(WelcomeScreenNavigation) }) {

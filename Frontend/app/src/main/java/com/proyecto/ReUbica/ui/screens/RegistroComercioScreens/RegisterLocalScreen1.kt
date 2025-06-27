@@ -140,6 +140,7 @@ fun RegisterLocalScreen1Content(
                     registroComercio.setCategoriasSecundarias(listOf(seleccion))
                 }
             )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
