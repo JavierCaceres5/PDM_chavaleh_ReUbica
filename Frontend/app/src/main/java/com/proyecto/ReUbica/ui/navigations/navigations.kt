@@ -81,7 +81,7 @@ object ProductDetailNavigation {
     fun withArgs(productId: String) = "$route/$productId"
 }
 
-
+@Serializable
 object EmprendedorProfileScreenNavigation
 
 @Serializable
