@@ -36,7 +36,7 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
                     _resultadosByCategory.value = emptyList()
                 }
             } catch (e: Exception) {
-                Log.e("BuscarViewModel", "Error de red: ${e.message}")
+                Log.e("HomeScreenViewModel", "Error de red: ${e.message}")
                 _error.value = "Ocurrió un error de red."
                 _resultadosByCategory.value = emptyList()
             }

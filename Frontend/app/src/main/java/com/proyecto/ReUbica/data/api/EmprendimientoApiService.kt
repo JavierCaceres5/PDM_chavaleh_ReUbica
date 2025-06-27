@@ -17,8 +17,10 @@ interface EmprendimientoApiService {
 
     @GET("emprendimientos/nombre")
     suspend fun getEmprendimientosByNombre(
+        @Header("Authorization") token: String,
         @Query("nombre") nombre: String
     ): Response<List<EmprendimientoModel>>
+
 
     @POST("emprendimientos/registrarEmprendimiento")
     suspend fun registrarEmprendimiento(
