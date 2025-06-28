@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.ui.screens.HomeScreen
 
+import android.location.Location
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,9 +33,17 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import androidx.compose.ui.platform.LocalContext
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.proyecto.ReUbica.utils.LocationUtils
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
@@ -49,7 +58,21 @@ fun HomeScreen(
     val todosLosEmprendimientos by homeViewModel.todosLosEmprendimientos.collectAsState()
     var userToken by remember { mutableStateOf<String?>(null) }
     var categoriaSeleccionada by remember { mutableStateOf<String?>(null) }
+    val locationPermissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
+    var userLocation by remember { mutableStateOf<Location?>(null) }
+
+    LaunchedEffect(locationPermissionState.status.isGranted) {
+        if (locationPermissionState.status.isGranted) {
+            val location = LocationUtils.getCurrentLocation(context)
+            userLocation = location
+        } else {
+            locationPermissionState.launchPermissionRequest()
+        }
+    }
+
+    val userLat = userLocation?.latitude ?: 0.0
+    val userLon = userLocation?.longitude ?: 0.0
 
 
     LaunchedEffect(Unit) {
@@ -80,22 +103,18 @@ fun HomeScreen(
 
     val categorias2 = listOf(
         CategoriaItem(Icons.Filled.Diamond, "Artesanías") {
-            categoriaSeleccionada = "Artesanías"
-            homeViewModel.searchEmprendimientoByCategory("Artesanías")
+            categoriaSeleccionada = "Artesanias"
+            homeViewModel.searchEmprendimientoByCategory("Artesanias")
         },
         CategoriaItem(Icons.Filled.Book, "Librería") {
             categoriaSeleccionada = "Librería"
-            homeViewModel.searchEmprendimientoByCategory("Librería")
+            homeViewModel.searchEmprendimientoByCategory("Libreria")
         },
         CategoriaItem(Icons.Filled.Settings, "Servicios") {
             categoriaSeleccionada = "Servicios"
             homeViewModel.searchEmprendimientoByCategory("Servicios")
         },
     )
-
-    // 🌍 Simula ubicación del usuario (San Salvador)
-    val userLat = 13.6929
-    val userLon = -89.2182
 
     fun isNearby(
         userLat: Double, userLon: Double,
@@ -127,7 +146,20 @@ fun HomeScreen(
         )
     }
 
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+    fun parseFecha(fecha: String): Date? {
+        return try {
+            val zonedDateTime = ZonedDateTime.parse(fecha, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+            Date.from(zonedDateTime.toInstant())
+        } catch (e: Exception) {
+            println("❌ Error parseando fecha: $fecha")
+            e.printStackTrace()
+            null
+        }
+    }
+
+
+
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ", Locale.getDefault())
     dateFormat.timeZone = TimeZone.getTimeZone("UTC")
     val now = Date()
     val oneWeekMillis = 7 * 24 * 60 * 60 * 1000
@@ -135,9 +167,10 @@ fun HomeScreen(
     val nuevosEmprendimientos = todosLosEmprendimientos.filter {
         it.created_at?.let { fecha ->
             try {
-                val createdDate = dateFormat.parse(fecha)
+                val createdDate = parseFecha(fecha)
                 createdDate != null && now.time - createdDate.time <= oneWeekMillis
             } catch (e: Exception) {
+                e.printStackTrace()
                 false
             }
         } ?: false
@@ -145,9 +178,34 @@ fun HomeScreen(
         Triple(
             it.nombre ?: "Sin nombre",
             it.direccion ?: "Sin dirección",
-            it.categoriasPrincipales.firstOrNull() ?: "Sin categoría"
+            it.categoriasPrincipales?.firstOrNull() ?: "Sin categoría"
         )
     }
+
+
+    LaunchedEffect(todosLosEmprendimientos) {
+        val now = Date()
+        val oneWeekMillis = 7 * 24 * 60 * 60 * 1000
+
+        println("====== DEPURACIÓN DE NUEVOS EMPRENDIMIENTOS ======")
+        todosLosEmprendimientos.forEach { emp ->
+            emp.created_at?.let { fecha ->
+                val parsed = parseFecha(fecha)
+                val diff = parsed?.let { now.time - it.time }
+                val isNew = diff != null && diff <= oneWeekMillis
+                println("Nombre: ${emp.nombre}")
+                println("Fecha Original: $fecha")
+                println("Fecha Parseada: $parsed")
+                println("Diff (ms): $diff")
+                println("Es nuevo?: $isNew")
+                println("------------------------------------")
+            }
+        }
+        println("======================================")
+    }
+
+
+
 
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
