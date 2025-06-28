@@ -9,6 +9,9 @@ import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 
 class HomeScreenViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -26,14 +29,13 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
-    /**
-     * Obtener emprendimientos por categoría
-     */
     fun searchEmprendimientoByCategory(categoria: String) {
         viewModelScope.launch {
             _loading.value = true
             try {
-                val response = repository.searchByCategory(categoria)
+                val response = withContext(Dispatchers.IO) {
+                    repository.searchByCategory(categoria)
+                }
                 if (response.isSuccessful) {
                     _resultadosByCategory.value = response.body() ?: emptyList()
                     _error.value = null
@@ -50,11 +52,18 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    private var isDataLoaded = false
+
     fun obtenerTodosLosEmprendimientos(token: String) {
+        if (isDataLoaded) return
+        isDataLoaded = true
+
         viewModelScope.launch {
             _loading.value = true
             try {
-                val response = repository.getAllEmprendimientos(token)
+                val response = withContext(Dispatchers.IO) {
+                    repository.getAllEmprendimientos(token)
+                }
                 if (response.isSuccessful) {
                     _todosLosEmprendimientos.value = response.body() ?: emptyList()
                     _error.value = null

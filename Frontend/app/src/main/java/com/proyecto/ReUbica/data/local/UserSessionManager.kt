@@ -49,7 +49,4 @@ class UserSessionManager(private val context: Context) {
             .map { prefs -> prefs[TOKEN_KEY] }
             .first()
     }
-
-
-
 }

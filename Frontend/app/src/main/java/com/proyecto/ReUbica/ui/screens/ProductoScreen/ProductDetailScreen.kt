@@ -1,6 +1,5 @@
-package com.proyecto.ReUbica.ui.screens.ComercioScreen
+package com.proyecto.ReUbica.ui.screens.ProductoScreen
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,9 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.outlined.Email
@@ -40,22 +36,6 @@ fun ProductDetailScreen(
     navController: NavHostController,
     viewModel: ComercioViewModel = viewModel()
 ) {
-    // ️ Solo mientras no juntamos la base de datos o sea el back:
-    LaunchedEffect(Unit) {
-        viewModel.setBusinessInfo(
-            navArgs = ComercioNavigation(
-                id = "1",
-                nombre = "Café Dani",
-                descripcion = "Delicias salvadoreñas",
-                categoria = "Cafetería",
-                direccion = "UCA",
-                latitud = 13.682,
-                longitud = -89.240,
-                horario = "8:00 AM - 5:00 PM"
-            )
-        )
-    }
-
     val business by viewModel.business.collectAsState()
     val product = business.products.find { it.id.toString() == productId }
     var ratingSeleccionado by remember { mutableStateOf(0) }
@@ -72,7 +52,6 @@ fun ProductDetailScreen(
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        // Imagen placeholder
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -84,7 +63,7 @@ fun ProductDetailScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = product.name,
+            text = product.nombre,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF5A3C1D)
@@ -92,11 +71,11 @@ fun ProductDetailScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(product.description, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF5A3C1D))
+        Text(product.descripcion, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF5A3C1D))
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("$${product.price}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = Color(0xFF5A3C1D))
+        Text("$${product.precio}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = Color(0xFF5A3C1D))
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -151,21 +130,21 @@ fun ProductDetailScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center) {
                         Text(
-                            text = String.format("%.1f", product.rating),
+                            text = "Ya casi",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF5D4F30) // color café como en la imagen
                         )
-                        Row {
-                            repeat(5) { index ->
-                                Icon(
-                                    imageVector = if (index < product.rating.toInt()) Icons.Default.Star else Icons.Default.StarOutline,
-                                    contentDescription = null,
-                                    tint = Color(0xFFFFD700),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
+                        //Row {
+                        //    repeat(5) { index ->
+                        //        Icon(
+                        //            imageVector = if (index < product.rating.toInt()) Icons.Default.Star else Icons.Default.StarOutline,
+                        //            contentDescription = null,
+                        //            tint = Color(0xFFFFD700),
+                        //            modifier = Modifier.size(16.dp)
+                        //        )
+                        //    }
+                        //}
                     }
                 }
             }

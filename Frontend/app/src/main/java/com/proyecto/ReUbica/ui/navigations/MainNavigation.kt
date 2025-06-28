@@ -6,7 +6,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.proyecto.ReUbica.ui.layouts.CustomScaffold
-import com.proyecto.ReUbica.ui.screens.ComercioScreen.ProductDetailScreen
 import com.proyecto.ReUbica.ui.screens.LoginScreen.LoginScreen
 import com.proyecto.ReUbica.ui.screens.RegisterScreen.RegisterScreen
 import com.proyecto.ReUbica.ui.screens.SessionCheckScreen
