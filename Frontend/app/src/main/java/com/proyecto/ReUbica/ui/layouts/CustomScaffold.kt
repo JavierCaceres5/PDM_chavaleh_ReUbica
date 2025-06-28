@@ -144,7 +144,6 @@ fun CustomScaffold(rootNavController: NavHostController){
                 navController = navController,
                 startDestination = HomeScreenNavigation,
                 Modifier.padding(innerPadding)
-
             ) {
 
                 composable<HomeScreenNavigation> {

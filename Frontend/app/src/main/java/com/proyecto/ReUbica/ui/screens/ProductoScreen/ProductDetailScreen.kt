@@ -37,13 +37,47 @@ fun ProductDetailScreen(
     viewModel: ComercioViewModel = viewModel()
 ) {
     val business by viewModel.business.collectAsState()
-    val product = business.products.find { it.id.toString() == productId }
-    var ratingSeleccionado by remember { mutableStateOf(0) }
+    var timedOut by remember { mutableStateOf(false) }
 
-    if (product == null) {
-        Text("Producto no encontrado", color = Color.Red)
+    LaunchedEffect(business.products) {
+        if (business.products.isEmpty()) {
+            kotlinx.coroutines.delay(8000)
+            if (business.products.isEmpty()) {
+                timedOut = true
+            }
+        }
+    }
+
+    val product = remember(business.products, productId) {
+        business.products.find { it.id.toString() == productId }
+    }
+
+    if (timedOut) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                "Error al cargar el producto. Regresa e intenta nuevamente.",
+                color = Color.Red,
+                fontWeight = FontWeight.Bold
+            )
+        }
         return
     }
+
+    if (business.products.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color(0xFF5A3C1D))
+        }
+        return
+    }
+
+    if (product == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Producto no encontrado", color = Color.Red, fontWeight = FontWeight.Bold)
+        }
+        return
+    }
+
+
 
     var comentario by remember { mutableStateOf("") }
 
@@ -52,12 +86,13 @@ fun ProductDetailScreen(
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        Box(
+        AsyncImage(
+            model = product.product_image ?: "https://via.placeholder.com/150",
+            contentDescription = product.nombre,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color.LightGray)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -213,23 +248,23 @@ fun ProductDetailScreen(
                     .padding(top = 8.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) {
-                    repeat(5) { index ->
-                        Icon(
-                            imageVector = if (index < ratingSeleccionado) Icons.Default.Star else Icons.Default.StarOutline,
-                            contentDescription = "Estrella ${index + 1}",
-                            tint = Color(0xFFFFD700),
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clickable { ratingSeleccionado = index + 1 }
-                        )
+                //Row(
+                //    verticalAlignment = Alignment.CenterVertically,
+                //    horizontalArrangement = Arrangement.Center,
+                //    modifier = Modifier.padding(bottom = 8.dp)
+                //) {
+                //    repeat(5) { index ->
+                //        Icon(
+                //            imageVector = if (index < ratingSeleccionado) Icons.Default.Star else Icons.Default.StarOutline,
+                //            contentDescription = "Estrella ${index + 1}",
+                //            tint = Color(0xFFFFD700),
+                //           modifier = Modifier
+                //                .size(30.dp)
+                //                //.clickable { ratingSeleccionado = index + 1 }
+                //        )
 
-                    }
-                }
+                //    }
+                //}
 
                 OutlinedTextField(
                     value = comentario,

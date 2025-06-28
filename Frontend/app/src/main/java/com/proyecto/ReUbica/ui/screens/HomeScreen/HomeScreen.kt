@@ -36,8 +36,6 @@ import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.ui.screens.SearchScreen.CategoriaItem
 import com.proyecto.ReUbica.utils.LocationUtils
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -122,12 +120,13 @@ fun HomeScreen(
     }
 
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
             Column {
-                Text("Categorías", fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
+                Text("Categorías", fontWeight = FontWeight.ExtraBold, color = Color(0xFF5A3C1D),
+                    modifier = Modifier
+                    .padding(start = 16.dp, top = 16.dp, bottom = 0.dp))
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     categorias1.forEach {
@@ -210,6 +209,9 @@ fun HomeScreen(
 }
 
 
+fun isValidUrl(url: String?): Boolean =
+    url != null && (url.startsWith("http://") || url.startsWith("https://"))
+
 @Composable
 fun SeccionRestaurantes(
     titulo: String,
@@ -223,7 +225,8 @@ fun SeccionRestaurantes(
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
             color = Color(0xFF5A3C1D),
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
         )
 
         LazyRow(
@@ -231,17 +234,21 @@ fun SeccionRestaurantes(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(emprendimientos) { emprendimiento ->
+
+                val logoUrl = if (isValidUrl(emprendimiento.logo)) emprendimiento.logo else null
+
                 RestaurantCard(
                     nombre = emprendimiento.nombre ?: "Sin nombre",
                     departamento = emprendimiento.direccion ?: "Sin dirección",
                     categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: "Sin categoría",
-                    imagenRes = R.drawable.reubica,
+                    imagenRes = logoUrl,
                     isFavorito = favoritosViewModel.isFavoritoComercio(emprendimiento.nombre ?: ""),
                     onFavoritoClick = {
                         favoritosViewModel.toggleFavoritoComercio(
                             nombre = emprendimiento.nombre ?: "",
                             departamento = emprendimiento.direccion ?: "",
-                            categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: ""
+                            categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: "",
+                            logo = emprendimiento.logo ?: ""
                         )
                     },
                     onVerTiendaClick = {

@@ -191,7 +191,7 @@ fun ComercioScreen(
                             ProductCard(
                                 product = product.toProducto(),
                                 favoritosViewModel = favoritosViewModel,
-                                navController = navController
+                                navController = navController,
                             )
                         }
                     }
