@@ -2,7 +2,7 @@ package com.proyecto.ReUbica.ui.screens.ComercioScreen
 
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
-import com.proyecto.ReUbica.data.api.DummyProduct
+import com.proyecto.ReUbica.data.model.DummyProduct
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

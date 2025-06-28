@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.proyecto.ReUbica.data.api.DummyProduct
+import com.proyecto.ReUbica.data.model.DummyProduct
 import com.proyecto.ReUbica.ui.navigations.ProductDetailNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 

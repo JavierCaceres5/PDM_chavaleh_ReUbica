@@ -1,4 +1,4 @@
-package com.proyecto.ReUbica.data.api
+package com.proyecto.ReUbica.data.model
 
 import java.util.UUID
 

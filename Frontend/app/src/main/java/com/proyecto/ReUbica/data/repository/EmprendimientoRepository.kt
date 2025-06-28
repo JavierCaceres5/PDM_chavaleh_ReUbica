@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoResponse
+import com.proyecto.ReUbica.data.model.emprendimiento.UpdateEmprendimientoRequest
 import com.proyecto.ReUbica.network.RetrofitInstance
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -29,7 +30,7 @@ class EmprendimientoRepository {
             MultipartBody.Part.createFormData("logo", file.name, requestFile)
         }
 
-        return api.registrarEmprendimientoMultipart(
+        return api.registrarEmprendimiento(
             token = "Bearer $token",
             nombre = data.nombre.toBody(),
             descripcion = data.descripcion.toBody(),
@@ -41,6 +42,7 @@ class EmprendimientoRepository {
             lat = data.latitud.toString().toBody(),
             lng = data.longitud.toString().toBody(),
             logo = logoPart
+
         )
     }
 
@@ -50,5 +52,17 @@ class EmprendimientoRepository {
 
     suspend fun searchByCategory(categoria: String): Response<List<EmprendimientoModel>> {
         return api.getEmprendimientosByCategoria(categoria)
+    }
+
+    suspend fun deleteMiEmprendimiento(token: String): Response<Unit> {
+        return api.deleteMiEmprendimiento("Bearer $token")
+    }
+
+    suspend fun getMiEmprendimiento(token: String): Response<EmprendimientoModel> {
+        return api.getMiEmprendimiento("Bearer $token")
+    }
+
+    suspend fun updateEmprendimiento(token: String, updateData: UpdateEmprendimientoRequest): Response<Unit> {
+        return api.updateEmprendimiento("Bearer $token", updateData)
     }
 }

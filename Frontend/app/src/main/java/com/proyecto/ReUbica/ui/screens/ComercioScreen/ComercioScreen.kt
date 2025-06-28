@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavArgs
 import androidx.navigation.NavHostController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
@@ -32,14 +31,10 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.proyecto.ReUbica.ui.Components.ProductCard
-import com.proyecto.ReUbica.ui.layouts.BottomBar
-import com.proyecto.ReUbica.ui.layouts.TopBar
 import com.proyecto.ReUbica.ui.layouts.navItem
-import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioViewModel
 import com.proyecto.ReUbica.ui.navigations.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.outlined.LocationOn
-import com.proyecto.ReUbica.data.api.DummyProduct
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 
 

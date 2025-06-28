@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
+import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 
 
 @Composable
@@ -45,6 +46,7 @@ fun RegisterLocalScreen4Content(
     val abel = FontFamily(Font(R.font.abelregular))
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
     var showConfirmation by remember { mutableStateOf(false) }
+    val profileViewModel: ProfileScreenViewModel = viewModel()
 
     Column(modifier = Modifier.fillMaxSize()) {
         StepTopBar(step = 2, title = "Carta de productos", onBackClick = onBack)
@@ -96,7 +98,7 @@ fun RegisterLocalScreen4Content(
                 precio = "$5.99"
             )
 
-            HorizontalDivider(color = Color(0xFF49724C), thickness = 2.dp, modifier = Modifier.padding(vertical = 8.dp))
+            Divider(color = Color(0xFF49724C), thickness = 2.dp, modifier = Modifier.padding(vertical = 8.dp))
 
             ProductoItem(
                 imageRes = R.drawable.yuca,
@@ -112,7 +114,9 @@ fun RegisterLocalScreen4Content(
             Button(
                 onClick = { Log.e("error", "hola")
                     registroComercio.initSessionManager(navController.context)
-                    registroComercio.createEmprendimiento() },
+                    registroComercio.createEmprendimiento(profileViewModel)
+                    navController.navigate(HomeScreenNavigation)
+                          },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

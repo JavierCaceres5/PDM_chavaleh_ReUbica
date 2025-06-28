@@ -6,10 +6,12 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
 import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
+import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +21,8 @@ class RegistroComercioViewModel : ViewModel() {
 
     private lateinit var userSessionManager: UserSessionManager
     private val repository = EmprendimientoRepository()
+
+
 
     private val _emprendimiento = MutableStateFlow(
         EmprendimientoCreateRequest(
@@ -47,6 +51,7 @@ class RegistroComercioViewModel : ViewModel() {
 
     private val _success = MutableStateFlow(false)
     val success = _success.asStateFlow()
+
 
     private val TAG = "RegistroComercioViewModel"
 
@@ -90,7 +95,7 @@ class RegistroComercioViewModel : ViewModel() {
         _emprendimiento.value = _emprendimiento.value.copy(redes_sociales = nuevasRedes)
     }
 
-    fun createEmprendimiento() {
+    fun createEmprendimiento(profileViewModel: ProfileScreenViewModel) {
         viewModelScope.launch {
             if (!::userSessionManager.isInitialized) {
                 _error.value = "Session manager no inicializado"
@@ -112,10 +117,22 @@ class RegistroComercioViewModel : ViewModel() {
                 Log.e(TAG, token)
                 return@launch
             }
+
+            val body = response.body()
+            if (body != null) {
+                val nuevoToken = body.token
+                val nuevoUsuario = body.user
+                Log.d("RegistroComercioVM", "Nuevo token: ${body.token}")
+                Log.d("RegistroComercioVM", "Nuevo usuario: ${body.user}")
+                userSessionManager.saveUserSession(nuevoToken, nuevoUsuario)
+                profileViewModel.refreshUserData()
+            }
+
             Log.e(TAG, "Emprendimiento creado exitosamente: ${_emprendimiento.value}")
             _error.value = null
             _success.value = true
             _loading.value = false
         }
     }
+
 }

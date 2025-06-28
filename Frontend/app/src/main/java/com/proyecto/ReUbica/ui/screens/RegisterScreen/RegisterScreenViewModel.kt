@@ -33,7 +33,7 @@ class RegisterScreenViewModel(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             _loading.value = true
             val response = repository.register(user)
-            Log.e("REGISTER PROBLEM", response.toString())
+            Log.e("Registro", "Error de emprendimiento: ${_user.value}")
             if (response.isSuccessful) {
                 val userResponse = response.body()?.user
                 val tokenResponse = response.body()?.token

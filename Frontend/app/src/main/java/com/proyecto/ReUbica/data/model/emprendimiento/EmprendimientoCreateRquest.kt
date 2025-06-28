@@ -1,6 +1,5 @@
 package com.proyecto.ReUbica.data.model.emprendimiento
 
-import java.util.UUID
 
 data class EmprendimientoCreateRequest(
     val nombre: String,

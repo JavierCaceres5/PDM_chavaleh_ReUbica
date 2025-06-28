@@ -50,4 +50,23 @@ class UserSessionManager(private val context: Context) {
             .first()
     }
 
+    suspend fun updateUserProfile(user: UserProfile) {
+        context.dataStore.edit { prefs ->
+            val currentToken = prefs[TOKEN_KEY] ?: ""
+            prefs[USER_KEY] = gson.toJson(user)
+            prefs[TOKEN_KEY] = currentToken
+        }
+    }
+
+    suspend fun getUserProfile(token: String): UserProfile? {
+        return context.dataStore.data
+            .map { prefs ->
+                val savedToken = prefs[TOKEN_KEY]
+                val userJson = prefs[USER_KEY]
+                if (savedToken == token && userJson != null) {
+                    gson.fromJson(userJson, UserProfile::class.java)
+                } else null
+            }
+            .first()
+    }
 }

@@ -30,7 +30,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import com.proyecto.ReUbica.ui.navigations.CartaProductosScreenNavigation
-import com.proyecto.ReUbica.ui.navigations.EmprendedorProfileScreenNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
 import com.proyecto.ReUbica.ui.screens.HomeScreen.HomeScreen
 import com.proyecto.ReUbica.ui.screens.LegalInformationScreen
@@ -58,24 +57,16 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
 import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
-import com.proyecto.ReUbica.ui.screens.CartaProductosScreen
-
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ChatComercioScreen
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
-
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioScreen
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ProductDetailScreen
-import com.proyecto.ReUbica.ui.screens.EmprendedorProfileScreen
-import com.proyecto.ReUbica.ui.screens.LocalInformationScreen
-
-import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen4
-import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
-import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
-import com.proyecto.ReUbica.ui.screens.SearchScreen.CartaProductosScreen
+import com.proyecto.ReUbica.ui.screens.CartaProductosScreen
+import com.proyecto.ReUbica.ui.screens.PersonalInformationScreen.LocalInformationScreen
 
 
 data class navItem(
@@ -127,7 +118,9 @@ fun CustomScaffold(rootNavController: NavHostController){
     Scaffold (
         topBar = {
             if (showBars && currentRoute != ProfileScreenNavigation::class.qualifiedName &&
-                currentRoute !=  PersonalDataNavigation::class.qualifiedName){
+                currentRoute !=  PersonalDataNavigation::class.qualifiedName &&
+                currentRoute != LocalInformationScreenNavigation::class.qualifiedName
+                ){
                 TopBar(navController)
             }
         },
@@ -216,17 +209,14 @@ fun CustomScaffold(rootNavController: NavHostController){
                         CircularProgressIndicator(color = Color(0xFF49724C))
                     }
                 }
-                composable<EmprendedorProfileScreenNavigation> {
-                    EmprendedorProfileScreen(navController, rootNavController)
-                }
 
                 composable<LocalInformationScreenNavigation> {
                     LocalInformationScreen(navController)
                 }
 
-//                composable<CartaProductosScreenNavigation> {
-//                    CartaProductosScreen(navController)
-//                }
+                composable<CartaProductosScreenNavigation> {
+                    CartaProductosScreen(navController)
+                }
 
                 composable<ComercioNavigation> { backStackEntry ->
                     val navArgs = backStackEntry.toRoute<ComercioNavigation>()

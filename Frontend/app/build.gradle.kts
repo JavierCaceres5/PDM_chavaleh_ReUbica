@@ -116,7 +116,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // Room (runtime, ktx y kapt)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+
     // Retrofit y Gson
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.gson)
 }

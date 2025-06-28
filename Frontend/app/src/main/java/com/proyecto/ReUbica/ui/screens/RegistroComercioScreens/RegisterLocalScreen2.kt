@@ -43,11 +43,7 @@ import org.json.JSONObject
 import java.net.URL
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.AnnotatedString
-
+import com.proyecto.ReUbica.ui.Components.RedesSociales
 
 
 @Composable
@@ -77,8 +73,6 @@ fun RegisterLocalScreen2Content(
     val emprendimiento by registroComercio.emprendimiento.collectAsState()
     val redesSociales = emprendimiento.redes_sociales
 
-    val camposValidos = emprendimiento.direccion.isNotBlank() &&
-            emprendimiento.latitud != 0.0 && emprendimiento.longitud != 0.0
 
     val context = LocalContext.current
     val placesClient = remember {
@@ -90,35 +84,7 @@ fun RegisterLocalScreen2Content(
     var showRedes by remember { mutableStateOf(false) }
     var showValidationError by remember { mutableStateOf(false) }
 
-    val phoneVisualTransformation = VisualTransformation { text ->
-        val trimmed = text.text.filter { it.isDigit() }.take(8)
-        val transformed = if (trimmed.length > 4) {
-            trimmed.substring(0, 4) + "-" + trimmed.substring(4)
-        } else {
-            trimmed
-        }
-
-        val offsetMapping = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int {
-                return when {
-                    offset <= 4 -> offset
-                    offset <= 8 -> offset + 1
-                    else -> 9
-                }
-            }
-
-            override fun transformedToOriginal(offset: Int): Int {
-                return when {
-                    offset <= 4 -> offset
-                    offset <= 9 -> offset - 1
-                    else -> 8
-                }
-            }
-        }
-
-        TransformedText(AnnotatedString(transformed), offsetMapping)
-    }
-
+    var errorUrl by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val error by registroComercio.error.collectAsState()
 
@@ -218,7 +184,6 @@ fun RegisterLocalScreen2Content(
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Number
                 ),
-                visualTransformation = phoneVisualTransformation,
 
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
@@ -422,7 +387,7 @@ fun RegisterLocalScreen2Content(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Por favor, complete todos los campos antes de continuar.",
+                        text = "Por favor, complete todos los campos antes de continuar",
                         color = Color(0xFFD32F2F),
                         fontSize = 14.sp,
                         fontFamily = abel,
@@ -432,20 +397,62 @@ fun RegisterLocalScreen2Content(
                 }
             }
 
+            if (errorUrl) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .background(Color(0xFFFFE6E6), shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFD32F2F), shape = RoundedCornerShape(8.dp))
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Error,
+                        contentDescription = "Error",
+                        tint = Color(0xFFD32F2F),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Las redes sociales deben ser URLs válidas.",
+                        color = Color(0xFFD32F2F),
+                        fontSize = 14.sp,
+                        fontFamily = abel,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
 
             Button(
                 onClick = {
-
                     val telefonoValido = Regex("^\\d{4}-\\d{4}$").matches(emprendimiento.emprendimientoPhone)
                     val direccionValida = emprendimiento.direccion.isNotBlank()
                     val coordenadasValidas = emprendimiento.latitud != 0.0 && emprendimiento.longitud != 0.0
 
+                    val urlRegex = Regex("^(https?://)?(www\\.)?([a-zA-Z0-9\\-]+\\.)+[a-zA-Z]{2,}(/.*)?$")
 
-                    if (!telefonoValido || !direccionValida || !coordenadasValidas) {
-                        showValidationError = true
-                    } else {
-                        showValidationError = false
-                        onNext()
+                    val instagramValido = redesSociales.Instagram.isNullOrBlank() || urlRegex.matches(redesSociales.Instagram!!)
+                    val facebookValido = redesSociales.Facebook.isNullOrBlank() || urlRegex.matches(redesSociales.Facebook!!)
+                    val tiktokValido = redesSociales.TikTok.isNullOrBlank() || urlRegex.matches(redesSociales.TikTok!!)
+                    val twitterValido = redesSociales.Twitter.isNullOrBlank() || urlRegex.matches(redesSociales.Twitter!!)
+
+                    when {
+                        !telefonoValido || !direccionValida || !coordenadasValidas -> {
+                            showValidationError = true
+                            errorUrl = false
+                        }
+                        !instagramValido || !facebookValido || !tiktokValido || !twitterValido -> {
+                            showValidationError = false
+                            errorUrl = true
+                        }
+                        else -> {
+                            showValidationError = false
+                            errorUrl = false
+                            errorMessage = null
+                            onNext()
+                        }
                     }
                 },
                 modifier = Modifier
@@ -461,55 +468,7 @@ fun RegisterLocalScreen2Content(
                 Text("Continuar a la carta de productos", fontFamily = abel)
             }
 
-
-
             Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-fun RedesSociales(iconId: Int, value: String, onValueChange: (String) -> Unit) {
-    val abel = FontFamily(Font(R.font.abelregular))
-
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(bottom = 8.dp))
-    {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFDFF2E1), shape = RoundedCornerShape(8.dp))
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = iconId),
-                contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier
-                    .size(24.dp)
-                    .padding(end = 8.dp)
-            )
-            OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
-                placeholder = {
-                    Text(
-                        text = "Ingrese su usuario",
-                        fontFamily = abel,
-                        color = Color.Black
-                    )
-                },
-                textStyle = LocalTextStyle.current.copy(color = Color.Black),
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
-                ),
-                singleLine = true,
-                shape = RoundedCornerShape(8.dp)
-            )
         }
     }
 }
@@ -532,5 +491,5 @@ suspend fun getCoordinatesFromAddress(address: String): LatLng? = withContext(Di
         }
     } catch (e: Exception) {
         null
-        }
+    }
 }
