@@ -35,7 +35,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SearchScreen(
     navController: NavHostController,
-    favoritosViewModel: FavoritosViewModel = viewModel()
+    favoritosViewModel: FavoritosViewModel = viewModel(),
+    categoriaPreseleccionada: String? = null
 ) {
     val viewModel: SearchScreenViewModel = viewModel()
     val resultadosApi by viewModel.resultadosByNombre.collectAsState()
@@ -49,7 +50,7 @@ fun SearchScreen(
         viewModel.setUserSessionManager(userSessionManager)
     }
 
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf(categoriaPreseleccionada ?: "") }
     var searchHistory by remember { mutableStateOf(listOf<String>()) }
     val coroutineScope = rememberCoroutineScope()
     var debounceJob by remember { mutableStateOf<Job?>(null) }

@@ -52,4 +52,9 @@ class EmprendimientoRepository {
     suspend fun searchByCategory(categoria: String): Response<List<EmprendimientoModel>> {
         return api.getEmprendimientosByCategoria(categoria)
     }
+
+    suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
+        return api.getAllEmprendimientos("Bearer $token")
+    }
+
 }

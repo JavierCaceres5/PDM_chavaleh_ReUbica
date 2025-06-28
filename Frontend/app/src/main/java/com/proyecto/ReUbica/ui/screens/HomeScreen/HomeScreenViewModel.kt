@@ -17,12 +17,18 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
     private val _resultadosByCategory = MutableStateFlow<List<EmprendimientoModel>>(emptyList())
     val resultadosByCategory: StateFlow<List<EmprendimientoModel>> = _resultadosByCategory
 
+    private val _todosLosEmprendimientos = MutableStateFlow<List<EmprendimientoModel>>(emptyList())
+    val todosLosEmprendimientos: StateFlow<List<EmprendimientoModel>> = _todosLosEmprendimientos
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
+    /**
+     * Obtener emprendimientos por categoría
+     */
     fun searchEmprendimientoByCategory(categoria: String) {
         viewModelScope.launch {
             _loading.value = true
@@ -39,6 +45,27 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
                 Log.e("HomeScreenViewModel", "Error de red: ${e.message}")
                 _error.value = "Ocurrió un error de red."
                 _resultadosByCategory.value = emptyList()
+            }
+            _loading.value = false
+        }
+    }
+
+    fun obtenerTodosLosEmprendimientos(token: String) {
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                val response = repository.getAllEmprendimientos(token)
+                if (response.isSuccessful) {
+                    _todosLosEmprendimientos.value = response.body() ?: emptyList()
+                    _error.value = null
+                } else {
+                    _error.value = "Error: ${response.message()}"
+                    _todosLosEmprendimientos.value = emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("HomeScreenViewModel", "Error al obtener todos: ${e.message}")
+                _error.value = "Ocurrió un error al cargar los emprendimientos."
+                _todosLosEmprendimientos.value = emptyList()
             }
             _loading.value = false
         }

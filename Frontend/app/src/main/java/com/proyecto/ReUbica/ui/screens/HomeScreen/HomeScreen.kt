@@ -28,6 +28,11 @@ import com.proyecto.ReUbica.ui.Components.RestaurantCard
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.ui.screens.SearchScreen.CategoriaItem
+import java.text.SimpleDateFormat
+import java.util.*
+import com.proyecto.ReUbica.data.local.UserSessionManager
+import androidx.compose.ui.platform.LocalContext
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,26 +44,110 @@ fun HomeScreen(
     val resultados by homeViewModel.resultadosByCategory.collectAsState()
     val loading by homeViewModel.loading.collectAsState()
     val error by homeViewModel.error.collectAsState()
+    val context = LocalContext.current
+    val userSessionManager = remember { UserSessionManager(context) }
+    val todosLosEmprendimientos by homeViewModel.todosLosEmprendimientos.collectAsState()
+    var userToken by remember { mutableStateOf<String?>(null) }
+    var categoriaSeleccionada by remember { mutableStateOf<String?>(null) }
+
+
+
+    LaunchedEffect(Unit) {
+        userToken = userSessionManager.getToken()
+        userToken?.let {
+            homeViewModel.obtenerTodosLosEmprendimientos(it)
+        }
+    }
 
     val categorias1 = listOf(
-        CategoriaItem(Icons.Filled.LocalOffer, "Ropa") { homeViewModel.searchEmprendimientoByCategory("Ropa") },
-        CategoriaItem(Icons.Filled.Fastfood, "Alimentos") { homeViewModel.searchEmprendimientoByCategory("Alimentos") },
-        CategoriaItem(Icons.Filled.Restaurant, "Comida") { homeViewModel.searchEmprendimientoByCategory("Comida") },
-        CategoriaItem(Icons.Filled.LocalLaundryService, "Higiene") { homeViewModel.searchEmprendimientoByCategory("Higiene") },
+        CategoriaItem(Icons.Filled.LocalOffer, "Ropa") {
+            categoriaSeleccionada = "Ropa"
+            homeViewModel.searchEmprendimientoByCategory("Ropa")
+        },
+        CategoriaItem(Icons.Filled.Fastfood, "Alimentos") {
+            categoriaSeleccionada = "Alimentos"
+            homeViewModel.searchEmprendimientoByCategory("Alimentos")
+        },
+        CategoriaItem(Icons.Filled.Restaurant, "Comida") {
+            categoriaSeleccionada = "Comida"
+            homeViewModel.searchEmprendimientoByCategory("Comida")
+        },
+        CategoriaItem(Icons.Filled.LocalLaundryService, "Higiene") {
+            categoriaSeleccionada = "Higiene"
+            homeViewModel.searchEmprendimientoByCategory("Higiene")
+        },
     )
 
     val categorias2 = listOf(
-        CategoriaItem(Icons.Filled.Diamond, "Artesanías") { homeViewModel.searchEmprendimientoByCategory("Artesanías") },
-        CategoriaItem(Icons.Filled.Book, "Librería") { homeViewModel.searchEmprendimientoByCategory("Librería") },
-        CategoriaItem(Icons.Filled.Settings, "Servicios") { homeViewModel.searchEmprendimientoByCategory("Servicios") },
+        CategoriaItem(Icons.Filled.Diamond, "Artesanías") {
+            categoriaSeleccionada = "Artesanías"
+            homeViewModel.searchEmprendimientoByCategory("Artesanías")
+        },
+        CategoriaItem(Icons.Filled.Book, "Librería") {
+            categoriaSeleccionada = "Librería"
+            homeViewModel.searchEmprendimientoByCategory("Librería")
+        },
+        CategoriaItem(Icons.Filled.Settings, "Servicios") {
+            categoriaSeleccionada = "Servicios"
+            homeViewModel.searchEmprendimientoByCategory("Servicios")
+        },
     )
 
-    val destacados = listOf(
-        Triple("El Panalito", "Chinameca", "Alimentos"),
-        Triple("Solemare", "Santa Ana", "Artesanías"),
-        Triple("Pizza Ranch", "San Miguel", "Comida"),
-        Triple("Arte Maya", "Ahuachapán", "Artesanías")
-    )
+    // 🌍 Simula ubicación del usuario (San Salvador)
+    val userLat = 13.6929
+    val userLon = -89.2182
+
+    fun isNearby(
+        userLat: Double, userLon: Double,
+        placeLat: Double?, placeLon: Double?,
+        radiusKm: Double = 5.0
+    ): Boolean {
+        if (placeLat == null || placeLon == null) return false
+        val earthRadiusKm = 6371.0
+        val dLat = Math.toRadians(placeLat - userLat)
+        val dLon = Math.toRadians(placeLon - userLon)
+        val lat1 = Math.toRadians(userLat)
+        val lat2 = Math.toRadians(placeLat)
+
+        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        val distance = earthRadiusKm * c
+
+        return distance <= radiusKm
+    }
+
+    val comerciosCercanos = todosLosEmprendimientos.filter {
+        isNearby(userLat, userLon, it.latitud, it.longitud)
+    }.map {
+        Triple(
+            it.nombre ?: "Sin nombre",
+            it.direccion ?: "Sin dirección",
+            it.categoriasPrincipales.firstOrNull() ?: "Sin categoría"
+        )
+    }
+
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+    dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+    val now = Date()
+    val oneWeekMillis = 7 * 24 * 60 * 60 * 1000
+
+    val nuevosEmprendimientos = todosLosEmprendimientos.filter {
+        it.created_at?.let { fecha ->
+            try {
+                val createdDate = dateFormat.parse(fecha)
+                createdDate != null && now.time - createdDate.time <= oneWeekMillis
+            } catch (e: Exception) {
+                false
+            }
+        } ?: false
+    }.map {
+        Triple(
+            it.nombre ?: "Sin nombre",
+            it.direccion ?: "Sin dirección",
+            it.categoriasPrincipales.firstOrNull() ?: "Sin categoría"
+        )
+    }
 
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
@@ -129,12 +218,16 @@ fun HomeScreen(
             }
         }
 
-        item {
-            SeccionRestaurantes("Los mejores restaurantes", destacados, favoritosViewModel, navController)
+        if (comerciosCercanos.isNotEmpty()) {
+            item {
+                SeccionRestaurantes("Locales cerca de ti", comerciosCercanos, favoritosViewModel, navController)
+            }
         }
 
-        item {
-            SeccionRestaurantes("Según tus preferencias", destacados, favoritosViewModel, navController)
+        if (nuevosEmprendimientos.isNotEmpty()) {
+            item {
+                SeccionRestaurantes("Nuevos en la plataforma", nuevosEmprendimientos, favoritosViewModel, navController)
+            }
         }
 
         if (loading) {
@@ -194,7 +287,6 @@ fun SeccionRestaurantes(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(titulo, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF5A3C1D))
-            Text("Ver más", fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color(0xFF5A3C1D))
         }
 
         LazyRow(

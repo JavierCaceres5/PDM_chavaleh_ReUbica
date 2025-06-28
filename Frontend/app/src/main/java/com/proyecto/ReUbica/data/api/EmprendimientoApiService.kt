@@ -44,4 +44,10 @@ interface EmprendimientoApiService {
         @Part("longitud") lng: RequestBody,
         @Part logo: MultipartBody.Part? = null
     ): Response<EmprendimientoResponse>
+
+    @GET("emprendimientos/")
+    suspend fun getAllEmprendimientos(
+        @Header("Authorization") token: String
+    ): Response<List<EmprendimientoModel>>
+
 }
