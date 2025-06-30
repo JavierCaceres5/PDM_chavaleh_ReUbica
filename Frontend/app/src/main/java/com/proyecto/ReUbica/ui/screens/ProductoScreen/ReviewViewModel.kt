@@ -59,7 +59,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Publica una reseña para un producto y refresca las valoraciones tras subirla.
      */
-    fun postReview(token: String, productoID: String, comentario: String, rating: Double, emprendimientoID: String) {
+    fun postReview(token: String, productoID: String, comentario: String, rating: Double, emprendimientoID: String, onConflict: () -> Unit = {}) {
         viewModelScope.launch {
             _loading.value = true
             try {
@@ -69,7 +69,12 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
                     _error.value = null
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    _error.value = "Error al publicar: ${response.code()} - ${response.message()}"
+                    if (response.code() == 409) {
+                        // Ya existe la reseña, no reemplazar comentarios, solo mostrar aviso
+                        onConflict()
+                    } else {
+                        _error.value = "Error al publicar: ${response.code()} - ${response.message()}"
+                    }
                     Log.e("ReviewError", "Código: ${response.code()}, Mensaje: ${response.message()}, Body: $errorBody")
                 }
             } catch (e: Exception) {

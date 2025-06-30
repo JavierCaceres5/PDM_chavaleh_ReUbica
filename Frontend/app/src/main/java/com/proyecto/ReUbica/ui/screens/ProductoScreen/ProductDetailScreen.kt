@@ -2,6 +2,7 @@ package com.proyecto.ReUbica.ui.screens.ProductoScreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.proyecto.ReUbica.data.model.review.ReviewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProductDetailScreen(
@@ -35,7 +37,8 @@ fun ProductDetailScreen(
     token: String,
     emprendimientoID: String,
     viewModel: ProductoViewModel = viewModel(),
-    reviewViewModel: ReviewViewModel = viewModel()
+    reviewViewModel: ReviewViewModel = viewModel(),
+    reviewUserViewModel: ReviewUserViewModel = viewModel()
 ) {
     val productos by viewModel.productos.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -44,6 +47,12 @@ fun ProductDetailScreen(
     val emprendimientoReviews by reviewViewModel.emprendimientoReviews.collectAsState()
     val reviewLoading by reviewViewModel.loading.collectAsState()
     val reviewError by reviewViewModel.error.collectAsState()
+
+    var ratingSeleccionado by remember { mutableStateOf(0) }
+    var comentario by remember { mutableStateOf("") }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.getProductosByEmprendimiento(token, emprendimientoID)
@@ -83,6 +92,11 @@ fun ProductDetailScreen(
             .fillMaxSize()
             .padding(20.dp)
     ) {
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
         AsyncImage(
             model = product.product_image ?: "https://via.placeholder.com/150",
             contentDescription = product.nombre,
@@ -94,15 +108,29 @@ fun ProductDetailScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(product.nombre, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
+        Text(
+            product.nombre,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF5A3C1D)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(product.descripcion, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF5A3C1D))
+        Text(
+            product.descripcion,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF5A3C1D)
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("$${product.precio}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = Color(0xFF5A3C1D))
+        Text(
+            "$${product.precio}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF5A3C1D)
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -129,7 +157,12 @@ fun ProductDetailScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Ya casi", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF5D4F30))
+                    Text(
+                        "Ya casi",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF5D4F30)
+                    )
                 }
             }
         }
@@ -138,39 +171,108 @@ fun ProductDetailScreen(
         Divider(color = Color(0xFF5A3C1D), thickness = 2.dp)
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("💡 Comentarios de usuarios", fontWeight = FontWeight.SemiBold, color = Color(0xFF5D4F30))
+        Text(
+            "💡 Comentarios de usuarios",
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF5D4F30)
+        )
 
-        if (reviewLoading) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFF5A3C1D))
-            }
-        } else if (reviewError != null) {
-            Text(
-                "Error al cargar comentarios: $reviewError",
-                color = Color.Red,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        } else if (filteredReviews.isEmpty()) {
-            Text(
-                "Aún no hay reseñas de este producto.",
-                color = Color.Gray,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        } else {
-            LazyColumn(
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .weight(0.5f)
+                    .fillMaxHeight()
             ) {
-                items(filteredReviews) { review ->
-                    ReviewItem(review)
+                if (reviewLoading) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFF5A3C1D))
+                    }
+                } else if (filteredReviews.isEmpty()) {
+                    Text(
+                        "Aún no hay reseñas de este producto.",
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(filteredReviews) { review ->
+                            ReviewItem(
+                                review = review,
+                                token = token,
+                                reviewUserViewModel = reviewUserViewModel
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(horizontalArrangement = Arrangement.Center) {
+                    repeat(5) { index ->
+                        Icon(
+                            imageVector = if (index < ratingSeleccionado) Icons.Default.Star else Icons.Default.StarOutline,
+                            contentDescription = "Estrella ${index + 1}",
+                            tint = Color(0xFFFFD700),
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clickable { ratingSeleccionado = index + 1 }
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = comentario,
+                    onValueChange = { comentario = it },
+                    label = { Text("Escribe tu comentario") },
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .height(60.dp),
+                )
+
+                OutlinedButton(
+                    onClick = {
+                        if (comentario.isNotBlank() && ratingSeleccionado > 0) {
+                            reviewViewModel.postReview(
+                                token = token,
+                                productoID = productId,
+                                comentario = comentario,
+                                rating = ratingSeleccionado.toDouble(),
+                                emprendimientoID = emprendimientoID,
+                                onConflict = {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar("Ya has calificado este producto.")
+                                    }
+                                }
+                            )
+                            comentario = ""
+                            ratingSeleccionado = 0
+                        }
+                    },
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                ) {
+                    Text("Enviar", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold)
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
@@ -182,18 +284,28 @@ fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String)
 }
 
 @Composable
-fun ReviewItem(review: ReviewModel) {
+fun ReviewItem(
+    review: ReviewModel,
+    token: String,
+    reviewUserViewModel: ReviewUserViewModel
+) {
+    val userProfiles by reviewUserViewModel.userProfiles.collectAsState()
+
+    // Trigger fetch on load
+    LaunchedEffect(review.userID) {
+        reviewUserViewModel.getUserById(token, review.userID.toString())
+    }
+
+    val userProfile = userProfiles[review.userID.toString()]
+    val userName = if (userProfile != null) {
+        "${userProfile.firstname} ${userProfile.lastname}"
+    } else {
+        "Usuario"
+    }
+
     Row(modifier = Modifier.padding(vertical = 8.dp)) {
-        AsyncImage(
-            model = "https://via.placeholder.com/150",
-            contentDescription = null,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(30.dp))
-        )
-        Spacer(modifier = Modifier.width(12.dp))
         Column {
-            Text("Usuario", fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
+            Text(userName, fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
             Row {
                 repeat(review.rating.toInt()) {
                     Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(15.dp))
@@ -206,3 +318,5 @@ fun ReviewItem(review: ReviewModel) {
         }
     }
 }
+
+

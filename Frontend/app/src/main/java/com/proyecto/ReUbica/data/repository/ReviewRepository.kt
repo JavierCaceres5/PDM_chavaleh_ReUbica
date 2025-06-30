@@ -11,7 +11,7 @@ class ReviewRepository(private val api: ReviewApiService) {
 
     suspend fun postReview(token: String, productoID: String, comentario: String, rating: Double): Response<ReviewModelResponse> {
         val request = CreateReviewRequest(comentario, rating)
-        return api.postReview(token, productoID, request)
+        return api.postReview("Bearer $token", productoID, request)
     }
 
     suspend fun deleteReview(token: String, productoID: String): Response<Unit> {
