@@ -186,14 +186,35 @@ fun ComercioScreen(
                     )
                 }
                 else -> {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(business.products) { product ->
-                            ProductCard(
-                                product = product.toProducto(),
-                                favoritosViewModel = favoritosViewModel,
-                                navController = navController,
-                            )
+                    val tokenState = remember { mutableStateOf("") }
+                    val emprendimientoID = business.id?.toString() ?: ""
+
+                    LaunchedEffect(Unit) {
+                        val token = userSessionManager.getToken() ?: ""
+                        tokenState.value = token
+                    }
+
+                    if (tokenState.value.isNotEmpty() && emprendimientoID.isNotEmpty()) {
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(business.products) { product ->
+                                ProductCard(
+                                    product = product.toProducto(),
+                                    favoritosViewModel = favoritosViewModel,
+                                    navController = navController,
+                                    token = tokenState.value,
+                                    emprendimientoID = emprendimientoID
+                                )
+                            }
                         }
+                    } else {
+                        Text(
+                            "Cargando datos de sesión...",
+                            color = Color(0xFF5A3C1D),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 16.dp)
+                        )
                     }
                 }
             }

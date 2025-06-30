@@ -77,8 +77,12 @@ data class ComercioNavigation(
 object ProductDetailNavigation {
     const val route = "product_detail"
     const val productIdArg = "productId"
+    const val tokenArg = "token"
+    const val emprendimientoIdArg = "emprendimientoID"
 
-    fun withArgs(productId: String) = "$route/$productId"
+    fun withArgs(productId: String, token: String, emprendimientoID: String): String {
+        return "$route/$productId?$tokenArg=$token&$emprendimientoIdArg=$emprendimientoID"
+    }
 }
 
 @Serializable

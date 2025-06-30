@@ -233,10 +233,21 @@ fun CustomScaffold(rootNavController: NavHostController){
                     )
                 }
 
-                composable("product_detail/{productId}") { backStackEntry ->
+                composable(
+                    "product_detail/{productId}?token={token}&emprendimientoID={emprendimientoID}"
+                ) { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId") ?: ""
-                    ProductDetailScreen(productId = productId, navController = navController)
+                    val token = backStackEntry.arguments?.getString("token") ?: ""
+                    val emprendimientoID = backStackEntry.arguments?.getString("emprendimientoID") ?: ""
+
+                    ProductDetailScreen(
+                        productId = productId,
+                        navController = navController,
+                        token = token,
+                        emprendimientoID = emprendimientoID
+                    )
                 }
+
                 composable("chat_comercio/{name}/{phone}") { backStackEntry ->
                     val name = backStackEntry.arguments?.getString("name") ?: ""
                     val phone = backStackEntry.arguments?.getString("phone") ?: ""

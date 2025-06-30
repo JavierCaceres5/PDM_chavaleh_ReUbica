@@ -25,7 +25,9 @@ import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 fun ProductCard(
     product: ProductoModel,
     favoritosViewModel: FavoritosViewModel = viewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    token: String,
+    emprendimientoID: String
 ) {
     val isFavorito = favoritosViewModel.isFavoritoProducto(product.id.toString())
 
@@ -34,8 +36,13 @@ fun ProductCard(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable {
-                navController.navigate(ProductDetailNavigation.withArgs(product.id.toString()))
-
+                navController.navigate(
+                    ProductDetailNavigation.withArgs(
+                        product.id.toString(),
+                        token,
+                        emprendimientoID
+                    )
+                )
             },
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent

@@ -2,9 +2,7 @@ package com.proyecto.ReUbica.ui.screens.ProductoScreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,48 +25,43 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
-import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioViewModel
 
 @Composable
 fun ProductDetailScreen(
     productId: String,
     navController: NavHostController,
-    viewModel: ComercioViewModel = viewModel()
+    token: String,
+    emprendimientoID: String,
+    viewModel: ProductoViewModel = viewModel()
 ) {
-    val business by viewModel.business.collectAsState()
-    var timedOut by remember { mutableStateOf(false) }
+    val productos by viewModel.productos.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+    val error by viewModel.error.collectAsState()
 
-    LaunchedEffect(business.products) {
-        if (business.products.isEmpty()) {
-            kotlinx.coroutines.delay(8000)
-            if (business.products.isEmpty()) {
-                timedOut = true
+    LaunchedEffect(Unit) {
+        viewModel.getProductosByEmprendimiento(token, emprendimientoID)
+    }
+
+    when {
+        loading -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFF5A3C1D))
             }
+            return
+        }
+        error != null -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = error ?: "Error desconocido",
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            return
         }
     }
 
-    val product = remember(business.products, productId) {
-        business.products.find { it.id.toString() == productId }
-    }
-
-    if (timedOut) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                "Error al cargar el producto. Regresa e intenta nuevamente.",
-                color = Color.Red,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        return
-    }
-
-    if (business.products.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color(0xFF5A3C1D))
-        }
-        return
-    }
+    val product = productos.find { it.id.toString() == productId }
 
     if (product == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -76,8 +69,6 @@ fun ProductDetailScreen(
         }
         return
     }
-
-
 
     var comentario by remember { mutableStateOf("") }
 
@@ -110,41 +101,21 @@ fun ProductDetailScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("$${product.precio}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = Color(0xFF5A3C1D))
+        Text(
+            "$${product.precio}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF5A3C1D)
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Row {
-            Column (modifier = Modifier.fillMaxWidth(0.6f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.SettingsPhone, contentDescription = null)
-                    Spacer(Modifier.width(6.dp))
-                    Text(text = "8874-7387" , color = Color(0xFF5A3C1D))
-                }
-
-                Spacer(modifier = Modifier.height(5.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Schedule, contentDescription = null)
-                    Spacer(Modifier.width(6.dp))
-                    Text(text = "Horario 2-5 pm" , color = Color(0xFF5A3C1D))
-                }
-
-                Spacer(modifier = Modifier.height(5.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.LocationOn, contentDescription = null)
-                    Spacer(Modifier.width(6.dp))
-                    Text(text = "Universidad José Simeón Cañas", color = Color(0xFF5A3C1D))
-                }
-
-                Spacer(modifier = Modifier.height(5.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Email, contentDescription = null)
-                    Spacer(Modifier.width(6.dp))
-                    Text(text = "correo@ejemplo.com", color = Color(0xFF5A3C1D))
-                }
+            Column(modifier = Modifier.fillMaxWidth(0.6f)) {
+                InfoRow(Icons.Outlined.SettingsPhone, "8874-7387")
+                InfoRow(Icons.Outlined.Schedule, "Horario 2-5 pm")
+                InfoRow(Icons.Outlined.LocationOn, "Universidad José Simeón Cañas")
+                InfoRow(Icons.Outlined.Email, "correo@ejemplo.com")
             }
 
             Column(
@@ -162,24 +133,13 @@ fun ProductDetailScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "Ya casi",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF5D4F30) // color café como en la imagen
+                            color = Color(0xFF5D4F30)
                         )
-                        //Row {
-                        //    repeat(5) { index ->
-                        //        Icon(
-                        //            imageVector = if (index < product.rating.toInt()) Icons.Default.Star else Icons.Default.StarOutline,
-                        //            contentDescription = null,
-                        //            tint = Color(0xFFFFD700),
-                        //            modifier = Modifier.size(16.dp)
-                        //        )
-                        //    }
-                        //}
                     }
                 }
             }
@@ -193,13 +153,11 @@ fun ProductDetailScreen(
 
         Text("💡 Comentarios de usuarios", fontWeight = FontWeight.SemiBold, color = Color(0xFF5D4F30))
 
-            // Comentarios a la izquierda
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 300.dp)
         ) {
-            // Comentarios scrollables
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -213,65 +171,23 @@ fun ProductDetailScreen(
 
                 items(comentarios.size) { index ->
                     val (imageUrl, nombre, rating) = comentarios[index]
-                    Row(modifier = Modifier.padding(vertical = 8.dp)) {
-                        AsyncImage(
-                            model = imageUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(30.dp))
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(nombre, fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
-                            Row {
-                                repeat(rating) {
-                                    Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(15.dp))
-                                }
-                                repeat(5 - rating) {
-                                    Icon(Icons.Default.Star, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(15.dp))
-                                }
-                            }
-                            Text(
-                                if (nombre == "Fernanda") "Me pareció increíble" else "Se despintan con facilidad",
-                                color = Color(0xFF5A3C1D)
-                            )
-                        }
-                    }
+                    UserComment(imageUrl, nombre, rating)
                 }
             }
 
-            // Área para escribir comentario a la derecha
             Column(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
                     .padding(top = 8.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                //Row(
-                //    verticalAlignment = Alignment.CenterVertically,
-                //    horizontalArrangement = Arrangement.Center,
-                //    modifier = Modifier.padding(bottom = 8.dp)
-                //) {
-                //    repeat(5) { index ->
-                //        Icon(
-                //            imageVector = if (index < ratingSeleccionado) Icons.Default.Star else Icons.Default.StarOutline,
-                //            contentDescription = "Estrella ${index + 1}",
-                //            tint = Color(0xFFFFD700),
-                //           modifier = Modifier
-                //                .size(30.dp)
-                //                //.clickable { ratingSeleccionado = index + 1 }
-                //        )
-
-                //    }
-                //}
-
                 OutlinedTextField(
                     value = comentario,
                     onValueChange = { comentario = it },
                     label = { Text("Escribe tu comentario") },
                     textStyle = LocalTextStyle.current.copy(fontSize = 12.sp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .height(60.dp)
                 )
 
@@ -279,7 +195,8 @@ fun ProductDetailScreen(
 
                 OutlinedButton(
                     onClick = { },
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier
+                        .align(Alignment.End)
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
@@ -291,6 +208,45 @@ fun ProductDetailScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null)
+        Spacer(Modifier.width(6.dp))
+        Text(text = text, color = Color(0xFF5A3C1D))
+        Spacer(modifier = Modifier.height(5.dp))
+    }
+}
+
+@Composable
+fun UserComment(imageUrl: String, nombre: String, rating: Int) {
+    Row(modifier = Modifier.padding(vertical = 8.dp)) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(30.dp))
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(nombre, fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
+            Row {
+                repeat(rating) {
+                    Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(15.dp))
+                }
+                repeat(5 - rating) {
+                    Icon(Icons.Default.StarOutline, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(15.dp))
+                }
+            }
+            Text(
+                if (nombre == "Fernanda") "Me pareció increíble" else "Se despintan con facilidad",
+                color = Color(0xFF5A3C1D)
+            )
         }
     }
 }
