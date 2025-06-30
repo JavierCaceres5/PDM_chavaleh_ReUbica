@@ -2,6 +2,7 @@ package com.proyecto.ReUbica.network
 
 import com.proyecto.ReUbica.data.api.EmprendimientoApiService
 import com.proyecto.ReUbica.data.api.ProductoApiService
+import com.proyecto.ReUbica.data.api.ReviewApiService
 import com.proyecto.ReUbica.data.api.UserApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -35,6 +36,10 @@ object RetrofitInstance {
 
     val productoApiService: ProductoApiService by lazy {
         retrofit.create(ProductoApiService::class.java)
+    }
+
+    val reviewApiService: ReviewApiService by lazy {
+        retrofit.create(ReviewApiService::class.java)
     }
 
 }

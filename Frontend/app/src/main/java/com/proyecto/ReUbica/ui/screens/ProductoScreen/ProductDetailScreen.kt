@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.proyecto.ReUbica.data.model.review.ReviewModel
 
 @Composable
 fun ProductDetailScreen(
@@ -32,37 +34,39 @@ fun ProductDetailScreen(
     navController: NavHostController,
     token: String,
     emprendimientoID: String,
-    viewModel: ProductoViewModel = viewModel()
+    viewModel: ProductoViewModel = viewModel(),
+    reviewViewModel: ReviewViewModel = viewModel()
 ) {
     val productos by viewModel.productos.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    val emprendimientoReviews by reviewViewModel.emprendimientoReviews.collectAsState()
+    val reviewLoading by reviewViewModel.loading.collectAsState()
+    val reviewError by reviewViewModel.error.collectAsState()
+
     LaunchedEffect(Unit) {
         viewModel.getProductosByEmprendimiento(token, emprendimientoID)
     }
 
-    when {
-        loading -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFF5A3C1D))
-            }
-            return
+    LaunchedEffect(emprendimientoID) {
+        reviewViewModel.getReviewsByEmprendimiento(token, emprendimientoID)
+    }
+
+    if (loading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color(0xFF5A3C1D))
         }
-        error != null -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = error ?: "Error desconocido",
-                    color = Color.Red,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            return
+        return
+    }
+    if (error != null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Error: $error", color = Color.Red, fontWeight = FontWeight.Bold)
         }
+        return
     }
 
     val product = productos.find { it.id.toString() == productId }
-
     if (product == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Producto no encontrado", color = Color.Red, fontWeight = FontWeight.Bold)
@@ -70,7 +74,9 @@ fun ProductDetailScreen(
         return
     }
 
-    var comentario by remember { mutableStateOf("") }
+    val filteredReviews: List<ReviewModel> = emprendimientoReviews
+        .find { it.productoID.toString() == productId }
+        ?.valoraciones ?: emptyList()
 
     Column(
         modifier = Modifier
@@ -88,12 +94,7 @@ fun ProductDetailScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = product.nombre,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF5A3C1D)
-        )
+        Text(product.nombre, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -101,12 +102,7 @@ fun ProductDetailScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            "$${product.precio}",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF5A3C1D)
-        )
+        Text("$${product.precio}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = Color(0xFF5A3C1D))
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -133,79 +129,43 @@ fun ProductDetailScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Ya casi",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF5D4F30)
-                        )
-                    }
+                    Text("Ya casi", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF5D4F30))
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(30.dp))
-
         Divider(color = Color(0xFF5A3C1D), thickness = 2.dp)
-
         Spacer(modifier = Modifier.height(8.dp))
 
         Text("💡 Comentarios de usuarios", fontWeight = FontWeight.SemiBold, color = Color(0xFF5D4F30))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 300.dp)
-        ) {
+        if (reviewLoading) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFF5A3C1D))
+            }
+        } else if (reviewError != null) {
+            Text(
+                "Error al cargar comentarios: $reviewError",
+                color = Color.Red,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        } else if (filteredReviews.isEmpty()) {
+            Text(
+                "Aún no hay reseñas de este producto.",
+                color = Color.Gray,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        } else {
             LazyColumn(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
-                    .fillMaxWidth(0.5f)
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val comentarios = listOf(
-                    Triple("https://randomuser.me/api/portraits/women/44.jpg", "Fernanda", 4),
-                    Triple("https://randomuser.me/api/portraits/men/45.jpg", "Jorge", 1)
-                )
-
-                items(comentarios.size) { index ->
-                    val (imageUrl, nombre, rating) = comentarios[index]
-                    UserComment(imageUrl, nombre, rating)
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .padding(top = 8.dp),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                OutlinedTextField(
-                    value = comentario,
-                    onValueChange = { comentario = it },
-                    label = { Text("Escribe tu comentario") },
-                    textStyle = LocalTextStyle.current.copy(fontSize = 12.sp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                ) {
-                    Text(
-                        "Envía tu comentario",
-                        color = Color(0xFF5A3C1D),
-                        fontWeight = FontWeight.Bold
-                    )
+                items(filteredReviews) { review ->
+                    ReviewItem(review)
                 }
             }
         }
@@ -218,15 +178,14 @@ fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String)
         Icon(icon, contentDescription = null)
         Spacer(Modifier.width(6.dp))
         Text(text = text, color = Color(0xFF5A3C1D))
-        Spacer(modifier = Modifier.height(5.dp))
     }
 }
 
 @Composable
-fun UserComment(imageUrl: String, nombre: String, rating: Int) {
+fun ReviewItem(review: ReviewModel) {
     Row(modifier = Modifier.padding(vertical = 8.dp)) {
         AsyncImage(
-            model = imageUrl,
+            model = "https://via.placeholder.com/150",
             contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
@@ -234,19 +193,16 @@ fun UserComment(imageUrl: String, nombre: String, rating: Int) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column {
-            Text(nombre, fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
+            Text("Usuario", fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
             Row {
-                repeat(rating) {
+                repeat(review.rating.toInt()) {
                     Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(15.dp))
                 }
-                repeat(5 - rating) {
+                repeat(5 - review.rating.toInt()) {
                     Icon(Icons.Default.StarOutline, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(15.dp))
                 }
             }
-            Text(
-                if (nombre == "Fernanda") "Me pareció increíble" else "Se despintan con facilidad",
-                color = Color(0xFF5A3C1D)
-            )
+            Text(review.comentario, color = Color(0xFF5A3C1D))
         }
     }
 }
