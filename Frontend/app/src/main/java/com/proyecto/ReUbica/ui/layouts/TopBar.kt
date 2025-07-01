@@ -24,7 +24,6 @@ fun TopBar(navController: NavController) {
 
     TopAppBar(
         title = {
-
             Text(
                 text = "ReUbica",
                 fontWeight = FontWeight.Bold,

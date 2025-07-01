@@ -17,15 +17,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.proyecto.ReUbica.data.api.DummyProduct
+import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.ui.navigations.ProductDetailNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 
 @Composable
 fun ProductCard(
-    product: DummyProduct,
+    product: ProductoModel,
     favoritosViewModel: FavoritosViewModel = viewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    token: String,
+    emprendimientoID: String
 ) {
     val isFavorito = favoritosViewModel.isFavoritoProducto(product.id.toString())
 
@@ -34,8 +36,13 @@ fun ProductCard(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable {
-                navController.navigate(ProductDetailNavigation.withArgs(product.id.toString()))
-
+                navController.navigate(
+                    ProductDetailNavigation.withArgs(
+                        product.id.toString(),
+                        token,
+                        emprendimientoID
+                    )
+                )
             },
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
@@ -52,20 +59,20 @@ fun ProductCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    product.name,
+                    product.nombre,
                     style = MaterialTheme.typography.titleMedium,
                     color = Color(0xFF5A3C1D),
                     fontWeight = FontWeight.ExtraBold
                 )
                 Text(
-                    product.description,
+                    product.descripcion,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     color = Color(0xFF5A3C1D)
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "$${product.price}",
+                        text = "$${product.precio}",
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF5A3C1D)
                     )
@@ -79,8 +86,8 @@ fun ProductCard(
                         modifier = Modifier.clickable {
                             favoritosViewModel.toggleFavoritoProducto(
                                 id = product.id.toString(),
-                                nombre = product.name,
-                                precio = product.price
+                                nombre = product.nombre,
+                                precio = product.precio
                             )
                         }
                     )
@@ -92,10 +99,10 @@ fun ProductCard(
                         contentDescription = "Calificación",
                         tint = Color(0xFF5A3C1D)
                     )
-                    Text(
-                        text = product.rating.toString(),
-                        color = Color(0xFF5A3C1D)
-                    )
+                    //Text(
+                    //    text = product.rating.toString(),
+                    //    color = Color(0xFF5A3C1D)
+                    //)
                 }
             }
         }

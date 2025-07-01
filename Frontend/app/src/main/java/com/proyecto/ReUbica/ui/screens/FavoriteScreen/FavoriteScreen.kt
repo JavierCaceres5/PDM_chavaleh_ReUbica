@@ -102,13 +102,14 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
                             nombre = favorito.nombre,
                             departamento = favorito.departamento,
                             categoria = favorito.categoria,
-                            imagenRes = R.drawable.reubica,
+                            imagenRes = if (favorito.logo?.isNotBlank() == true) favorito.logo else null,
                             isFavorito = true,
                             onFavoritoClick = {
                                 favoritosViewModel.toggleFavoritoComercio(
                                     favorito.nombre,
                                     favorito.departamento,
-                                    favorito.categoria
+                                    favorito.categoria,
+                                    favorito.logo
                                 )
                             },
                             onVerTiendaClick = {}

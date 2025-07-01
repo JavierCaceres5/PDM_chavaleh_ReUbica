@@ -21,13 +21,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.proyecto.ReUbica.R
+
 
 @Composable
 fun RestaurantCard(
     nombre: String,
     departamento: String,
     categoria: String,
-    imagenRes: Int,
+    imagenRes: String?,
     isFavorito: Boolean,
     onFavoritoClick: () -> Unit,
     onVerTiendaClick: () -> Unit
@@ -70,8 +73,8 @@ fun RestaurantCard(
                 Modifier.fillMaxWidth().padding(start = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(imagenRes),
+                AsyncImage(
+                    model = imagenRes ?: R.drawable.reubica,
                     contentDescription = null,
                     modifier = Modifier
                         .size(90.dp)

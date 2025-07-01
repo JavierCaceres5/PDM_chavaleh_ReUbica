@@ -1,52 +1,76 @@
 package com.proyecto.ReUbica.ui.screens.SearchScreen
 
-import android.content.Context
+import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.proyecto.ReUbica.data.local.UserSessionManager
+import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.ui.screens.EmprendimientosBuscar.SearchScreenViewModel
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
+import com.proyecto.ReUbica.ui.screens.HomeScreen.HomeScreenViewModel
 import com.proyecto.ReUbica.ui.screens.HomeScreen.SeccionRestaurantes
+import com.proyecto.ReUbica.utils.LocationUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.math.pow
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun SearchScreen(
     navController: NavHostController,
-    favoritosViewModel: FavoritosViewModel = viewModel()
+    favoritosViewModel: FavoritosViewModel = viewModel(),
+    searchViewModel: SearchScreenViewModel = viewModel(),
+    homeViewModel: HomeScreenViewModel = viewModel()
 ) {
-    val viewModel: SearchScreenViewModel = viewModel()
-    val resultadosApi by viewModel.resultadosByNombre.collectAsState()
-    val loading by viewModel.loading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val resultadosApi by searchViewModel.resultadosByNombre.collectAsState()
+    val loading by searchViewModel.loading.collectAsState()
+    val error by searchViewModel.error.collectAsState()
 
     val context = LocalContext.current
     val userSessionManager = remember { UserSessionManager(context) }
+    val todosLosEmprendimientos by homeViewModel.todosLosEmprendimientos.collectAsState()
+
+    var userLocation by remember { mutableStateOf<Location?>(null) }
+    val locationPermissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+
+    LaunchedEffect(locationPermissionState.status.isGranted) {
+        if (locationPermissionState.status.isGranted) {
+            userLocation = LocationUtils.getCurrentLocation(context)
+        } else {
+            locationPermissionState.launchPermissionRequest()
+        }
+    }
 
     LaunchedEffect(Unit) {
-        viewModel.setUserSessionManager(userSessionManager)
+        userSessionManager.getToken()?.let { homeViewModel.obtenerTodosLosEmprendimientos(it) }
+        searchViewModel.setUserSessionManager(userSessionManager)
     }
 
     var searchQuery by remember { mutableStateOf("") }
@@ -54,161 +78,195 @@ fun SearchScreen(
     val coroutineScope = rememberCoroutineScope()
     var debounceJob by remember { mutableStateOf<Job?>(null) }
 
-    val destacadosMock = listOf(
-        Triple("El Panalito", "Chinameca", "Alimentos"),
-        Triple("Solemare", "Santa Ana", "Artesanías"),
-        Triple("Pizza Ranch", "San Miguel", "Comida"),
-        Triple("Arte Maya", "Ahuachapán", "Artesanías")
-    )
+    fun isNearby(userLat: Double, userLon: Double, placeLat: Double?, placeLon: Double?, radiusKm: Double = 5.0): Boolean {
+        if (placeLat == null || placeLon == null) return false
+        val earthRadiusKm = 6371.0
+        val dLat = Math.toRadians(placeLat - userLat)
+        val dLon = Math.toRadians(placeLon - userLon)
+        val lat1 = Math.toRadians(userLat)
+        val lat2 = Math.toRadians(placeLat)
+        val a = Math.sin(dLat / 2).pow(2) + Math.sin(dLon / 2).pow(2) * Math.cos(lat1) * Math.cos(lat2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        val distance = earthRadiusKm * c
+        return distance <= radiusKm
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        //  Buscador
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Color(0xFFF7F8EF))
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                BasicTextField(
-                    value = searchQuery,
-                    onValueChange = {
-                        searchQuery = it
-                        debounceJob?.cancel()
-                        debounceJob = coroutineScope.launch {
-                            delay(2000)
-                            if (it.isNotBlank() && it !in searchHistory) {
-                                searchHistory = listOf(it) + searchHistory.take(4)
-                            }
-                            if (it.isNotBlank()) {
-                                viewModel.searchEmprendimientoByNombre(it)
-                            }
-                        }
-                    },
-                    singleLine = true,
-                    textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
-                    modifier = Modifier.weight(1f)
-                )
-                if (searchQuery.isNotBlank()) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Clear",
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable { searchQuery = "" },
-                        tint = Color.Black
-                    )
-                }
-            }
+    val userLat = userLocation?.latitude ?: 0.0
+    val userLon = userLocation?.longitude ?: 0.0
+
+    val comerciosCercanos = todosLosEmprendimientos.filter {
+        isNearby(userLat, userLon, it.latitud, it.longitud)
+    }
+
+    fun parseFecha(fecha: String): Date? {
+        return try {
+            val zonedDateTime = ZonedDateTime.parse(fecha, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+            Date.from(zonedDateTime.toInstant())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
+    }
 
-        //  Historial
-        if (searchHistory.isNotEmpty()) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                searchHistory.forEach { query ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.History, contentDescription = null, tint = Color.Gray)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = query,
-                            modifier = Modifier.weight(1f),
-                            fontSize = 14.sp
-                        )
+    val now = Date()
+    val oneWeekMillis = 7 * 24 * 60 * 60 * 1000
+
+    val nuevosEmprendimientos = todosLosEmprendimientos.filter {
+        it.created_at?.let { fecha ->
+            parseFecha(fecha)?.let { createdDate ->
+                now.time - createdDate.time <= oneWeekMillis
+            } ?: false
+        } ?: false
+    }
+
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            // Buscador
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(50))
+                    .background(Color(0xFFF7F8EF))
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar", tint = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { query ->
+                            searchQuery = query
+                            debounceJob?.cancel()
+                            debounceJob = coroutineScope.launch {
+                                delay(500)
+                                if (query.isNotBlank()) {
+                                    if (query !in searchHistory) {
+                                        searchHistory = listOf(query) + searchHistory.take(4)
+                                    }
+                                    searchViewModel.searchEmprendimientoByNombre(query)
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (searchQuery.isNotBlank()) {
                         Icon(
-                            Icons.Default.Close,
-                            contentDescription = "Remove",
-                            modifier = Modifier.clickable {
-                                searchHistory = searchHistory - query
-                            },
-                            tint = Color.Gray
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Borrar",
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clickable { searchQuery = "" },
+                            tint = Color.Black
                         )
                     }
                 }
             }
         }
 
+        if (searchHistory.isNotEmpty()) {
+            item {
+                Column {
+                    searchHistory.forEach { query ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    searchQuery = query
+                                    searchViewModel.searchEmprendimientoByNombre(query)
+                                }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.History, contentDescription = null, tint = Color.Gray)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = query, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Eliminar",
+                                modifier = Modifier.clickable { searchHistory = searchHistory - query },
+                                tint = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         when {
             loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 16.dp)
-                )
+                item {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .padding(top = 16.dp)
+                    )
+                }
             }
 
             !error.isNullOrEmpty() -> {
-                Text(
-                    text = "Error: $error",
-                    color = Color.Red,
-                    modifier = Modifier.padding(16.dp)
-                )
+                item {
+                    Text(
+                        text = "Error: $error",
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
 
             resultadosApi.isNotEmpty() -> {
-                val resultados = resultadosApi.map {
-                    Triple(
-                        it.nombre ?: "Sin nombre",
-                        it.direccion ?: "Sin dirección",
-                        it.categoriasPrincipales.firstOrNull() ?: "Sin categoría"
+                item {
+                    SeccionRestaurantes(
+                        titulo = "Resultados de búsqueda",
+                        emprendimientos = resultadosApi,
+                        favoritosViewModel = favoritosViewModel,
+                        navController = navController
                     )
                 }
+            }
 
-                SeccionRestaurantes(
-                    titulo = "Resultados de búsqueda",
-                    destacados = resultados,
-                    favoritosViewModel = favoritosViewModel,
-                    navController = navController
-                )
+            searchQuery.isBlank() -> {
+                if (nuevosEmprendimientos.isNotEmpty()) {
+                    item {
+                        SeccionRestaurantes(
+                            titulo = "Nuevos en la plataforma",
+                            emprendimientos = nuevosEmprendimientos,
+                            favoritosViewModel = favoritosViewModel,
+                            navController = navController
+                        )
+                    }
+                }
+                if (comerciosCercanos.isNotEmpty()) {
+                    item {
+                        SeccionRestaurantes(
+                            titulo = "Locales cerca de ti",
+                            emprendimientos = comerciosCercanos,
+                            favoritosViewModel = favoritosViewModel,
+                            navController = navController
+                        )
+                    }
+                }
             }
 
             searchQuery.isNotBlank() && resultadosApi.isEmpty() -> {
-                Text(
-                    text = "No se encontraron resultados para \"$searchQuery\".",
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-
-
-            searchQuery.isBlank() -> {
-                SeccionRestaurantes(
-                    titulo = "Pueden interesarte",
-                    destacados = destacadosMock,
-                    favoritosViewModel = favoritosViewModel,
-                    navController = navController
-                )
-
-                SeccionRestaurantes(
-                    titulo = "Nuevos emprendedores",
-                    destacados = destacadosMock,
-                    favoritosViewModel = favoritosViewModel,
-                    navController = navController
-                )
+                item {
+                    Text(
+                        text = "No se encontraron resultados para \"$searchQuery\".",
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }
 }
 
-// Conservamos esta clase porque se usa en HomeScreen en lo que hacemos esa conexión al backend es de comercios destacadso -Carlos
 data class CategoriaItem(
-    val icon: ImageVector,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
     val label: String,
     val onClick: () -> Unit
 )

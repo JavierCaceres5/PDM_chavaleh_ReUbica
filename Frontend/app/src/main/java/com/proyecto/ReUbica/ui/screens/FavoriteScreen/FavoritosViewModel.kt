@@ -7,7 +7,8 @@ sealed class Favorito {
     data class Comercio(
         val nombre: String,
         val departamento: String,
-        val categoria: String
+        val categoria: String,
+        val logo: String?
     ) : Favorito()
 
     data class Producto(
@@ -21,13 +22,23 @@ class FavoritosViewModel : ViewModel() {
     private val _favoritos = mutableStateListOf<Favorito>()
     val favoritos: List<Favorito> = _favoritos
 
-    // Para comercios
-    fun toggleFavoritoComercio(nombre: String, departamento: String, categoria: String) {
-        val favorito = Favorito.Comercio(nombre, departamento, categoria)
-        if (_favoritos.contains(favorito)) {
-            _favoritos.remove(favorito)
+    // ✅ Para comercios
+    fun toggleFavoritoComercio(nombre: String, departamento: String, categoria: String, logo: String?) {
+        val exists = _favoritos.any {
+            it is Favorito.Comercio &&
+                    it.nombre == nombre &&
+                    it.departamento == departamento &&
+                    it.categoria == categoria
+        }
+        if (exists) {
+            _favoritos.removeIf {
+                it is Favorito.Comercio &&
+                        it.nombre == nombre &&
+                        it.departamento == departamento &&
+                        it.categoria == categoria
+            }
         } else {
-            _favoritos.add(favorito)
+            _favoritos.add(Favorito.Comercio(nombre, departamento, categoria, logo))
         }
     }
 
@@ -37,11 +48,11 @@ class FavoritosViewModel : ViewModel() {
 
     // Para productos
     fun toggleFavoritoProducto(id: String, nombre: String, precio: Double) {
-        val favorito = Favorito.Producto(id, nombre, precio)
-        if (_favoritos.contains(favorito)) {
-            _favoritos.remove(favorito)
+        val exists = _favoritos.any { it is Favorito.Producto && it.id == id }
+        if (exists) {
+            _favoritos.removeIf { it is Favorito.Producto && it.id == id }
         } else {
-            _favoritos.add(favorito)
+            _favoritos.add(Favorito.Producto(id, nombre, precio))
         }
     }
 
@@ -49,4 +60,3 @@ class FavoritosViewModel : ViewModel() {
         return _favoritos.any { it is Favorito.Producto && it.id == id }
     }
 }
-
