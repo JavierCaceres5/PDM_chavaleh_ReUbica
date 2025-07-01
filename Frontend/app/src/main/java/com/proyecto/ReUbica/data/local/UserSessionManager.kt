@@ -61,7 +61,6 @@ class UserSessionManager(private val context: Context) {
             .first()
     }
 
-
     suspend fun getUserProfile(token: String): UserProfile? {
         return context.dataStore.data
             .map { prefs ->
@@ -74,14 +73,6 @@ class UserSessionManager(private val context: Context) {
             .first()
     }
 
-    suspend fun saveToken(token: String) {
-        context.dataStore.edit { prefs ->
-            val currentUserJson = prefs[USER_KEY] ?: ""
-            prefs[TOKEN_KEY] = token
-            prefs[USER_KEY] = currentUserJson
-        }
-    }
-
     suspend fun actualizarSesionConNuevoToken(updatedToken: String) {
         val jwt = JWT(updatedToken)
         val nuevoRol = jwt.getClaim("role").asString() ?: return
@@ -89,6 +80,8 @@ class UserSessionManager(private val context: Context) {
         val perfilActualizado = perfilActual.copy(user_role = nuevoRol)
         saveUserSession(updatedToken, perfilActualizado)
     }
+
+
 
     suspend fun saveEmprendimientoID(emprendimientoId: String) {
         context.dataStore.edit { prefs ->
@@ -102,10 +95,4 @@ class UserSessionManager(private val context: Context) {
             .first()
     }
 
-    suspend fun saveSession(token: String, user: UserProfile) {
-        context.dataStore.edit { prefs ->
-            prefs[TOKEN_KEY] = token
-            prefs[USER_KEY] = gson.toJson(user)
-        }
-    }
 }

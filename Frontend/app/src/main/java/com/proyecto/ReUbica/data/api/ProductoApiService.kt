@@ -30,5 +30,4 @@ interface ProductoApiService {
         @Path("emprendimientoId") emprendimientoId: String
     ): Response<List<ProductoCreateResponse>>
 
-
 }

@@ -60,6 +60,7 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
+import com.proyecto.ReUbica.ui.screens.CartaProductos.CartaProductosScreen
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ChatComercioScreen
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
@@ -221,9 +222,9 @@ fun CustomScaffold(rootNavController: NavHostController){
                     LocalInformationScreen(navController)
                 }
 
-//                composable<CartaProductosScreenNavigation> {
-//                    CartaProductosScreen()
-//                }
+                composable<CartaProductosScreenNavigation> {
+                    CartaProductosScreen(navController)
+                }
 
                 composable<ComercioNavigation> { backStackEntry ->
                     val navArgs = backStackEntry.toRoute<ComercioNavigation>()

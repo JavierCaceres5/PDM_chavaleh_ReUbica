@@ -30,6 +30,9 @@ class ProductoRepository {
         fun String.toBody(): RequestBody =
             this.toRequestBody("text/plain".toMediaTypeOrNull())
 
+        fun Double.toBody(): RequestBody =
+            this.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
         fun createMultipartFromUri(context: Context, uri: Uri, partName: String): MultipartBody.Part? {
             val contentResolver = context.contentResolver
             val mimeType = contentResolver.getType(uri) ?: "image/*"
@@ -43,17 +46,18 @@ class ProductoRepository {
             return MultipartBody.Part.createFormData(partName, fileName, requestBody)
         }
 
-        val productoImage = data.product_image?.let { imagePathOrUriString ->
+        val productoImagePart = data.product_image?.let { imagePathOrUriString ->
             val uri = imagePathOrUriString.toUri()
             createMultipartFromUri(context, uri, "product_image")
         }
+
 
         return api.registrarProducto(
             token = "Bearer $token",
             nombre = data.nombre.toBody(),
             descripcion = data.descripcion.toBody(),
-            precio = data.precio.toString().toBody(),
-            product_image = productoImage
+            precio = data.precio.toBody(),
+            product_image = productoImagePart
         )
     }
 

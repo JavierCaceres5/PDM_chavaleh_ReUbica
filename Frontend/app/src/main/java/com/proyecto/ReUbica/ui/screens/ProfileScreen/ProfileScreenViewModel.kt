@@ -2,7 +2,9 @@ package com.proyecto.ReUbica.ui.screens.ProfileScreen
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Tag
@@ -21,6 +23,7 @@ import kotlinx.coroutines.launch
 
 class ProfileScreenViewModel(application: Application): AndroidViewModel(application) {
 
+
     private val repository = UserRepository()
     private val emprendimientoRepository = EmprendimientoRepository()
     private val sessionManager = UserSessionManager(application)
@@ -35,7 +38,6 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
     val error: StateFlow<String?> = _error
 
     private val TAG = "ProfileScreenViewModel"
-
 
     private val _negocioEliminado = MutableStateFlow(false)
     val negocioEliminado: StateFlow<Boolean> = _negocioEliminado
@@ -92,6 +94,7 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                     if (body != null) {
                         val updatedToken = body.updatedToken
                         sessionManager.actualizarSesionConNuevoToken(updatedToken)
+                        Log.d(TAG, "Emprendimiento eliminado correctamente. Nuevo token: $updatedToken")
                     }
                     _negocioEliminado.value = true
                 } else {
