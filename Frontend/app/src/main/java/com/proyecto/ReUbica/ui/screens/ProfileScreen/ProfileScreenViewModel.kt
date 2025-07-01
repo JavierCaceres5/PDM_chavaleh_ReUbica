@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Tag
+import com.android.volley.VolleyLog.e
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.user.UserProfile
@@ -14,6 +15,7 @@ import com.proyecto.ReUbica.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -34,40 +36,13 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
 
     private val TAG = "ProfileScreenViewModel"
 
-    val userSession = sessionManager.userSessionFlow
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            null
-        )
 
-    init {
-        refreshUserData()
-    }
+    private val _negocioEliminado = MutableStateFlow(false)
+    val negocioEliminado: StateFlow<Boolean> = _negocioEliminado
 
-    fun refreshUserData() {
-        viewModelScope.launch {
-            try {
-                val token = sessionManager.getToken()
-                if (token == null) {
-                    _error.value = "Token no encontrado"
-                    return@launch
-                }
-
-                val userProfile = sessionManager.getUserProfile(token)
-                if (userProfile != null) {
-                    sessionManager.updateUserProfile(userProfile)
-                    Log.d("ProfileVM", "Datos de usuario actualizados localmente: ${userProfile.user_role}")
-                } else {
-                    Log.e("ProfileVM", "Perfil no encontrado en almacenamiento local")
-                    _error.value = "Perfil no encontrado en almacenamiento local"
-                }
-            } catch (e: Exception) {
-                Log.e("ProfileVM", "Error actualizando datos: ${e.message}")
-                _error.value = "Error al actualizar datos: ${e.message}"
-            }
-        }
-    }
+    val user: StateFlow<UserProfile?> = sessionManager.userSessionFlow
+        .map { it?.userProfile }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
 
     fun deleteAccount(onSuccess: () -> Unit) {
@@ -85,6 +60,7 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                 if (response.isSuccessful) {
                     sessionManager.clearSession()
                     onSuccess()
+                    Log.d(TAG, "Cuenta eliminada correctamente")
                 } else {
                     _error.value = "Error al eliminar cuenta: ${response.message()}"
                 }
@@ -96,10 +72,12 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
         }
     }
 
-    fun deleteMiEmprendimiento(onSuccess: () -> Unit) {
+    fun deleteMiEmprendimiento() {
         viewModelScope.launch {
             _loading.value = true
             _error.value = null
+            _negocioEliminado.value = false
+
             try {
                 val token = sessionManager.getToken()
                 if (token.isNullOrBlank()) {
@@ -110,23 +88,25 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
 
                 val response = emprendimientoRepository.deleteMiEmprendimiento(token)
                 if (response.isSuccessful) {
-                    Log.d(TAG, "Emprendimiento eliminado correctamente")
-                    refreshUserData()
-                    _loading.value = false
-                    onSuccess()
+                    val body = response.body()
+                    if (body != null) {
+                        val updatedToken = body.updatedToken
+                        sessionManager.actualizarSesionConNuevoToken(updatedToken)
+                    }
+                    _negocioEliminado.value = true
                 } else {
                     _error.value = "Error al eliminar emprendimiento: ${response.message()}"
-                    Log.e(TAG, "Error eliminando emprendimiento: ${response.message()}")
                 }
             } catch (e: Exception) {
                 _error.value = "Error de red: ${e.message}"
-                Log.e(TAG, "Error de red: ${e.message}")
             } finally {
                 _loading.value = false
             }
         }
     }
 
-
+    fun resetNegocioEliminado() {
+        _negocioEliminado.value = false
+    }
 
 }

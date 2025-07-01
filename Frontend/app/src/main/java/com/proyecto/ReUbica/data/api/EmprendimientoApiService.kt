@@ -1,5 +1,6 @@
     package com.proyecto.ReUbica.data.api
 
+    import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoDeleteResponse
     import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
     import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoResponse
     import com.proyecto.ReUbica.data.model.emprendimiento.UpdateEmprendimientoRequest
@@ -40,7 +41,7 @@ interface EmprendimientoApiService {
     @DELETE("emprendimientos/eliminarMiEmprendimiento")
     suspend fun deleteMiEmprendimiento(
         @Header("Authorization") token: String
-    ) : Response<Unit>
+    ): Response<EmprendimientoDeleteResponse>
 
     @GET("emprendimientos/miEmprendimiento")
     suspend fun getMiEmprendimiento(

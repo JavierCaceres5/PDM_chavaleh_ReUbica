@@ -54,16 +54,15 @@ object RegisterLocalScreen2Navigation
 object RegisterLocalScreen3Navigation
 
 @Serializable
-object RegisterLocalScreen4Navigation
-
-@Serializable
 object SessionCheckNavigation
 
 @Serializable
 object LoadingScreenNavigation
 
 @Serializable
+object CartaProductosScreenNavigation
 
+@Serializable
 data class ComercioNavigation(
     val id: String,
     val nombre: String,
@@ -82,10 +81,4 @@ object ProductDetailNavigation {
 }
 
 @Serializable
-object EmprendedorProfileScreenNavigation
-
-@Serializable
 object LocalInformationScreenNavigation
-
-@Serializable
-object CartaProductosScreenNavigation

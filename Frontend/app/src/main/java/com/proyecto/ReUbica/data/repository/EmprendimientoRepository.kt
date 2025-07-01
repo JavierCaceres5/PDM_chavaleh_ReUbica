@@ -2,6 +2,7 @@ package com.proyecto.ReUbica.data.repository
 
 import com.google.gson.Gson
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
+import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoDeleteResponse
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoResponse
 import com.proyecto.ReUbica.data.model.emprendimiento.UpdateEmprendimientoRequest
@@ -54,7 +55,7 @@ class EmprendimientoRepository {
         return api.getEmprendimientosByCategoria(categoria)
     }
 
-    suspend fun deleteMiEmprendimiento(token: String): Response<Unit> {
+    suspend fun deleteMiEmprendimiento(token: String): Response<EmprendimientoDeleteResponse> {
         return api.deleteMiEmprendimiento("Bearer $token")
     }
 

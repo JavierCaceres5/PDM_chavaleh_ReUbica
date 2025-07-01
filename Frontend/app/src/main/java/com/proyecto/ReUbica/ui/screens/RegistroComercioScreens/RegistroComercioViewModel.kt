@@ -13,16 +13,17 @@ import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
 import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
 import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class RegistroComercioViewModel : ViewModel() {
 
     private lateinit var userSessionManager: UserSessionManager
     private val repository = EmprendimientoRepository()
 
-
+    var emprendimientoId: UUID? = null
+        private set
 
     private val _emprendimiento = MutableStateFlow(
         EmprendimientoCreateRequest(
@@ -51,7 +52,6 @@ class RegistroComercioViewModel : ViewModel() {
 
     private val _success = MutableStateFlow(false)
     val success = _success.asStateFlow()
-
 
     private val TAG = "RegistroComercioViewModel"
 
@@ -95,44 +95,41 @@ class RegistroComercioViewModel : ViewModel() {
         _emprendimiento.value = _emprendimiento.value.copy(redes_sociales = nuevasRedes)
     }
 
-    fun createEmprendimiento(profileViewModel: ProfileScreenViewModel) {
+    fun createEmprendimiento() {
         viewModelScope.launch {
             if (!::userSessionManager.isInitialized) {
                 _error.value = "Session manager no inicializado"
+                Log.d("RegistroComercioViewModel", "Session manager no inicializado")
                 return@launch
             }
             _loading.value = true
             val token = userSessionManager.getToken()
+
             if (token.isNullOrBlank()) {
                 _error.value = "No se encontró token de sesión"
+                Log.d("RegistroComercioViewModel", "No se encontró token de sesión")
+
                 _loading.value = false
                 return@launch
             }
             val response = repository.createEmprendimiento(token, _emprendimiento.value)
-            Log.e(TAG, response.toString())
+
             if (!response.isSuccessful) {
                 _error.value = "Error de creación de emprendimiento: ${response.message()}"
                 _loading.value = false
-                Log.e(TAG, "Error de emprendimiento: ${_emprendimiento.value}")
-                Log.e(TAG, token)
                 return@launch
             }
 
             val body = response.body()
             if (body != null) {
-                val nuevoToken = body.token
-                val nuevoUsuario = body.user
-                Log.d("RegistroComercioVM", "Nuevo token: ${body.token}")
-                Log.d("RegistroComercioVM", "Nuevo usuario: ${body.user}")
-                userSessionManager.saveUserSession(nuevoToken, nuevoUsuario)
-                profileViewModel.refreshUserData()
-            }
+                emprendimientoId = body.emprendimiento.id
+                val nuevoToken = body.updatedToken
+                Log.d(TAG, "Nuevo token: $nuevoToken")
 
-            Log.e(TAG, "Emprendimiento creado exitosamente: ${_emprendimiento.value}")
-            _error.value = null
-            _success.value = true
-            _loading.value = false
+                if (nuevoToken.isNotBlank()) {
+                    userSessionManager.actualizarSesionConNuevoToken(nuevoToken)
+                }
+            }
         }
     }
-
 }

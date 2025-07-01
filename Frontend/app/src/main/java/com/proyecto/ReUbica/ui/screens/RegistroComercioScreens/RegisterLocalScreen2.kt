@@ -43,24 +43,29 @@ import org.json.JSONObject
 import java.net.URL
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyecto.ReUbica.ui.Components.RedesSociales
+import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 
 
 @Composable
-fun RegisterLocalScreen2(navController: NavHostController, viewModel: RegistroComercioViewModel) {
+fun RegisterLocalScreen2(navController: NavHostController, viewModel: RegistroComercioViewModel, viewModelProducto: CreateProductoViewModel) {
     RegisterLocalScreen2Content(
+        createProducto = viewModelProducto,
         registroComercio = viewModel,
-        onNext = { navController.navigate(RegisterLocalScreen3Navigation) },
+        navController = navController,
         onBack = { navController.popBackStack() }
     )
 }
 
 @Composable
 fun RegisterLocalScreen2Content(
+    createProducto: CreateProductoViewModel,
     registroComercio: RegistroComercioViewModel,
-    onNext: () -> Unit = {},
+    navController: NavHostController,
     onBack: () -> Unit = {}
 ) {
+
     val abel = FontFamily(Font(R.font.abelregular))
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
 
@@ -72,7 +77,6 @@ fun RegisterLocalScreen2Content(
 
     val emprendimiento by registroComercio.emprendimiento.collectAsState()
     val redesSociales = emprendimiento.redes_sociales
-
 
     val context = LocalContext.current
     val placesClient = remember {
@@ -87,6 +91,7 @@ fun RegisterLocalScreen2Content(
     var errorUrl by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val error by registroComercio.error.collectAsState()
+    var publicarExitoso by remember { mutableStateOf(false) }
 
     val showError = errorMessage ?: error
 
@@ -366,7 +371,6 @@ fun RegisterLocalScreen2Content(
                 }
             }
 
-
             Spacer(modifier = Modifier.height(20.dp))
 
             if (showValidationError) {
@@ -427,6 +431,7 @@ fun RegisterLocalScreen2Content(
 
             Button(
                 onClick = {
+
                     val telefonoValido = Regex("^\\d{4}-\\d{4}$").matches(emprendimiento.emprendimientoPhone)
                     val direccionValida = emprendimiento.direccion.isNotBlank()
                     val coordenadasValidas = emprendimiento.latitud != 0.0 && emprendimiento.longitud != 0.0
@@ -442,32 +447,50 @@ fun RegisterLocalScreen2Content(
                         !telefonoValido || !direccionValida || !coordenadasValidas -> {
                             showValidationError = true
                             errorUrl = false
+                            publicarExitoso = false
                         }
+
                         !instagramValido || !facebookValido || !tiktokValido || !twitterValido -> {
                             showValidationError = false
                             errorUrl = true
+                            publicarExitoso = false
                         }
+
                         else -> {
-                            showValidationError = false
-                            errorUrl = false
-                            errorMessage = null
-                            onNext()
+                            registroComercio.initSessionManager(navController.context)
+                            registroComercio.createEmprendimiento()
+                            publicarExitoso = true
                         }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = true,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Publicar", color = Color.White, fontFamily = abel)
+            }
+
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate(RegisterLocalScreen3Navigation)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                enabled = publicarExitoso,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF49724C),
+                    containerColor = if (publicarExitoso) Color(0xFF49724C) else Color.Gray,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text("Continuar a la carta de productos", fontFamily = abel)
             }
-
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

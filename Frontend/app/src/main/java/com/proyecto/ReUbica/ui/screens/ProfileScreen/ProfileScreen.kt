@@ -76,32 +76,32 @@ fun ProfileScreen(
     val showConfirmDeleteAccount = remember { mutableStateOf(false) }
     val showConfirmDeleteEmprendimiento = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    var skipRefresh by remember { mutableStateOf(false) }
 
     val loading by profileViewModel.loading.collectAsState()
-    var navigatedToLoading by remember { mutableStateOf(false) }
 
-    val userSession by profileViewModel.userSession.collectAsState()
-    val rol = userSession?.userProfile?.user_role
+    val user by profileViewModel.user.collectAsState()
+    val rol = user?.user_role
 
-    LaunchedEffect(Unit) {
-        profileViewModel.refreshUserData()
-    }
+    val negocioEliminado by profileViewModel.negocioEliminado.collectAsState()
 
-    LaunchedEffect(loading) {
-        if (loading && !navigatedToLoading) {
-            navController.navigate(LoadingScreenNavigation::class.qualifiedName ?: "") {
-                popUpTo(ProfileScreenNavigation::class.qualifiedName ?: "") { inclusive = true }
-            }
-            navigatedToLoading = true
-        } else if (!loading && navigatedToLoading) {
-            navController.navigate(ProfileScreenNavigation::class.qualifiedName ?: "") {
-                popUpTo(LoadingScreenNavigation::class.qualifiedName ?: "") { inclusive = true }
-            }
-            navigatedToLoading = false
+    LaunchedEffect(negocioEliminado) {
+        if (negocioEliminado) {
+            skipRefresh = true
+            profileViewModel.resetNegocioEliminado()
         }
     }
 
-    if (loading) return
+    if (loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0.7f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color(0xFF49724C))
+        }
+    }
 
     Column(modifier = Modifier.verticalScroll(scrollState)) {
         Box(
@@ -188,7 +188,7 @@ fun ProfileScreen(
                 )
                 ListItemRow(
                     text = "Carta de productos",
-                    onClick = { navController.navigate(CartaProductosScreenNavigation) },
+                    onClick = { navController.navigate(HomeScreenNavigation) },
                     icon = Icons.Filled.ArrowOutward
                 )
                 ListItemRow(
@@ -229,6 +229,7 @@ fun ProfileScreen(
                             }
                         }
                         showSuccessLogOut.value = true
+                        Log.d("ProfileScreen", "User logged out successfully")
                     },
                     modifier = Modifier.width(130.dp),
                     shape = RoundedCornerShape(0.dp),
@@ -320,11 +321,8 @@ fun ProfileScreen(
                 Button(
                     onClick = {
                         showConfirmDeleteEmprendimiento.value = false
-                        profileViewModel.deleteMiEmprendimiento() {
-                            rootNavController.navigate(HomeScreenNavigation) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }                    },
+                        profileViewModel.deleteMiEmprendimiento()
+                              },
                     modifier = Modifier.width(130.dp),
                     shape = RoundedCornerShape(0.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E210B), contentColor = Color.White)

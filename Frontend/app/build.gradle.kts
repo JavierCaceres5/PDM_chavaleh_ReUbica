@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json.v160)
     implementation(libs.material3)
     implementation(libs.coil.compose.v240)
+    implementation (libs.jwtdecode)
 
 
     // DataStore

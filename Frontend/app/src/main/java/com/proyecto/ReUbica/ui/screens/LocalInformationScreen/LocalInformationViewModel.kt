@@ -92,6 +92,10 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
                 val response = emprendimientoRepository.updateEmprendimiento(token, updateData)
 
                 _success.value = response.isSuccessful
+
+                if(response.isSuccessful){
+                    cargarMiEmprendimiento()
+                }
             } catch (e: Exception) {
                 _error.value = "Error de red: ${e.message}"
                 _success.value = false
