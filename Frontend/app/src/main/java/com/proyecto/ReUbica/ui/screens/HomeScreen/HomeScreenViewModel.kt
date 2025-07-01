@@ -9,6 +9,9 @@ import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 
 class HomeScreenViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -16,6 +19,9 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
 
     private val _resultadosByCategory = MutableStateFlow<List<EmprendimientoModel>>(emptyList())
     val resultadosByCategory: StateFlow<List<EmprendimientoModel>> = _resultadosByCategory
+
+    private val _todosLosEmprendimientos = MutableStateFlow<List<EmprendimientoModel>>(emptyList())
+    val todosLosEmprendimientos: StateFlow<List<EmprendimientoModel>> = _todosLosEmprendimientos
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
@@ -27,7 +33,9 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             _loading.value = true
             try {
-                val response = repository.searchByCategory(categoria)
+                val response = withContext(Dispatchers.IO) {
+                    repository.searchByCategory(categoria)
+                }
                 if (response.isSuccessful) {
                     _resultadosByCategory.value = response.body() ?: emptyList()
                     _error.value = null
@@ -36,9 +44,37 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
                     _resultadosByCategory.value = emptyList()
                 }
             } catch (e: Exception) {
-                Log.e("BuscarViewModel", "Error de red: ${e.message}")
+                Log.e("HomeScreenViewModel", "Error de red: ${e.message}")
                 _error.value = "Ocurrió un error de red."
                 _resultadosByCategory.value = emptyList()
+            }
+            _loading.value = false
+        }
+    }
+
+    private var isDataLoaded = false
+
+    fun obtenerTodosLosEmprendimientos(token: String) {
+        if (isDataLoaded) return
+        isDataLoaded = true
+
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    repository.getAllEmprendimientos(token)
+                }
+                if (response.isSuccessful) {
+                    _todosLosEmprendimientos.value = response.body() ?: emptyList()
+                    _error.value = null
+                } else {
+                    _error.value = "Error: ${response.message()}"
+                    _todosLosEmprendimientos.value = emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("HomeScreenViewModel", "Error al obtener todos: ${e.message}")
+                _error.value = "Ocurrió un error al cargar los emprendimientos."
+                _todosLosEmprendimientos.value = emptyList()
             }
             _loading.value = false
         }

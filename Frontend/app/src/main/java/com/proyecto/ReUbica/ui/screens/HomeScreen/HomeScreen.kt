@@ -1,13 +1,14 @@
 package com.proyecto.ReUbica.ui.screens.HomeScreen
 
+import android.location.Location
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,114 +25,250 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.proyecto.ReUbica.ui.Components.RestaurantCard
-import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.proyecto.ReUbica.R
+import com.proyecto.ReUbica.data.local.UserSessionManager
+import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
+import com.proyecto.ReUbica.ui.Components.RestaurantCard
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
+import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.ui.screens.SearchScreen.CategoriaItem
+import com.proyecto.ReUbica.utils.LocationUtils
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.math.pow
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun HomeScreen(navController: NavHostController, favoritosViewModel: FavoritosViewModel = viewModel()) {
+fun HomeScreen(
+    navController: NavHostController,
+    favoritosViewModel: FavoritosViewModel = viewModel(),
+    homeViewModel: HomeScreenViewModel = viewModel()
+) {
+    val context = LocalContext.current
+    val userSessionManager = remember { UserSessionManager(context) }
+    val scope = rememberCoroutineScope()
+
+    val resultados by homeViewModel.resultadosByCategory.collectAsState()
+    val loading by homeViewModel.loading.collectAsState()
+    val error by homeViewModel.error.collectAsState()
+    val todosLosEmprendimientos by homeViewModel.todosLosEmprendimientos.collectAsState()
+
+    var userLocation by remember { mutableStateOf<Location?>(null) }
+    val locationPermissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+
+    LaunchedEffect(Unit) {
+        if (locationPermissionState.status.isGranted) {
+            userLocation = LocationUtils.getCurrentLocation(context)
+        } else {
+            locationPermissionState.launchPermissionRequest()
+        }
+
+        val token = userSessionManager.getToken()
+        token?.let { homeViewModel.obtenerTodosLosEmprendimientos(it) }
+    }
 
     val categorias1 = listOf(
-        CategoriaItem(Icons.Filled.LocalOffer, "Ropa") {},
-        CategoriaItem(Icons.Filled.Fastfood, "Alimentos") {},
-        CategoriaItem(Icons.Filled.Restaurant, "Comida") {},
-        CategoriaItem(Icons.Filled.LocalLaundryService, "Higiene") {},
+        CategoriaItem(Icons.Filled.LocalOffer, "Ropa") { homeViewModel.searchEmprendimientoByCategory("Ropa") },
+        CategoriaItem(Icons.Filled.Fastfood, "Alimentos") { homeViewModel.searchEmprendimientoByCategory("Alimentos") },
+        CategoriaItem(Icons.Filled.Restaurant, "Comida") { homeViewModel.searchEmprendimientoByCategory("Comida") },
+        CategoriaItem(Icons.Filled.LocalLaundryService, "Higiene") { homeViewModel.searchEmprendimientoByCategory("Higiene") },
     )
 
     val categorias2 = listOf(
-        CategoriaItem(Icons.Filled.Diamond, "Artesanías") {},
-        CategoriaItem(Icons.Filled.Book, "Librería") {},
-        CategoriaItem(Icons.Filled.Settings, "Servicios") {},
+        CategoriaItem(Icons.Filled.Diamond, "Artesanías") { homeViewModel.searchEmprendimientoByCategory("Artesanias") },
+        CategoriaItem(Icons.Filled.Book, "Librería") { homeViewModel.searchEmprendimientoByCategory("Libreria") },
+        CategoriaItem(Icons.Filled.Settings, "Servicios") { homeViewModel.searchEmprendimientoByCategory("Servicios") }
     )
 
-    val destacados = listOf(
-        Triple("El Panalito", "Chinameca", "Alimentos"),
-        Triple("Solemare", "Santa Ana", "Artesanías"),
-        Triple("Pizza Ranch", "San Miguel", "Comida"),
-        Triple("Arte Maya", "Ahuachapán", "Artesanías")
-    )
+    val userLat = userLocation?.latitude ?: 0.0
+    val userLon = userLocation?.longitude ?: 0.0
 
-    val resultadosFiltrados = destacados
+    fun isNearby(lat1: Double, lon1: Double, lat2: Double?, lon2: Double?, radiusKm: Double = 5.0): Boolean {
+        if (lat2 == null || lon2 == null) return false
+        val earthRadius = 6371.0
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a = Math.sin(dLat / 2).pow(2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2).pow(2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        return earthRadius * c <= radiusKm
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+    val comerciosCercanos by remember(todosLosEmprendimientos, userLocation) {
+        mutableStateOf(
+            todosLosEmprendimientos.filter {
+                isNearby(userLat, userLon, it.latitud, it.longitud)
+            }
+        )
+    }
+
+    val nuevosEmprendimientos by remember(todosLosEmprendimientos) {
+        mutableStateOf(
+            todosLosEmprendimientos.filter { emp ->
+                emp.created_at?.let {
+                    val date = try {
+                        Date.from(ZonedDateTime.parse(it, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant())
+                    } catch (_: Exception) { null }
+                    date?.let { d -> Date().time - d.time <= 7 * 24 * 60 * 60 * 1000 }
+                } ?: false
+            }
+        )
+    }
+
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
-
-
-        Column(modifier = Modifier.padding(horizontal = 16.dp).padding(18.dp)) {
-            Text("Categorías", fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                categorias1.forEach {
-                    CategoriaBox(it, Modifier.weight(1f))
+        item {
+            Column {
+                Text("Categorías", fontWeight = FontWeight.ExtraBold, color = Color(0xFF5A3C1D),
+                    modifier = Modifier
+                    .padding(start = 16.dp, top = 16.dp, bottom = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    categorias1.forEach {
+                        CategoriaBox(it, Modifier.weight(1f))
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Spacer(modifier = Modifier.weight(0.5f))
-                categorias2.forEach {
-                    CategoriaBox(it, Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Spacer(modifier = Modifier.weight(0.5f))
+                    categorias2.forEach {
+                        CategoriaBox(it, Modifier.weight(1f))
+                    }
+                    Spacer(modifier = Modifier.weight(0.5f))
                 }
-                Spacer(modifier = Modifier.weight(0.5f))
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFDFF2E1))
-                .padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Desayunos desde $5.99", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
-                Spacer(Modifier.height(4.dp))
-                Text("Descubre las mejores opciones para empezar bien tu día.", fontSize = 13.sp, color = Color(0xFF5A3C1D), textAlign = TextAlign.Justify)
-                Spacer(Modifier.height(10.dp))
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
-                    shape = RoundedCornerShape(40)
-                ) {
-                    Text("Explorar locales", color = Color.White)
-                }
+        if (resultados.isNotEmpty()) {
+            item {
+                SeccionRestaurantes("Descubrimientos por categoría", resultados, favoritosViewModel, navController)
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Image(
-                painter = painterResource(id = R.drawable.reubica),
-                contentDescription = "Desayuno",
+        }
+
+        item {
+            Row(
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(20.dp))
-            )
+                    .fillMaxWidth()
+                    .background(Color(0xFFDFF2E1))
+                    .padding(18.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Desayunos desde $5.99", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF5A3C1D))
+                    Spacer(Modifier.height(4.dp))
+                    Text("Descubre las mejores opciones para empezar bien tu día.", fontSize = 13.sp, color = Color(0xFF5A3C1D), textAlign = TextAlign.Justify)
+                    Spacer(Modifier.height(10.dp))
+                    Button(
+                        onClick = {},
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
+                        shape = RoundedCornerShape(40)
+                    ) {
+                        Text("Explorar locales", color = Color.White)
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.reubica),
+                    contentDescription = "Desayuno",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                )
+            }
         }
 
-        SeccionRestaurantes(
-            titulo = "Los mejores restaurantes",
-            destacados = resultadosFiltrados,
-            favoritosViewModel = favoritosViewModel,
-            navController = navController
-        )
+        if (comerciosCercanos.isNotEmpty()) {
+            item {
+                SeccionRestaurantes("Locales cerca de ti", comerciosCercanos, favoritosViewModel, navController)
+            }
+        }
 
-        SeccionRestaurantes(
-            titulo = "Según tus preferencias",
-            destacados = resultadosFiltrados,
-            favoritosViewModel = favoritosViewModel,
-            navController = navController
-        )
+        if (nuevosEmprendimientos.isNotEmpty()) {
+            item {
+                SeccionRestaurantes("Nuevos en la plataforma", nuevosEmprendimientos, favoritosViewModel, navController)
+            }
+        }
+
+        if (loading) {
+            item {
+                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+            }
+        }
+
+        if (!error.isNullOrEmpty()) {
+            item {
+                Text(error ?: "", color = Color.Red, modifier = Modifier.padding(16.dp))
+            }
+        }
     }
 }
 
+
+fun isValidUrl(url: String?): Boolean =
+    url != null && (url.startsWith("http://") || url.startsWith("https://"))
+
 @Composable
-fun Offset(x0: Float, x1: Float) {
-    TODO("Not yet implemented")
+fun SeccionRestaurantes(
+    titulo: String,
+    emprendimientos: List<EmprendimientoModel>,
+    favoritosViewModel: FavoritosViewModel,
+    navController: NavHostController
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            titulo,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Color(0xFF5A3C1D),
+            modifier = Modifier
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+        )
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(emprendimientos) { emprendimiento ->
+
+                val logoUrl = if (isValidUrl(emprendimiento.logo)) emprendimiento.logo else null
+
+                RestaurantCard(
+                    nombre = emprendimiento.nombre ?: "Sin nombre",
+                    departamento = emprendimiento.direccion ?: "Sin dirección",
+                    categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: "Sin categoría",
+                    imagenRes = logoUrl,
+                    isFavorito = favoritosViewModel.isFavoritoComercio(emprendimiento.nombre ?: ""),
+                    onFavoritoClick = {
+                        favoritosViewModel.toggleFavoritoComercio(
+                            nombre = emprendimiento.nombre ?: "",
+                            departamento = emprendimiento.direccion ?: "",
+                            categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: "",
+                            logo = emprendimiento.logo ?: ""
+                        )
+                    },
+                    onVerTiendaClick = {
+                        navController.navigate(
+                            ComercioNavigation(
+                                id = emprendimiento.id.toString(),
+                                nombre = emprendimiento.nombre ?: "Sin nombre",
+                                descripcion = emprendimiento.descripcion ?: "Sin descripción",
+                                categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: "Sin categoría",
+                                direccion = emprendimiento.direccion ?: "Sin dirección",
+                                latitud = emprendimiento.latitud ?: 0.0,
+                                longitud = emprendimiento.longitud ?: 0.0,
+                                horario = "8:00 AM - 5:00 PM"
+                            )
+                        )
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -160,62 +298,3 @@ fun CategoriaBox(categoria: CategoriaItem, modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun SeccionRestaurantes(
-    titulo: String,
-    destacados: List<Triple<String, String, String>>,
-    favoritosViewModel: FavoritosViewModel,
-    navController: NavHostController
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .padding(top = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(titulo, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF5A3C1D))
-        Text("Ver más", fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color(0xFF5A3C1D))
-    }
-
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(destacados.size) { index ->
-            val (nombre, departamento, categoria) = destacados[index]
-            val isFavorito = favoritosViewModel.isFavoritoComercio(nombre)
-
-            RestaurantCard(
-                nombre = nombre,
-                departamento = departamento,
-                categoria = categoria,
-                imagenRes = R.drawable.reubica,
-                isFavorito = isFavorito,
-                onFavoritoClick = {
-                    favoritosViewModel.toggleFavoritoComercio(
-                        nombre = nombre,
-                        departamento = departamento,
-                        categoria = categoria
-                    )
-                },
-                onVerTiendaClick = {
-                    navController.navigate(
-                        ComercioNavigation(
-                            id = "1",
-                            nombre = nombre,
-                            descripcion = "Comercio destacado de la zona",
-                            categoria = categoria,
-                            direccion = departamento,
-                            latitud = 13.6989,
-                            longitud = -89.1914,
-                            horario = "9:00 AM - 9:00 PM"
-                        )
-                    )
-
-                }
-            )
-        }
-    }
-}

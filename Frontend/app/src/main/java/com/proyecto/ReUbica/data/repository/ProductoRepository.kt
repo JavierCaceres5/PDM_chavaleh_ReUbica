@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.data.repository
 
+
 import android.content.Context
 import android.net.Uri
 import com.google.gson.Gson
@@ -60,4 +61,5 @@ class ProductoRepository {
     suspend fun getProductosByEmprendimientoId(token: String, emprendimientoId: String): Response<List<ProductoCreateResponse>> {
         return api.getProductosByEmprendimientoId(token = "Bearer $token", emprendimientoId = emprendimientoId)
     }
+
 }

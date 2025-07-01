@@ -17,6 +17,7 @@ interface EmprendimientoApiService {
             @Query("categoria") categoria: String
         ): Response<List<EmprendimientoModel>>
 
+
         @GET("emprendimientos/nombre")
         suspend fun getEmprendimientosByNombre(
             @Query("nombre") nombre: String
@@ -43,6 +44,20 @@ interface EmprendimientoApiService {
         @Header("Authorization") token: String
     ): Response<EmprendimientoDeleteResponse>
 
+    @GET("emprendimientos/nombre")
+    suspend fun getEmprendimientosByNombre(
+        @Header("Authorization") token: String,
+        @Query("nombre") nombre: String
+    ): Response<List<EmprendimientoModel>>
+
+
+    @POST("emprendimientos/registrarEmprendimiento")
+    suspend fun registrarEmprendimiento(
+        @Header("Authorization") token: String,
+        @Body request: EmprendimientoCreateRequest
+    ): Response<EmprendimientoResponse>
+
+
     @GET("emprendimientos/miEmprendimiento")
     suspend fun getMiEmprendimiento(
         @Header("Authorization") token: String
@@ -51,7 +66,27 @@ interface EmprendimientoApiService {
     @PUT("emprendimientos/actualizarMiEmprendimiento")
     suspend fun updateEmprendimiento(
         @Header("Authorization") token: String,
+
         @Body updateData: UpdateEmprendimientoRequest
     ): Response<Unit>
+
+        @Part("nombre") nombre: RequestBody,
+        @Part("descripcion") descripcion: RequestBody,
+        @Part("categoriasPrincipales") categoriasPrincipales: RequestBody,
+        @Part("categoriasSecundarias") categoriasSecundarias: RequestBody,
+        @Part("direccion") direccion: RequestBody,
+        @Part("emprendimientoPhone") phone: RequestBody,
+        @Part("redes_sociales") redes: RequestBody,
+        @Part("latitud") lat: RequestBody,
+        @Part("longitud") lng: RequestBody,
+        @Part logo: MultipartBody.Part? = null
+    ): Response<EmprendimientoResponse>
+
+    @GET("emprendimientos/")
+    suspend fun getAllEmprendimientos(
+        @Header("Authorization") token: String
+    ): Response<List<EmprendimientoModel>>
+
+
 }
 
