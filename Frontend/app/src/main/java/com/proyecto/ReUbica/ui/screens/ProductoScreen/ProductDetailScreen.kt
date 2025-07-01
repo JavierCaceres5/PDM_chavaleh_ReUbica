@@ -9,7 +9,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarHalf
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.LocationOn
@@ -29,6 +31,8 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.proyecto.ReUbica.data.model.review.ReviewModel
 import kotlinx.coroutines.launch
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 @Composable
 fun ProductDetailScreen(
@@ -86,6 +90,12 @@ fun ProductDetailScreen(
     val filteredReviews: List<ReviewModel> = emprendimientoReviews
         .find { it.productoID.toString() == productId }
         ?.valoraciones ?: emptyList()
+
+    val promedioRating = if (filteredReviews.isNotEmpty()) {
+        filteredReviews.map { it.rating }.average()
+    } else {
+        0.0
+    }
 
     Column(
         modifier = Modifier
@@ -151,18 +161,49 @@ fun ProductDetailScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(90.dp)
+                        .size(100.dp)
                         .clip(CircleShape)
                         .border(2.dp, Color(0xFF5A3C1D), CircleShape)
                         .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        "Ya casi",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF5D4F30)
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = String.format("%.1f", promedioRating),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF5D4F30)
+                        )
+                        Row(horizontalArrangement = Arrangement.Center) {
+                            val fullStars = floor(promedioRating).toInt()
+                            val hasHalfStar = (promedioRating - fullStars) >= 0.5
+
+                            repeat(fullStars) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = Color(0xFFFFD700),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            if (hasHalfStar) {
+                                Icon(
+                                    imageVector = Icons.Default.StarHalf, // Usa tu ícono de media estrella aquí si tienes uno
+                                    contentDescription = null,
+                                    tint = Color(0xFFFFD700),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            repeat(5 - fullStars - if (hasHalfStar) 1 else 0) {
+                                Icon(
+                                    imageVector = Icons.Default.StarOutline,
+                                    contentDescription = null,
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
