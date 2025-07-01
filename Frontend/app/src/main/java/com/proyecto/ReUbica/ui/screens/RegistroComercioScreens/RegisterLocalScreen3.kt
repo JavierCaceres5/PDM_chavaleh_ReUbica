@@ -21,60 +21,79 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import androidx.navigation.NavHostController
-import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen4Navigation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.filled.Error
+import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
+import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.CreateProductoViewModel
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
-
+import kotlinx.coroutines.launch
 
 @Composable
-fun RegisterLocalScreen3(navController: NavHostController, viewModel: RegistroComercioViewModel) {
+fun RegisterLocalScreen3(
+    navController: NavHostController,
+    registroComercioViewModel: RegistroComercioViewModel,
+    createProductoViewModel: CreateProductoViewModel
+) {
     RegisterLocalScreen3Content(
-        registroComercio = viewModel,
-        onNext = { navController.navigate(RegisterLocalScreen4Navigation) },
+        createProducto = createProductoViewModel,
+        registroComercio = registroComercioViewModel,
+        navController = navController,
+        onNext = { navController.navigate(HomeScreenNavigation) },
         onBack = { navController.popBackStack() }
     )
 }
 
 @Composable
 fun RegisterLocalScreen3Content(
+    createProducto: CreateProductoViewModel,
     registroComercio: RegistroComercioViewModel,
+    navController: NavHostController,
     onNext: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
-    var nombre by remember { mutableStateOf("") }
-    var descripcion by remember { mutableStateOf("") }
-    var precio by remember { mutableStateOf("") }
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
     var showDialog by remember { mutableStateOf(false) }
     var contadorProductos by remember { mutableStateOf(0) }
 
     val abel = FontFamily(Font(R.font.abelregular))
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-        imageUri = it
+    val context = LocalContext.current
+    val producto by createProducto.producto.collectAsState()
+    val imagenUri by createProducto.imagenUri.collectAsState()
+    var showError by remember { mutableStateOf(false) }
+    var descripcionInvalida by remember { mutableStateOf(false) }
+
+    val camposValidos =
+        producto.nombre.isNotBlank() && producto.descripcion.isNotBlank() &&
+                producto.precio > 0.0 && imagenUri != null
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            createProducto.setImage(uri)
+            createProducto.setValues("product_image", uri.toString())
+        }
     }
 
-    val camposValidos = nombre.isNotBlank() && descripcion.isNotBlank() && precio.isNotBlank()
-
     Column(Modifier.fillMaxSize()) {
-        StepTopBar(step = 1, title = "Carta de productos", onBackClick = onBack)
+        StepTopBar(step = 2, title = "Carta de productos", onBackClick = onBack)
 
-        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -100,17 +119,50 @@ fun RegisterLocalScreen3Content(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-
-            Text("Nombre del producto", fontFamily = poppins, fontSize = 14.sp, color = Color(0xFF5A3C1D), modifier = Modifier.fillMaxWidth())
-            ProductInputField("Nombre del producto", nombre) { nombre = it }
+            Text(
+                "Nombre del producto",
+                fontFamily = poppins,
+                fontSize = 14.sp,
+                color = Color(0xFF5A3C1D),
+                modifier = Modifier.fillMaxWidth()
+            )
+            ProductInputField(
+                placeholder = "Nombre del producto",
+                value = producto.nombre
+            ) {
+                createProducto.setValues("nombre", it)
+            }
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text("Descripción del producto", fontFamily = poppins, fontSize = 14.sp, color = Color(0xFF5A3C1D), modifier = Modifier.fillMaxWidth())
-            ProductInputField("Descripción del producto", descripcion) { descripcion = it }
+            Text(
+                "Descripción del producto",
+                fontFamily = poppins,
+                fontSize = 14.sp,
+                color = Color(0xFF5A3C1D),
+                modifier = Modifier.fillMaxWidth()
+            )
+            ProductInputField(
+                placeholder = "Descripción del producto",
+                value = producto.descripcion
+            ) {
+                createProducto.setValues("descripcion", it)
+            }
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text("Precio", fontFamily = poppins, fontSize = 14.sp, color = Color(0xFF5A3C1D), modifier = Modifier.fillMaxWidth())
-            ProductInputField("0.00", precio, isPrice = true) { precio = it }
+            Text(
+                "Precio",
+                fontFamily = poppins,
+                fontSize = 14.sp,
+                color = Color(0xFF5A3C1D),
+                modifier = Modifier.fillMaxWidth()
+            )
+            ProductInputField(
+                placeholder = "Precio del producto",
+                value = if (producto.precio == 0.0) "" else producto.precio.toString(),
+                isPrice = true
+            ) {
+                createProducto.setValues("precio", it)
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -121,7 +173,6 @@ fun RegisterLocalScreen3Content(
                 color = Color(0xFF5A3C1D),
                 modifier = Modifier.fillMaxWidth()
             )
-
             OutlinedTextField(
                 value = contadorProductos.toString(),
                 onValueChange = {},
@@ -141,16 +192,15 @@ fun RegisterLocalScreen3Content(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Adjunte foto del producto",
+                "Adjunte foto del producto",
                 fontFamily = poppins,
                 fontSize = 14.sp,
                 color = Color(0xFF5A3C1D),
                 modifier = Modifier.fillMaxWidth()
             )
 
-
             Text(
-                text = "Asegúrese de que el menú adjunto se vea correctamente. Sólo archivos con formatos JPEG, PDF o PNG podrán ser convertidos",
+                "Asegúrese de que el menú adjunto se vea correctamente. Sólo archivos con formatos JPEG, PDF o PNG podrán ser convertidos",
                 fontFamily = abel,
                 fontSize = 12.sp,
                 color = Color.Black,
@@ -168,9 +218,9 @@ fun RegisterLocalScreen3Content(
                     .align(Alignment.CenterHorizontally),
                 contentAlignment = Alignment.Center
             ) {
-                if (imageUri != null) {
+                if (imagenUri != null) {
                     Image(
-                        painter = rememberAsyncImagePainter(imageUri),
+                        painter = rememberAsyncImagePainter(imagenUri),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -183,13 +233,32 @@ fun RegisterLocalScreen3Content(
                             tint = Color.Black,
                             modifier = Modifier.size(40.dp)
                         )
-                        Text("Seleccione una imagen", fontFamily = abel, fontSize = 12.sp, color = Color.Black)
+                        Text(
+                            "Seleccione una imagen",
+                            fontFamily = abel,
+                            fontSize = 12.sp,
+                            color = Color.Black
+                        )
                     }
                 }
             }
 
-
             Spacer(modifier = Modifier.height(24.dp))
+
+            if (showError) {
+                ErrorMessageBox(
+                    message = "Por favor, complete todos los campos antes de continuar",
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            if (descripcionInvalida) {
+                ErrorMessageBox(
+                    message = "La descripción no puede exceder los 150 caracteres.",
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -197,15 +266,35 @@ fun RegisterLocalScreen3Content(
             ) {
                 Button(
                     onClick = {
-                        contadorProductos++
-                        nombre = ""
-                        descripcion = ""
-                        precio = ""
-                        imageUri = null
-                        showDialog = true
+                        val descripcionValida = producto.descripcion.length <= 150
+                        val precioValido = producto.precio > 0.0
+
+                        if (producto.nombre.isBlank() || producto.descripcion.isBlank() || !precioValido || imagenUri == null) {
+                            showError = true
+                            descripcionInvalida = false
+                        } else if (!descripcionValida) {
+                            showError = false
+                            descripcionInvalida = true
+                        } else {
+                            showError = false
+                            descripcionInvalida = false
+                            coroutineScope.launch {
+                                createProducto.crearProducto(context)
+                                createProducto.success.collect { isSuccess ->
+                                    if (isSuccess) {
+                                        contadorProductos++
+                                        showDialog = true
+                                        createProducto.clearProducto()
+                                        createProducto.setImage(null)
+                                    }
+                                }
+                            }
+                        }
                     },
                     enabled = camposValidos,
-                    colors = ButtonDefaults.buttonColors(containerColor = if (camposValidos) Color(0xFF49724C) else Color.Gray),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (camposValidos) Color(0xFF49724C) else Color.Gray
+                    ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text("Agregar", color = Color.White, fontFamily = abel)
@@ -219,72 +308,52 @@ fun RegisterLocalScreen3Content(
                     Text("Continuar", color = Color.White, fontFamily = abel)
                 }
             }
-
         }
+    }
 
-        if (showDialog) {
-            AlertDialog(
-                onDismissRequest = { showDialog = false },
-                title = {
-                    Text(
-                        "¡Todo listo!",
-                        fontFamily = poppins,
-                        fontSize = 20.sp,
-                        color = Color.Black,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(
+                    "¡Todo listo!",
+                    fontFamily = poppins,
+                    fontSize = 20.sp,
+                    color = Color.Black,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Text(
+                    "Tu producto ha sido publicado con éxito.",
+                    fontFamily = abel,
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { showDialog = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
                     )
-                },
-                text = {
-                    Text(
-                        "Tu producto ha sido publicado con éxito.",
-                        fontFamily = abel,
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                },
-                confirmButton = {
-                    OutlinedButton(
-                        onClick = { showDialog = false },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(1.dp, Color.Black),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black
-                        )
-                    ) {
-                        Text("Continuar", fontFamily = poppins)
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            if (contadorProductos > 0) contadorProductos--
-                            showDialog = false
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF8B1A1A),
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text("Cancelar", fontFamily = poppins)
-                    }
-                },
-                containerColor = Color.White,
-                tonalElevation = 6.dp,
-                shape = RoundedCornerShape(12.dp)
-            )
-        }
-
+                ) {
+                    Text("Continuar", fontFamily = poppins)
+                }
+            },
+            containerColor = Color.White,
+            tonalElevation = 6.dp,
+            shape = RoundedCornerShape(12.dp)
+        )
     }
 }
 
@@ -301,7 +370,7 @@ fun ProductInputField(
         value = value,
         onValueChange = {
             if (isPrice) {
-                val cleanValue = it.replace("[^\\d.]".toRegex(), "")
+                val cleanValue = it.filter { char -> char.isDigit() || char == '.' }
                 onValueChange(cleanValue)
             } else {
                 onValueChange(it)
@@ -342,4 +411,33 @@ fun ProductInputField(
         shape = RoundedCornerShape(8.dp),
         keyboardOptions = if (isPrice) KeyboardOptions(keyboardType = KeyboardType.Number) else KeyboardOptions.Default
     )
+}
+
+@Composable
+fun ErrorMessageBox(message: String, modifier: Modifier = Modifier) {
+    val abel = FontFamily(Font(R.font.abelregular))
+
+    Row(
+        modifier = modifier
+            .background(Color(0xFFFFE6E6), shape = RoundedCornerShape(8.dp))
+            .border(1.dp, Color(0xFFD32F2F), shape = RoundedCornerShape(8.dp))
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Error,
+            contentDescription = "Error",
+            tint = Color(0xFFD32F2F),
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = message,
+            color = Color(0xFFD32F2F),
+            fontSize = 14.sp,
+            fontFamily = abel,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.weight(1f)
+        )
+    }
 }

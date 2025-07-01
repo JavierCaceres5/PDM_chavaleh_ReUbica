@@ -1,6 +1,7 @@
 package com.proyecto.ReUbica.ui.screens.ProfileScreen
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,7 +47,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.proyecto.ReUbica.data.local.UserSessionManager
+import com.proyecto.ReUbica.ui.navigations.CartaProductosScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.LoadingScreenNavigation
+import com.proyecto.ReUbica.ui.navigations.LocalInformationScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.LoginScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.ProfileScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.RegistroNavigation
@@ -60,39 +64,46 @@ import kotlinx.coroutines.launch
 fun ProfileScreen(
     navController: NavHostController, rootNavController: NavHostController
 )
- {
+{
 
-     val context = LocalContext.current
-     val sessionManager = remember { UserSessionManager(context) }
+    val context = LocalContext.current
+    val sessionManager = remember { UserSessionManager(context) }
 
-     val profileViewModel: ProfileScreenViewModel = viewModel()
+    val profileViewModel: ProfileScreenViewModel = viewModel()
 
-     val showConfirmLogOut = remember { mutableStateOf(false) }
-     val showSuccessLogOut = remember { mutableStateOf(false) }
-     val showConfirmDelete = remember { mutableStateOf(false) }
-     val scrollState = rememberScrollState()
+    val showConfirmLogOut = remember { mutableStateOf(false) }
+    val showSuccessLogOut = remember { mutableStateOf(false) }
+    val showConfirmDeleteAccount = remember { mutableStateOf(false) }
+    val showConfirmDeleteEmprendimiento = remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+    var skipRefresh by remember { mutableStateOf(false) }
 
-     val loading by profileViewModel.loading.collectAsState()
-     var navigatedToLoading by remember { mutableStateOf(false) }
+    val loading by profileViewModel.loading.collectAsState()
 
+    val user by profileViewModel.user.collectAsState()
+    val rol = user?.user_role
 
-     LaunchedEffect(loading) {
-         if (loading && !navigatedToLoading) {
-             navController.navigate(LoadingScreenNavigation::class.qualifiedName ?: "") {
-                 popUpTo(ProfileScreenNavigation::class.qualifiedName ?: "") { inclusive = true }
-             }
-             navigatedToLoading = true
-         } else if (!loading && navigatedToLoading) {
-             navController.navigate(ProfileScreenNavigation::class.qualifiedName ?: "") {
-                 popUpTo(LoadingScreenNavigation::class.qualifiedName ?: "") { inclusive = true }
-             }
-             navigatedToLoading = false
-         }
-     }
+    val negocioEliminado by profileViewModel.negocioEliminado.collectAsState()
 
-     if (loading) return
+    LaunchedEffect(negocioEliminado) {
+        if (negocioEliminado) {
+            skipRefresh = true
+            profileViewModel.resetNegocioEliminado()
+        }
+    }
 
-     Column(modifier = Modifier.verticalScroll(scrollState)) {
+    if (loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0.7f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color(0xFF49724C))
+        }
+    }
+
+    Column(modifier = Modifier.verticalScroll(scrollState)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -144,7 +155,7 @@ fun ProfileScreen(
 
             ListItemRow("Datos personales", onClick = { navController.navigate(PersonalDataNavigation) }, icon = Icons.Filled.ArrowOutward)
             ListItemRow("Cerrar sesión",  onClick = { showConfirmLogOut.value = true },  icon = Icons.Filled.ArrowOutward)
-            ListItemRow("Eliminar cuenta",  onClick = { showConfirmDelete.value = true },  icon = Icons.Filled.ArrowOutward)
+            ListItemRow("Eliminar cuenta",  onClick = { showConfirmDeleteAccount.value = true },  icon = Icons.Filled.ArrowOutward)
 
             Text(
                 text = "Actividad",
@@ -154,8 +165,40 @@ fun ProfileScreen(
                 modifier = Modifier.padding(start = 16.dp, top = 15.dp)
             )
 
-            ListItemRow("Registrar negocio",  onClick = { navController.navigate(RegisterLocalNavigation) },  icon = Icons.Filled.ArrowOutward)
             ListItemRow("Notificaciones",  onClick = { navController.navigate(NotificationsNavigation) },  icon = Icons.Filled.ArrowOutward)
+
+            if (rol == "cliente") {
+                ListItemRow(
+                    text = "Registrar negocio",
+                    onClick = { navController.navigate(RegisterLocalNavigation) },
+                    icon = Icons.Filled.ArrowOutward
+                )
+            } else if (rol == "emprendedor") {
+                Text(
+                    text = "Mi negocio",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF5A3C1D),
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(start = 16.dp, top = 15.dp)
+                )
+                ListItemRow(
+                    text = "Información de local",
+                    onClick = { navController.navigate(LocalInformationScreenNavigation) },
+                    icon = Icons.Filled.ArrowOutward
+                )
+                ListItemRow(
+                    text = "Carta de productos",
+                    onClick = { navController.navigate(HomeScreenNavigation) },
+                    icon = Icons.Filled.ArrowOutward
+                )
+                ListItemRow(
+                    text = "Eliminar negocio",
+                    onClick = {
+                        showConfirmDeleteEmprendimiento.value = true
+                    },
+                    icon = Icons.Filled.ArrowOutward
+                )
+            }
 
             Text(
                 text = "Configuración",
@@ -186,6 +229,7 @@ fun ProfileScreen(
                             }
                         }
                         showSuccessLogOut.value = true
+                        Log.d("ProfileScreen", "User logged out successfully")
                     },
                     modifier = Modifier.width(130.dp),
                     shape = RoundedCornerShape(0.dp),
@@ -210,14 +254,14 @@ fun ProfileScreen(
         )
     }
 
-    if (showConfirmDelete.value) {
+    if (showConfirmDeleteAccount.value) {
         AlertDialog(
             containerColor = Color.White,
-            onDismissRequest = { showConfirmDelete.value = false },
+            onDismissRequest = { showConfirmDeleteAccount.value = false },
             confirmButton = {
                 Button(
                     onClick = {
-                        showConfirmDelete.value = false
+                        showConfirmDeleteAccount.value = false
                         profileViewModel.deleteAccount {
                             rootNavController.navigate(RegistroNavigation) {
                                 popUpTo(0) { inclusive = true }
@@ -233,7 +277,7 @@ fun ProfileScreen(
             dismissButton = {
                 Button(
                     onClick = {
-                        showConfirmDelete.value = false
+                        showConfirmDeleteAccount.value = false
                     },
                     modifier = Modifier.width(130.dp),
                     shape = RoundedCornerShape(0.dp),
@@ -268,4 +312,61 @@ fun ProfileScreen(
             }
         )
     }
+
+    if (showConfirmDeleteEmprendimiento.value) {
+        AlertDialog(
+            containerColor = Color.White,
+            onDismissRequest = { showConfirmDeleteEmprendimiento.value = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showConfirmDeleteEmprendimiento.value = false
+                        profileViewModel.deleteMiEmprendimiento()
+                              },
+                    modifier = Modifier.width(130.dp),
+                    shape = RoundedCornerShape(0.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E210B), contentColor = Color.White)
+                ) {
+                    Text("Eliminar", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showConfirmDeleteEmprendimiento.value = false
+                    },
+                    modifier = Modifier.width(130.dp),
+                    shape = RoundedCornerShape(0.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+                ) {
+                    Text("Cancelar", fontWeight = FontWeight.Bold)
+                }
+            },
+            title = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Eliminar emprendimiento", fontWeight = FontWeight.Bold, fontSize = 24.sp, textAlign = TextAlign.Center, color = Color.Black)
+                }
+            },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "ADVERTENCIA",
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF8E210B),
+                        fontSize = 24.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        "Estás a punto de eliminar un emprendimiento de estado activo. Todos la información y datos almacenados serán eliminados permanentemente. Esta acción no se puede deshacer.",
+                        textAlign = TextAlign.Center, color = Color.Black
+                    )
+                }
+            }
+        )
+    }
+
 }

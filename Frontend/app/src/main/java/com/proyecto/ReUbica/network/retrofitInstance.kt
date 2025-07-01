@@ -2,7 +2,9 @@ package com.proyecto.ReUbica.network
 
 import com.proyecto.ReUbica.data.api.EmprendimientoApiService
 import com.proyecto.ReUbica.data.api.ProductoApiService
+
 import com.proyecto.ReUbica.data.api.ReviewApiService
+
 import com.proyecto.ReUbica.data.api.UserApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -27,11 +29,18 @@ object RetrofitInstance {
             .create(EmprendimientoApiService::class.java)
     }
 
+
+    val productoApi: ProductoApiService by lazy {
+
     private val retrofit by lazy {
+
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+
+            .create(ProductoApiService::class.java)
+
     }
 
     val productoApiService: ProductoApiService by lazy {
@@ -40,6 +49,7 @@ object RetrofitInstance {
 
     val reviewApiService: ReviewApiService by lazy {
         retrofit.create(ReviewApiService::class.java)
+
     }
 
 }

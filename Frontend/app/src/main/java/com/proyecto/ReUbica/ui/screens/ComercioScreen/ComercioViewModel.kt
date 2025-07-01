@@ -4,12 +4,16 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+
+import com.proyecto.ReUbica.data.model.DummyProduct
+
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
 import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.model.producto.ProductoResponse
 import com.proyecto.ReUbica.data.model.producto.toProductoResponse
 import com.proyecto.ReUbica.network.RetrofitInstance
+
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

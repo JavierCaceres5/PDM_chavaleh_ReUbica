@@ -32,6 +32,8 @@ class PersonalInformationViewModel(application: Application) : AndroidViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    private val TAG = "PersonalInformationViewModel"
+
     init {
         viewModelScope.launch {
             sessionManager.userSessionFlow.collect { session ->
@@ -57,6 +59,7 @@ class PersonalInformationViewModel(application: Application) : AndroidViewModel(
                             user_icon = updatedProfile.user_icon ?: currentSession.userProfile.user_icon
                         )
                         sessionManager.saveUserSession(token, newUserProfile)
+                        Log.e(TAG, "Profile updated successfully: $newUserProfile")
                     }
                 }
             } catch (e: Exception) {

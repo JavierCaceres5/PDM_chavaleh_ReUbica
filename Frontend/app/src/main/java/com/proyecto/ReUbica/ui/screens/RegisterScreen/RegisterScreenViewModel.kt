@@ -29,11 +29,13 @@ class RegisterScreenViewModel(application: Application) : AndroidViewModel(appli
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
+    private val TAG = "RegisterScreenViewModel"
+
     fun register(user: UserRegisterRequest) {
         viewModelScope.launch {
             _loading.value = true
             val response = repository.register(user)
-            Log.e("REGISTER PROBLEM", response.toString())
+            Log.e("Registro", "Error de emprendimiento: ${_user.value}")
             if (response.isSuccessful) {
                 val userResponse = response.body()?.user
                 val tokenResponse = response.body()?.token
@@ -42,12 +44,13 @@ class RegisterScreenViewModel(application: Application) : AndroidViewModel(appli
                     _token.value = tokenResponse
                     _error.value = null
                     sessionManager.saveUserSession(tokenResponse, userResponse)
+                    Log.d(TAG, "Registro exitoso: ${_user.value}, Token: $tokenResponse")
                 } else {
                     _error.value = "Error: datos de usuario o token nulos"
                 }
             } else {
                 _error.value = "Error de registro: ${response.message()}"
-                Log.e("UserViewModel", "Error de registro: ${response.body()?.message}")
+                Log.e("UserViewModel", "Error de registro: ${response.body()}")
             }
             _loading.value = false
         }

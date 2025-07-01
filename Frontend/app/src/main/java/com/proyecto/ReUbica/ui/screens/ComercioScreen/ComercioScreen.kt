@@ -27,7 +27,14 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.ui.Components.ProductCard
+
+import com.proyecto.ReUbica.ui.layouts.navItem
+import com.proyecto.ReUbica.ui.navigations.*
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.LocationOn
+
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
+
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
