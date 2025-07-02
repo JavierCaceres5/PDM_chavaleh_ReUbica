@@ -12,3 +12,4 @@ data class ProductoModel(
     val updated_at: String?,
     val emprendimientoID: UUID,
 )
+

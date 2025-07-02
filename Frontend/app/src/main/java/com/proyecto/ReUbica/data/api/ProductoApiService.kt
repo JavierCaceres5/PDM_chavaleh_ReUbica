@@ -24,10 +24,10 @@ interface ProductoApiService {
         @Part product_image: MultipartBody.Part? = null
     ): Response<ProductoCreateResponse>
 
-    @GET("productos/emprendimiento/{emprendimientoId}")
-    suspend fun getProductosByEmprendimientoId(
+    @GET("productos/emprendimiento/{id}")
+    suspend fun getProductosByEmprendimiento(
         @Header("Authorization") token: String,
-        @Path("emprendimientoId") emprendimientoId: String
-    ): Response<List<ProductoCreateResponse>>
+        @Path("id") emprendimientoID: String
+    ): Response<List<ProductoModel>>
 
 }

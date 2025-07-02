@@ -19,9 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.Components.RestaurantCard
-import com.proyecto.ReUbica.ui.screens.FavoriteScreen.Favorito
 
 @Composable
 fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
@@ -102,13 +100,14 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
                             nombre = favorito.nombre,
                             departamento = favorito.departamento,
                             categoria = favorito.categoria,
-                            imagenRes = R.drawable.reubica,
+                            imagenRes = if (favorito.logo?.isNotBlank() == true) favorito.logo else null,
                             isFavorito = true,
                             onFavoritoClick = {
                                 favoritosViewModel.toggleFavoritoComercio(
                                     favorito.nombre,
                                     favorito.departamento,
-                                    favorito.categoria
+                                    favorito.categoria,
+                                    favorito.logo
                                 )
                             },
                             onVerTiendaClick = {}

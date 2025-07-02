@@ -4,6 +4,7 @@ import com.proyecto.ReUbica.data.model.user.UpdateProfileRequest
 import retrofit2.Response
 import com.proyecto.ReUbica.data.model.user.UserLoginRequest
 import com.proyecto.ReUbica.data.model.user.UserLoginResponse
+import com.proyecto.ReUbica.data.model.user.UserProfile
 import com.proyecto.ReUbica.data.model.user.UserRegisterRequest
 import com.proyecto.ReUbica.network.RetrofitInstance
 
@@ -25,6 +26,10 @@ class UserRepository {
 
     suspend fun updateAccount(token: String, updateData: UpdateProfileRequest): Response<Unit> {
         return api.updateProfile("Bearer $token", updateData)
+    }
+
+    suspend fun getUserById(token: String, userId: String): Response<UserProfile> {
+        return api.getUserById("Bearer $token", userId)
     }
 
 }

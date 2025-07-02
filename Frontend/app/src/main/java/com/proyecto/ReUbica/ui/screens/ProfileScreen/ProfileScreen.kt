@@ -79,6 +79,7 @@ fun ProfileScreen(
     val scrollState = rememberScrollState()
 
     val loading by profileViewModel.loading.collectAsState()
+    val showBlockedDeleteAccountDialog = remember { mutableStateOf(false) }
 
     val user by profileViewModel.user.collectAsState()
     val rol = user?.user_role
@@ -163,7 +164,13 @@ fun ProfileScreen(
                 )
                 ListItemRow(
                     "Eliminar cuenta",
-                    onClick = { showConfirmDeleteAccount.value = true },
+                    onClick = {
+                        if (rol == "emprendedor") {
+                            showBlockedDeleteAccountDialog.value = true
+                        } else {
+                            showConfirmDeleteAccount.value = true
+                        }
+                    },
                     icon = Icons.Filled.ArrowOutward
                 )
 
@@ -364,6 +371,48 @@ fun ProfileScreen(
                 }
             )
         }
+
+        if (showBlockedDeleteAccountDialog.value) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { showBlockedDeleteAccountDialog.value = false },
+                confirmButton = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) { Button(
+                        onClick = { showBlockedDeleteAccountDialog.value = false },
+                        modifier = Modifier.width(130.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF8E210B),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Entendido", fontWeight = FontWeight.Bold)
+                    }
+                }
+                                },
+                title = {
+                    Text(
+                        "No puedes eliminar tu cuenta",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
+                    )
+                },
+                text = {
+                    Text(
+                        "Para eliminar tu cuenta primero debes eliminar tu emprendimiento. Dirígete a la sección \"Eliminar negocio\" en tu perfil.",
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
+                    )
+                },
+
+            )
+        }
+
 
         if (showConfirmDeleteEmprendimiento.value) {
             AlertDialog(

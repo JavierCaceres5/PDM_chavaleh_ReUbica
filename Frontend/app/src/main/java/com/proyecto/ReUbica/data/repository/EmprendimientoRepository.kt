@@ -47,9 +47,10 @@ class EmprendimientoRepository {
         )
     }
 
-    suspend fun searchByName(nombre: String): Response<List<EmprendimientoModel>> {
-        return api.getEmprendimientosByNombre(nombre)
+    suspend fun searchByName(token: String, nombre: String): Response<List<EmprendimientoModel>> {
+        return api.getEmprendimientosByNombre("Bearer $token", nombre)
     }
+
 
     suspend fun searchByCategory(categoria: String): Response<List<EmprendimientoModel>> {
         return api.getEmprendimientosByCategoria(categoria)
@@ -65,5 +66,9 @@ class EmprendimientoRepository {
 
     suspend fun updateEmprendimiento(token: String, updateData: UpdateEmprendimientoRequest): Response<Unit> {
         return api.updateEmprendimiento("Bearer $token", updateData)
+    }
+
+    suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
+        return api.getAllEmprendimientos("Bearer $token")
     }
 }

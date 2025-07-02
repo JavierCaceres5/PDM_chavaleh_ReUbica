@@ -21,11 +21,11 @@ data class UserSession(
 )
 
 class UserSessionManager(private val context: Context) {
+
     companion object {
         private val Context.dataStore by preferencesDataStore("user_prefs")
         private val TOKEN_KEY = stringPreferencesKey("TOKEN_KEY")
         private val USER_KEY = stringPreferencesKey("USER_KEY")
-        private val EMPRENDIMIENTO_ID_KEY = stringPreferencesKey("EMPRENDIMIENTO_ID_KEY")
     }
 
     private val gson = Gson()
@@ -61,6 +61,7 @@ class UserSessionManager(private val context: Context) {
             .first()
     }
 
+
     suspend fun getUserProfile(token: String): UserProfile? {
         return context.dataStore.data
             .map { prefs ->
@@ -79,20 +80,6 @@ class UserSessionManager(private val context: Context) {
         val perfilActual = userSessionFlow.first()?.userProfile ?: return
         val perfilActualizado = perfilActual.copy(user_role = nuevoRol)
         saveUserSession(updatedToken, perfilActualizado)
-    }
-
-
-
-    suspend fun saveEmprendimientoID(emprendimientoId: String) {
-        context.dataStore.edit { prefs ->
-            prefs[EMPRENDIMIENTO_ID_KEY] = emprendimientoId
-        }
-    }
-
-    suspend fun getEmprendimientoID(): String? {
-        return context.dataStore.data
-            .map { prefs -> prefs[EMPRENDIMIENTO_ID_KEY] }
-            .first()
     }
 
 }

@@ -31,7 +31,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.proyecto.ReUbica.data.local.UserSessionManager
-import com.proyecto.ReUbica.data.repository.ProductoRepository
+import com.proyecto.ReUbica.data.model.emprendimiento.toEmprendimientoModel
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import com.proyecto.ReUbica.ui.navigations.CartaProductosScreenNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
@@ -65,7 +65,7 @@ import com.proyecto.ReUbica.ui.screens.ComercioScreen.ChatComercioScreen
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioScreen
-import com.proyecto.ReUbica.ui.screens.ComercioScreen.ProductDetailScreen
+import com.proyecto.ReUbica.ui.screens.ProductoScreen.ProductDetailScreen
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
 import com.proyecto.ReUbica.ui.screens.PersonalInformationScreen.LocalInformationScreen
 import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
@@ -130,7 +130,8 @@ fun CustomScaffold(rootNavController: NavHostController){
             if (showBars && currentRoute != ProfileScreenNavigation::class.qualifiedName &&
                 currentRoute !=  PersonalDataNavigation::class.qualifiedName &&
                 currentRoute != LocalInformationScreenNavigation::class.qualifiedName &&
-                currentRoute != CartaProductosScreenNavigation::class.qualifiedName
+                currentRoute != CartaProductosScreenNavigation::class.qualifiedName &&
+                !currentRoute.orEmpty().startsWith("chat_comercio")
                 ){
                 TopBar(navController)
             }
@@ -151,7 +152,6 @@ fun CustomScaffold(rootNavController: NavHostController){
                 navController = navController,
                 startDestination = HomeScreenNavigation,
                 Modifier.padding(innerPadding)
-
             ) {
 
                 composable<HomeScreenNavigation> {
@@ -228,22 +228,34 @@ fun CustomScaffold(rootNavController: NavHostController){
 
                 composable<ComercioNavigation> { backStackEntry ->
                     val navArgs = backStackEntry.toRoute<ComercioNavigation>()
+
                     ComercioScreen(
                         navController = navController,
-                        navArgs = navArgs
+                        navArgs = navArgs.toEmprendimientoModel()
                     )
                 }
-                composable("product_detail/{productId}") { backStackEntry ->
+
+                composable(
+                    "product_detail/{productId}?token={token}&emprendimientoID={emprendimientoID}"
+                ) { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId") ?: ""
-                    ProductDetailScreen(productId = productId, navController = navController)
+                    val token = backStackEntry.arguments?.getString("token") ?: ""
+                    val emprendimientoID = backStackEntry.arguments?.getString("emprendimientoID") ?: ""
+
+                    ProductDetailScreen(
+                        productId = productId,
+                        navController = navController,
+                        token = token,
+                        emprendimientoID = emprendimientoID
+                    )
                 }
+
                 composable("chat_comercio/{name}/{phone}") { backStackEntry ->
                     val name = backStackEntry.arguments?.getString("name") ?: ""
                     val phone = backStackEntry.arguments?.getString("phone") ?: ""
                     ChatComercioScreen(
                         navController = navController,
                         businessName = name,
-                        phone = phone
                     )
                 }
 

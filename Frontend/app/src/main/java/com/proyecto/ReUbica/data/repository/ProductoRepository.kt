@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.data.repository
 
+
 import android.content.Context
 import android.net.Uri
 import com.google.gson.Gson
@@ -16,6 +17,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
 import androidx.core.net.toUri
+import com.proyecto.ReUbica.data.model.producto.ProductoModel
 
 class ProductoRepository {
 
@@ -61,7 +63,13 @@ class ProductoRepository {
         )
     }
 
-    suspend fun getProductosByEmprendimientoId(token: String, emprendimientoId: String): Response<List<ProductoCreateResponse>> {
-        return api.getProductosByEmprendimientoId(token = "Bearer $token", emprendimientoId = emprendimientoId)
-    }
+    suspend fun getProductosByEmprendimiento(
+        token: String,
+        emprendimientoID: String
+    ): Response<List<ProductoModel>> {
+        return api.getProductosByEmprendimiento(
+            token = "Bearer $token",
+            emprendimientoID = emprendimientoID
+            )
+      }
 }

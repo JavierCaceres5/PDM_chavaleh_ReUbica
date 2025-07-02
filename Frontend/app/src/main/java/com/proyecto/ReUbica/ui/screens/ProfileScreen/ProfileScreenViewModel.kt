@@ -59,6 +59,7 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                     return@launch
                 }
                 val response = repository.deleteAccount(token)
+                Log.d("ProfileViewModel", "Delete account response: ${response.code()} - ${response.body()}")
                 if (response.isSuccessful) {
                     sessionManager.clearSession()
                     onSuccess()
@@ -67,7 +68,7 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                     _error.value = "Error al eliminar cuenta: ${response.message()}"
                 }
             } catch (e: Exception) {
-                _error.value = "Error de red: ${e.message}"
+                Log.e("ProfileViewModel", "Error deleting account", e)
             } finally {
                 _loading.value = false
             }
