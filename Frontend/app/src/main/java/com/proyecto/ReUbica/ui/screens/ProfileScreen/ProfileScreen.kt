@@ -67,6 +67,7 @@ fun ProfileScreen(
 )
 {
 
+
     val context = LocalContext.current
     val sessionManager = remember { UserSessionManager(context) }
 
@@ -209,7 +210,9 @@ fun ProfileScreen(
                     )
                     ListItemRow(
                         text = "Carta de productos",
-                        onClick = { navController.navigate(CartaProductosScreenNavigation) },
+                        onClick = {
+                            navController.navigate(CartaProductosScreenNavigation)
+                        },
                         icon = Icons.Filled.ArrowOutward
                     )
                     ListItemRow(

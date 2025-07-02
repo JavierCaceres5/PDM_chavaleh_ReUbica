@@ -1,5 +1,8 @@
 package com.proyecto.ReUbica.data.repository
 
+import com.proyecto.ReUbica.data.model.password.GenericResponse
+import com.proyecto.ReUbica.data.model.password.ResetPasswordRequest
+import com.proyecto.ReUbica.data.model.password.SendResetCodeRequest
 import com.proyecto.ReUbica.data.model.user.UpdateProfileRequest
 import retrofit2.Response
 import com.proyecto.ReUbica.data.model.user.UserLoginRequest
@@ -30,6 +33,14 @@ class UserRepository {
 
     suspend fun getUserById(token: String, userId: String): Response<UserProfile> {
         return api.getUserById("Bearer $token", userId)
+    }
+
+    suspend fun sendResetCode(request: SendResetCodeRequest): Response<GenericResponse> {
+        return api.sendResetCode(request)
+    }
+
+    suspend fun resetPassword(request: ResetPasswordRequest): Response<GenericResponse> {
+        return api.resetPassword(request)
     }
 
 }

@@ -2,6 +2,7 @@ package com.proyecto.ReUbica.ui.screens.LoginScreen
 
 import android.app.Application
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,9 +38,11 @@ import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.navigations.LoginScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.RegistroNavigation
+import com.proyecto.ReUbica.ui.navigations.ResetPasswordScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.WelcomeScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.mainNavigation
 import com.proyecto.ReUbica.ui.screens.RegisterScreen.RegisterScreenViewModel
+import com.proyecto.ReUbica.ui.screens.ResetPassword.ResetPasswordScreen
 
 @Composable
 fun LoginScreen(
@@ -181,7 +184,11 @@ fun LoginScreen(
                 color = Color(0xFF5A3C1D),
                 fontSize = 14.sp,
                 fontFamily = abel,
-                modifier = Modifier.padding(end = 10.dp)
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .clickable {
+                        navController.navigate(ResetPasswordScreenNavigation)
+                    }
             )
         }
 

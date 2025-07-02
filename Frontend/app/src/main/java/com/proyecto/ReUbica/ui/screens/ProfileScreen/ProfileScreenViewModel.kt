@@ -46,7 +46,6 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
         .map { it?.userProfile }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-
     fun deleteAccount(onSuccess: () -> Unit) {
         viewModelScope.launch {
             _loading.value = true

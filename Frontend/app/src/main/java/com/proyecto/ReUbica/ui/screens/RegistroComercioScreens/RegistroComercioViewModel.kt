@@ -22,8 +22,8 @@ class RegistroComercioViewModel : ViewModel() {
     private lateinit var userSessionManager: UserSessionManager
     private val repository = EmprendimientoRepository()
 
-    var emprendimientoId: UUID? = null
-        private set
+    private val _emprendimientoId = MutableStateFlow<UUID?>(null)
+    val emprendimientoId = _emprendimientoId.asStateFlow()
 
     private val _emprendimiento = MutableStateFlow(
         EmprendimientoCreateRequest(
@@ -99,37 +99,35 @@ class RegistroComercioViewModel : ViewModel() {
         viewModelScope.launch {
             if (!::userSessionManager.isInitialized) {
                 _error.value = "Session manager no inicializado"
-                Log.d("RegistroComercioViewModel", "Session manager no inicializado")
                 return@launch
             }
-            _loading.value = true
+
             val token = userSessionManager.getToken()
 
             if (token.isNullOrBlank()) {
                 _error.value = "No se encontró token de sesión"
-                Log.d(TAG, "No se encontró token de sesión")
-
-                _loading.value = false
-                return@launch
-            }
-            val response = repository.createEmprendimiento(token, _emprendimiento.value)
-
-            if (!response.isSuccessful) {
-                _error.value = "Error de creación de emprendimiento: ${response.message()}"
-                _loading.value = false
                 return@launch
             }
 
-            val body = response.body()
-            if (body != null) {
-                emprendimientoId = body.emprendimiento.id
-                val nuevoToken = body.updatedToken
-                Log.d(TAG, "Nuevo token: $nuevoToken")
+            try {
+                val response = repository.createEmprendimiento(token, _emprendimiento.value)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null) {
+                        userSessionManager.saveEmprendimientoID(body.emprendimiento.id.toString())
 
-                if (nuevoToken.isNotBlank()) {
-                    userSessionManager.actualizarSesionConNuevoToken(nuevoToken)
+                        if (body.updatedToken.isNotBlank()) {
+                            userSessionManager.actualizarSesionConNuevoToken(body.updatedToken)
+                        }
+                        _success.value = true
+                    } else {
+                        _error.value = "Respuesta vacía del servidor"
+                    }
+                } else {
+                    _error.value = "Error de creación de emprendimiento: ${response.message()}"
                 }
-                Log.d(TAG, "Emprendimiento creado exitosamente: ${body.emprendimiento}")
+            } catch (e: Exception) {
+                _error.value = "Error en la creación: ${e.localizedMessage}"
             }
         }
     }

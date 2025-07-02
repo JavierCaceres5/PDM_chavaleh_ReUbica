@@ -1,6 +1,5 @@
 package com.proyecto.ReUbica.data.model.producto
 
-
 data class ProductoResponse(
     val id: String,
     val nombre: String,

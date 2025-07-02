@@ -1,5 +1,8 @@
 package com.proyecto.ReUbica.data.api
 
+import com.proyecto.ReUbica.data.model.password.GenericResponse
+import com.proyecto.ReUbica.data.model.password.ResetPasswordRequest
+import com.proyecto.ReUbica.data.model.password.SendResetCodeRequest
 import com.proyecto.ReUbica.data.model.user.*
 import retrofit2.Response
 import retrofit2.http.Body
@@ -38,4 +41,15 @@ interface UserApiService {
         @Header("Authorization") token: String,
         @Path("id") userId: String
     ): Response<UserProfile>
+
+    @POST("users/sendResetCode")
+    suspend fun sendResetCode(
+        @Body request: SendResetCodeRequest
+    ): Response<GenericResponse>
+
+    @POST("users/resetPassword")
+    suspend fun resetPassword(
+        @Body request: ResetPasswordRequest
+    ): Response<GenericResponse>
+
 }

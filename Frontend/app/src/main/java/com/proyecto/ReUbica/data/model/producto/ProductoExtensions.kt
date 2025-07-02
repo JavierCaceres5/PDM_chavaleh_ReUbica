@@ -2,13 +2,13 @@ package com.proyecto.ReUbica.data.model.producto
 
 fun ProductoModel.toProductoResponse(): ProductoResponse {
     return ProductoResponse(
-        id = this.id.toString(),
-        nombre = this.nombre.toString(),
-        descripcion = this.descripcion.toString(),
-        precio = this.precio?: 0.0,
-        product_image = this.product_image,
-        created_at = this.created_at.toString(),
-        updated_at = this.updated_at.toString(),
-        emprendimientoID = this.emprendimientoID.toString()
+        id = id.toString(),
+        nombre = nombre.orEmpty(),
+        descripcion = descripcion.orEmpty(),
+        precio = precio ?: 0.0,
+        product_image = product_image,
+        created_at = created_at.orEmpty(),
+        updated_at = updated_at.orEmpty(),
+        emprendimientoID = emprendimientoID.toString()
     )
 }
