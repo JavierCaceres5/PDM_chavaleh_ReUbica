@@ -39,7 +39,11 @@ import com.proyecto.ReUbica.utils.LocationUtils
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -50,7 +54,6 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val userSessionManager = remember { UserSessionManager(context) }
-    val scope = rememberCoroutineScope()
 
     val resultados by homeViewModel.resultadosByCategory.collectAsState()
     val loading by homeViewModel.loading.collectAsState()
@@ -59,6 +62,9 @@ fun HomeScreen(
 
     var userLocation by remember { mutableStateOf<Location?>(null) }
     val locationPermissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+
+    var buscadoByCategory by remember { mutableStateOf(false) }
+    var categoriaSeleccionada by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         if (locationPermissionState.status.isGranted) {
@@ -72,17 +78,46 @@ fun HomeScreen(
     }
 
     val categorias1 = listOf(
-        CategoriaItem(Icons.Filled.LocalOffer, "Ropa") { homeViewModel.searchEmprendimientoByCategory("Ropa") },
-        CategoriaItem(Icons.Filled.Fastfood, "Alimentos") { homeViewModel.searchEmprendimientoByCategory("Alimentos") },
-        CategoriaItem(Icons.Filled.Restaurant, "Comida") { homeViewModel.searchEmprendimientoByCategory("Comida") },
-        CategoriaItem(Icons.Filled.LocalLaundryService, "Higiene") { homeViewModel.searchEmprendimientoByCategory("Higiene") },
+        CategoriaItem(Icons.Filled.LocalOffer, "Ropa") {
+            buscadoByCategory = true
+            categoriaSeleccionada = "Ropa"
+            homeViewModel.searchEmprendimientoByCategory("Ropa")
+        },
+        CategoriaItem(Icons.Filled.Fastfood, "Alimentos") {
+            buscadoByCategory = true
+            categoriaSeleccionada = "Alimentos"
+            homeViewModel.searchEmprendimientoByCategory("Alimentos")
+        },
+        CategoriaItem(Icons.Filled.Restaurant, "Comida") {
+            buscadoByCategory = true
+            categoriaSeleccionada = "Comida"
+            homeViewModel.searchEmprendimientoByCategory("Comida")
+        },
+        CategoriaItem(Icons.Filled.LocalLaundryService, "Higiene") {
+            buscadoByCategory = true
+            categoriaSeleccionada = "Higiene"
+            homeViewModel.searchEmprendimientoByCategory("Higiene")
+        },
     )
 
     val categorias2 = listOf(
-        CategoriaItem(Icons.Filled.Diamond, "Artesanías") { homeViewModel.searchEmprendimientoByCategory("Artesanias") },
-        CategoriaItem(Icons.Filled.Book, "Librería") { homeViewModel.searchEmprendimientoByCategory("Libreria") },
-        CategoriaItem(Icons.Filled.Settings, "Servicios") { homeViewModel.searchEmprendimientoByCategory("Servicios") }
+        CategoriaItem(Icons.Filled.Diamond, "Artesanías") {
+            buscadoByCategory = true
+            categoriaSeleccionada = "Artesanías"
+            homeViewModel.searchEmprendimientoByCategory("Artesanias")
+        },
+        CategoriaItem(Icons.Filled.Book, "Librería") {
+            buscadoByCategory = true
+            categoriaSeleccionada = "Librería"
+            homeViewModel.searchEmprendimientoByCategory("Libreria")
+        },
+        CategoriaItem(Icons.Filled.Settings, "Servicios") {
+            buscadoByCategory = true
+            categoriaSeleccionada = "Servicios"
+            homeViewModel.searchEmprendimientoByCategory("Servicios")
+        }
     )
+
 
     val userLat = userLocation?.latitude ?: 0.0
     val userLon = userLocation?.longitude ?: 0.0
@@ -93,8 +128,8 @@ fun HomeScreen(
         val dLat = Math.toRadians(lat2 - lat1)
         val dLon = Math.toRadians(lon2 - lon1)
         val a = Math.sin(dLat / 2).pow(2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2).pow(2)
-        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+                cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         return earthRadius * c <= radiusKm
     }
 
@@ -123,10 +158,16 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Column {
-                Text("Categorías", fontWeight = FontWeight.ExtraBold, color = Color(0xFF5A3C1D),
+            Column (
+                modifier = Modifier.padding(15.dp)
+            ) {
+                Text(
+                    text = "Explora nuestras opciones",
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF5A3C1D),
                     modifier = Modifier
-                    .padding(start = 16.dp, top = 16.dp, bottom = 0.dp))
+                        .padding(start = 16.dp, top = 16.dp, bottom = 0.dp)
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     categorias1.forEach {
@@ -144,9 +185,36 @@ fun HomeScreen(
             }
         }
 
-        if (resultados.isNotEmpty()) {
+        if (loading) {
             item {
-                SeccionRestaurantes("Descubrimientos por categoría", resultados, favoritosViewModel, navController)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF49724C),
+                        modifier = Modifier
+                            .padding(10.dp))
+                }
+            }
+        } else {
+
+            if (resultados.isNotEmpty()) {
+                item {
+                    SeccionRestaurantes("Descubrimientos para $categoriaSeleccionada", resultados, favoritosViewModel, navController)
+                }
+            } else if (buscadoByCategory) {
+                item {
+                    Text(
+                        "No se encontraron emprendimientos en esta categoría.",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color.Gray
+                    )
+                }
             }
         }
 
@@ -196,7 +264,16 @@ fun HomeScreen(
 
         if (loading) {
             item {
-                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF49724C),
+                        modifier = Modifier
+                            .padding(10.dp))
+                }
             }
         }
 
@@ -240,14 +317,14 @@ fun SeccionRestaurantes(
                 RestaurantCard(
                     nombre = emprendimiento.nombre ?: "Sin nombre",
                     departamento = emprendimiento.direccion ?: "Sin dirección",
-                    categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: "Sin categoría",
+                    categoria = emprendimiento.categoriasPrincipales?.firstOrNull() ?: "Sin categoría",
                     imagenRes = logoUrl,
                     isFavorito = favoritosViewModel.isFavoritoComercio(emprendimiento.nombre ?: ""),
                     onFavoritoClick = {
                         favoritosViewModel.toggleFavoritoComercio(
                             nombre = emprendimiento.nombre ?: "",
                             departamento = emprendimiento.direccion ?: "",
-                            categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: "",
+                            categoria = emprendimiento.categoriasPrincipales?.firstOrNull() ?: "",
                             logo = emprendimiento.logo ?: ""
                         )
                     },
@@ -257,7 +334,7 @@ fun SeccionRestaurantes(
                                 id = emprendimiento.id.toString(),
                                 nombre = emprendimiento.nombre ?: "Sin nombre",
                                 descripcion = emprendimiento.descripcion ?: "Sin descripción",
-                                categoria = emprendimiento.categoriasPrincipales.firstOrNull() ?: "Sin categoría",
+                                categoria = emprendimiento.categoriasPrincipales?.firstOrNull() ?: "Sin categoría",
                                 direccion = emprendimiento.direccion ?: "Sin dirección",
                                 latitud = emprendimiento.latitud ?: 0.0,
                                 longitud = emprendimiento.longitud ?: 0.0,

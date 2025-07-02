@@ -30,12 +30,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-
 import com.proyecto.ReUbica.data.local.UserSessionManager
-import com.proyecto.ReUbica.data.repository.ProductoRepository
-
 import com.proyecto.ReUbica.data.model.emprendimiento.toEmprendimientoModel
-
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import com.proyecto.ReUbica.ui.navigations.CartaProductosScreenNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoriteScreen
@@ -64,19 +60,12 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
+import com.proyecto.ReUbica.ui.screens.CartaProductos.CartaProductosScreen
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ChatComercioScreen
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioScreen
-
-import com.proyecto.ReUbica.ui.screens.ComercioScreen.ProductDetailScreen
-
 import com.proyecto.ReUbica.ui.screens.ProductoScreen.ProductDetailScreen
-import com.proyecto.ReUbica.ui.screens.EmprendedorProfileScreen
-import com.proyecto.ReUbica.ui.screens.LocalInformationScreen
-
-import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen4
-
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegistroComercioViewModel
 import com.proyecto.ReUbica.ui.screens.PersonalInformationScreen.LocalInformationScreen
 import com.proyecto.ReUbica.ui.screens.RegisterLocalScreen3
@@ -141,7 +130,8 @@ fun CustomScaffold(rootNavController: NavHostController){
             if (showBars && currentRoute != ProfileScreenNavigation::class.qualifiedName &&
                 currentRoute !=  PersonalDataNavigation::class.qualifiedName &&
                 currentRoute != LocalInformationScreenNavigation::class.qualifiedName &&
-                currentRoute != CartaProductosScreenNavigation::class.qualifiedName
+                currentRoute != CartaProductosScreenNavigation::class.qualifiedName &&
+                !currentRoute.orEmpty().startsWith("chat_comercio")
                 ){
                 TopBar(navController)
             }
@@ -232,9 +222,9 @@ fun CustomScaffold(rootNavController: NavHostController){
                     LocalInformationScreen(navController)
                 }
 
-//                composable<CartaProductosScreenNavigation> {
-//                    CartaProductosScreen()
-//                }
+                composable<CartaProductosScreenNavigation> {
+                    CartaProductosScreen(navController)
+                }
 
                 composable<ComercioNavigation> { backStackEntry ->
                     val navArgs = backStackEntry.toRoute<ComercioNavigation>()
@@ -266,7 +256,6 @@ fun CustomScaffold(rootNavController: NavHostController){
                     ChatComercioScreen(
                         navController = navController,
                         businessName = name,
-                        phone = phone
                     )
                 }
 

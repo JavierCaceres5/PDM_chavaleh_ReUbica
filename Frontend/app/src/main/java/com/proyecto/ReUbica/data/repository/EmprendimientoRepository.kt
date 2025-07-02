@@ -67,11 +67,8 @@ class EmprendimientoRepository {
     suspend fun updateEmprendimiento(token: String, updateData: UpdateEmprendimientoRequest): Response<Unit> {
         return api.updateEmprendimiento("Bearer $token", updateData)
     }
-}
 
     suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
         return api.getAllEmprendimientos("Bearer $token")
     }
-
 }
-

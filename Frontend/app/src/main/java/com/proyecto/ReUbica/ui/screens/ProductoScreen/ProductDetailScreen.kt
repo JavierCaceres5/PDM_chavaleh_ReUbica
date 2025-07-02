@@ -119,7 +119,7 @@ fun ProductDetailScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            product.nombre,
+            product.nombre.toString(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF5A3C1D)
@@ -128,7 +128,7 @@ fun ProductDetailScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            product.descripcion,
+            product.descripcion.toString(),
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF5A3C1D)
         )

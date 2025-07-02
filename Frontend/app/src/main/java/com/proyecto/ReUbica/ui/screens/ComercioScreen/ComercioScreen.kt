@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -27,14 +28,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.ui.Components.ProductCard
-
-import com.proyecto.ReUbica.ui.layouts.navItem
-import com.proyecto.ReUbica.ui.navigations.*
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.outlined.LocationOn
-
-import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
-
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +66,7 @@ fun ComercioScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
+                .padding(10.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -80,7 +74,8 @@ fun ComercioScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(150.dp)
+                        .height(220.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFFEAEAEA)),
                     contentAlignment = Alignment.Center
@@ -100,58 +95,69 @@ fun ComercioScreen(
                         color = Color(0xFF5A3C1D),
                         fontWeight = FontWeight.ExtraBold
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         business.descripcion.toString(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFF5A3C1D)
                     )
-                }
-            }
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(Modifier.height(5.dp))
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 5.dp)
-                ) {
                     Row {
                         Icon(
                             imageVector = Icons.Default.Schedule,
                             contentDescription = null,
-                            tint = Color.Black
+                            tint = Color.Black,
+                            modifier = Modifier.padding(end = 4.dp)
                         )
                         Text(
                             "8:00 AM - 5:00 PM",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF5A3C1D)
+                            color = Color(0xFF5A3C1D),
+                            textAlign = TextAlign.Justify
                         )
                     }
+
+                    Spacer(Modifier.height(6.dp))
+
                     Row {
                         Icon(
                             imageVector = Icons.Outlined.LocationOn,
                             contentDescription = null,
-                            tint = Color.Black
+                            tint = Color.Black,
+                            modifier = Modifier.padding(end = 4.dp)
+
                         )
                         Text(
                             "Ubicación: ${business.direccion}",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF5A3C1D)
+                            color = Color(0xFF5A3C1D),
+                            textAlign = TextAlign.Justify
                         )
                     }
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Icon(Icons.Default.Facebook, contentDescription = null)
-                        Icon(Icons.Default.Email, contentDescription = null)
-                        Icon(Icons.Filled.AccountCircle, contentDescription = null)
-                    }
+
                 }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Row(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Icon(Icons.Default.Facebook, contentDescription = null)
+                Icon(Icons.Default.Facebook, contentDescription = null)
+                Icon(Icons.Default.Facebook, contentDescription = null)
+                Icon(Icons.Default.Facebook, contentDescription = null)
+
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -161,8 +167,8 @@ fun ComercioScreen(
 
                 GoogleMap(
                     modifier = Modifier
-                        .width(140.dp)
-                        .height(120.dp),
+                        .fillMaxWidth()
+                        .height(150.dp),
                     cameraPositionState = cameraPositionState
                 ) {
                     Marker(state = markerState)
@@ -205,7 +211,7 @@ fun ComercioScreen(
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(business.products) { product ->
                                 ProductCard(
-                                    product = product.toProducto(),
+                                    product = product,
                                     favoritosViewModel = favoritosViewModel,
                                     navController = navController,
                                     token = tokenState.value,

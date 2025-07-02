@@ -17,6 +17,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
 import androidx.core.net.toUri
+import com.proyecto.ReUbica.data.model.producto.ProductoModel
 
 class ProductoRepository {
 
@@ -31,6 +32,9 @@ class ProductoRepository {
         fun String.toBody(): RequestBody =
             this.toRequestBody("text/plain".toMediaTypeOrNull())
 
+        fun Double.toBody(): RequestBody =
+            this.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
         fun createMultipartFromUri(context: Context, uri: Uri, partName: String): MultipartBody.Part? {
             val contentResolver = context.contentResolver
             val mimeType = contentResolver.getType(uri) ?: "image/*"
@@ -44,22 +48,28 @@ class ProductoRepository {
             return MultipartBody.Part.createFormData(partName, fileName, requestBody)
         }
 
-        val productoImage = data.product_image?.let { imagePathOrUriString ->
+        val productoImagePart = data.product_image?.let { imagePathOrUriString ->
             val uri = imagePathOrUriString.toUri()
             createMultipartFromUri(context, uri, "product_image")
         }
+
 
         return api.registrarProducto(
             token = "Bearer $token",
             nombre = data.nombre.toBody(),
             descripcion = data.descripcion.toBody(),
-            precio = data.precio.toString().toBody(),
-            product_image = productoImage
+            precio = data.precio.toBody(),
+            product_image = productoImagePart
         )
     }
 
-    suspend fun getProductosByEmprendimientoId(token: String, emprendimientoId: String): Response<List<ProductoCreateResponse>> {
-        return api.getProductosByEmprendimientoId(token = "Bearer $token", emprendimientoId = emprendimientoId)
-    }
-
+    suspend fun getProductosByEmprendimiento(
+        token: String,
+        emprendimientoID: String
+    ): Response<List<ProductoModel>> {
+        return api.getProductosByEmprendimiento(
+            token = "Bearer $token",
+            emprendimientoID = emprendimientoID
+            )
+      }
 }

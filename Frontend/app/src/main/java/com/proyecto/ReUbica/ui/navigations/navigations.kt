@@ -75,7 +75,6 @@ data class ComercioNavigation(
 )
 object ProductDetailNavigation {
     const val route = "product_detail"
-    const val productIdArg = "productId"
     const val tokenArg = "token"
     const val emprendimientoIdArg = "emprendimientoID"
 

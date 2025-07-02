@@ -5,9 +5,12 @@ import com.proyecto.ReUbica.data.model.review.EmprendimientoReviewsResponse
 import com.proyecto.ReUbica.data.model.review.ReviewModel
 import com.proyecto.ReUbica.data.model.review.ReviewModelResponse
 import com.proyecto.ReUbica.data.api.ReviewApiService
+import com.proyecto.ReUbica.network.RetrofitInstance
 import retrofit2.Response
 
-class ReviewRepository(private val api: ReviewApiService) {
+class ReviewRepository() {
+
+    private val api = RetrofitInstance.reviewApi
 
     suspend fun postReview(token: String, productoID: String, comentario: String, rating: Double): Response<ReviewModelResponse> {
         val request = CreateReviewRequest(comentario, rating)

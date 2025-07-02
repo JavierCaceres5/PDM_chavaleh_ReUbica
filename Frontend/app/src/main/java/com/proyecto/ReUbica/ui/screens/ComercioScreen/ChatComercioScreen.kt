@@ -24,71 +24,79 @@ import androidx.navigation.NavHostController
 fun ChatComercioScreen(
     navController: NavHostController,
     businessName: String,
-    phone: String
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = businessName, color = Color(0xFF5A3C1D))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(Icons.Default.Call, contentDescription = null, tint = Color.Black)
-                        Text(text = phone, style = MaterialTheme.typography.bodyMedium)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFDFF1DC))
-            )
-        }
-    ) { innerPadding ->
-        Column(
+    Box (
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .windowInsetsPadding(WindowInsets.systemBars)
+    ){
+        Scaffold(
             modifier = Modifier
-                .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp, 8.dp, 16.dp, 0.dp)
-        ) {
-            // Mensajes simulados
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                ChatBubble(text = "Hola, estoy interesado en el collar. ¿Cuál es la longitud de este?", isUser = true)
-                ChatBubble(text = "¡Hola! El collar tiene una longitud de 45 cm", isUser = false)
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            var mensaje by remember { mutableStateOf("") }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = mensaje,
-                    onValueChange = { mensaje = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Escribe tu mensaje") },
-                    shape = RoundedCornerShape(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-
-                IconButton(
-                    onClick = { /* acción para enviar */ },
+                .background(Color.White),
+            topBar = {
+                TopAppBar(
                     modifier = Modifier
-                        .size(48.dp)
-                        .background(Color(0xFF49724C), shape = CircleShape)
+                        .windowInsetsPadding(WindowInsets.statusBars),
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = Color.Black)
+                            }
+                            Text(text = businessName, color = Color(0xFF5A3C1D))
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFDFF1DC))
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .navigationBarsPadding()
+                    .padding(16.dp, 8.dp, 16.dp, 0.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ChatBubble(text = "Hola, estoy interesado en el collar. ¿Cuál es la longitud de este?", isUser = true)
+                    ChatBubble(text = "¡Hola! El collar tiene una longitud de 45 cm", isUser = false)
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                var mensaje by remember { mutableStateOf("") }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Send,
-                        contentDescription = "Enviar mensaje",
-                        tint = Color.White
+                    OutlinedTextField(
+                        value = mensaje,
+                        onValueChange = { mensaje = it },
+                        modifier = Modifier.weight(1f),
+                        placeholder = { Text("Escribe tu mensaje") },
+                        shape = RoundedCornerShape(24.dp)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    IconButton(
+                        onClick = {  },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(Color(0xFF49724C), shape = CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Send,
+                            contentDescription = "Enviar mensaje",
+                            tint = Color.White
+                        )
+                    }
                 }
             }
         }

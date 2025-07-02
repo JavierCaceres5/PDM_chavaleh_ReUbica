@@ -1,8 +1,10 @@
 package com.proyecto.ReUbica.ui.screens.LocalInformationScreen
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Tag
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
@@ -35,6 +37,8 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
 
     private val _success = MutableStateFlow<Boolean?>(null)
     val success: StateFlow<Boolean?> = _success.asStateFlow()
+
+    private val TAG = "EmprendimientoViewModel"
 
     fun cargarMiEmprendimiento() {
         viewModelScope.launch {
@@ -95,6 +99,7 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
 
                 if(response.isSuccessful){
                     cargarMiEmprendimiento()
+                    Log.d(TAG, "Emprendimiento actualizado correctamente")
                 }
             } catch (e: Exception) {
                 _error.value = "Error de red: ${e.message}"

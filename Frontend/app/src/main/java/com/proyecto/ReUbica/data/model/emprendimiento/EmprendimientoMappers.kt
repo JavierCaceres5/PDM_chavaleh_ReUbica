@@ -5,12 +5,10 @@ import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import java.util.UUID
 import android.util.Log
 
-
 fun ComercioNavigation.toEmprendimientoModel(): EmprendimientoModel {
     val parsedId = try {
         UUID.fromString(this.id)
     } catch (e: IllegalArgumentException) {
-        // Log para depuración
         Log.w("toEmprendimientoModel", "ID inválido recibido (${this.id}), usando UUID.randomUUID() temporalmente")
         UUID.randomUUID()
     }

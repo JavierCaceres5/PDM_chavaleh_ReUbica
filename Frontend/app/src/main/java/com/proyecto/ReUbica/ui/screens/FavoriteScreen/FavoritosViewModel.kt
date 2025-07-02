@@ -14,7 +14,7 @@ sealed class Favorito {
     data class Producto(
         val id: String,
         val nombre: String,
-        val precio: Double
+        val precio: Double?
     ) : Favorito()
 }
 
@@ -47,7 +47,7 @@ class FavoritosViewModel : ViewModel() {
     }
 
     // Para productos
-    fun toggleFavoritoProducto(id: String, nombre: String, precio: Double) {
+    fun toggleFavoritoProducto(id: String, nombre: String, precio: Double?) {
         val exists = _favoritos.any { it is Favorito.Producto && it.id == id }
         if (exists) {
             _favoritos.removeIf { it is Favorito.Producto && it.id == id }

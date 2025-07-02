@@ -18,16 +18,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 
-import com.proyecto.ReUbica.data.model.DummyProduct
-
-import com.proyecto.ReUbica.data.model.producto.ProductoModel
+import com.proyecto.ReUbica.data.model.producto.ProductoResponse
 
 import com.proyecto.ReUbica.ui.navigations.ProductDetailNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 
 @Composable
 fun ProductCard(
-    product: ProductoModel,
+    product: ProductoResponse,
     favoritosViewModel: FavoritosViewModel = viewModel(),
     navController: NavHostController,
     token: String,
@@ -63,13 +61,13 @@ fun ProductCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    product.nombre,
+                    product.nombre.toString(),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color(0xFF5A3C1D),
                     fontWeight = FontWeight.ExtraBold
                 )
                 Text(
-                    product.descripcion,
+                    product.descripcion.toString(),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     color = Color(0xFF5A3C1D)
@@ -90,7 +88,7 @@ fun ProductCard(
                         modifier = Modifier.clickable {
                             favoritosViewModel.toggleFavoritoProducto(
                                 id = product.id.toString(),
-                                nombre = product.nombre,
+                                nombre = product.nombre.toString(),
                                 precio = product.precio
                             )
                         }
@@ -103,10 +101,6 @@ fun ProductCard(
                         contentDescription = "Calificación",
                         tint = Color(0xFF5A3C1D)
                     )
-                    //Text(
-                    //    text = product.rating.toString(),
-                    //    color = Color(0xFF5A3C1D)
-                    //)
                 }
             }
         }

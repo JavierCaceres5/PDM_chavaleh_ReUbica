@@ -107,7 +107,7 @@ class RegistroComercioViewModel : ViewModel() {
 
             if (token.isNullOrBlank()) {
                 _error.value = "No se encontró token de sesión"
-                Log.d("RegistroComercioViewModel", "No se encontró token de sesión")
+                Log.d(TAG, "No se encontró token de sesión")
 
                 _loading.value = false
                 return@launch
@@ -129,6 +129,7 @@ class RegistroComercioViewModel : ViewModel() {
                 if (nuevoToken.isNotBlank()) {
                     userSessionManager.actualizarSesionConNuevoToken(nuevoToken)
                 }
+                Log.d(TAG, "Emprendimiento creado exitosamente: ${body.emprendimiento}")
             }
         }
     }

@@ -27,7 +27,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.proyecto.ReUbica.data.local.UserSessionManager
-import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.ui.screens.EmprendimientosBuscar.SearchScreenViewModel
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.ui.screens.HomeScreen.HomeScreenViewModel

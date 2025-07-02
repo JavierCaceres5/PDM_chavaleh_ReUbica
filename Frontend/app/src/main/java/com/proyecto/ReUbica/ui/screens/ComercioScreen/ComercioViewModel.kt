@@ -4,30 +4,26 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-
-import com.proyecto.ReUbica.data.model.DummyProduct
-
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
 import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.model.producto.ProductoResponse
 import com.proyecto.ReUbica.data.model.producto.toProductoResponse
 import com.proyecto.ReUbica.network.RetrofitInstance
-
-import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
+import com.proyecto.ReUbica.network.RetrofitInstance.productoApi
 
 data class BusinessDetailState(
     val id: UUID = UUID.randomUUID(),
     val nombre: String? = null,
     val descripcion: String? = null,
-    val categoriasSecundarias: List<String> = emptyList(),
-    val categoriasPrincipales: List<String> = emptyList(),
+    val categoriasSecundarias: List<String>? = emptyList(),
+    val categoriasPrincipales: List<String>? = emptyList(),
     val logo: String? = null,
     val direccion: String? = null,
     val emprendimientoPhone: String? = null,
@@ -84,7 +80,7 @@ class ComercioViewModel : ViewModel() {
                     "Iniciando llamada a getProductosByEmprendimiento con token: $token y ID: ${emprendimiento.id}"
                 )
 
-                val response = RetrofitInstance.productoApiService.getProductosByEmprendimiento(
+                val response = productoApi.getProductosByEmprendimiento(
                     token = "Bearer $token",
                     emprendimientoID = emprendimiento.id.toString()
                 )

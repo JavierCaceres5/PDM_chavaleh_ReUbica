@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 
 class HomeScreenViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = EmprendimientoRepository(  )
+    private val repository = EmprendimientoRepository()
 
     private val _resultadosByCategory = MutableStateFlow<List<EmprendimientoModel>>(emptyList())
     val resultadosByCategory: StateFlow<List<EmprendimientoModel>> = _resultadosByCategory

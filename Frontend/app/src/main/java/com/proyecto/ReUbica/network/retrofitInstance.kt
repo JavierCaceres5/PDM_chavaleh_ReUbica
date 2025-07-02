@@ -31,9 +31,6 @@ object RetrofitInstance {
 
 
     val productoApi: ProductoApiService by lazy {
-
-    private val retrofit by lazy {
-
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -43,13 +40,11 @@ object RetrofitInstance {
 
     }
 
-    val productoApiService: ProductoApiService by lazy {
-        retrofit.create(ProductoApiService::class.java)
+    val reviewApi: ReviewApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ReviewApiService::class.java)
     }
-
-    val reviewApiService: ReviewApiService by lazy {
-        retrofit.create(ReviewApiService::class.java)
-
-    }
-
 }

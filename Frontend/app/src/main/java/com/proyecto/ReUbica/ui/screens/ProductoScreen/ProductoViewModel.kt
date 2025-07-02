@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class ProductoViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = ProductoRepository(RetrofitInstance.productoApiService)
+    private val repository = ProductoRepository()
 
     private val _productos = MutableStateFlow<List<ProductoModel>>(emptyList())
     val productos: StateFlow<List<ProductoModel>> = _productos

@@ -19,9 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.Components.RestaurantCard
-import com.proyecto.ReUbica.ui.screens.FavoriteScreen.Favorito
 
 @Composable
 fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {

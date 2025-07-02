@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class ReviewViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = ReviewRepository(RetrofitInstance.reviewApiService)
+    private val repository = ReviewRepository()
 
     private val _emprendimientoReviews = MutableStateFlow<List<EmprendimientoReviewsResponse>>(emptyList())
     val emprendimientoReviews: StateFlow<List<EmprendimientoReviewsResponse>> = _emprendimientoReviews
