@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.proyecto.ReUbica.ui.layouts.CustomScaffold
 import com.proyecto.ReUbica.ui.screens.LoginScreen.LoginScreen
 import com.proyecto.ReUbica.ui.screens.RegisterScreen.RegisterScreen
+import com.proyecto.ReUbica.ui.screens.ResetPassword.ResetPasswordScreen
 import com.proyecto.ReUbica.ui.screens.SessionCheckScreen
 import com.proyecto.ReUbica.ui.screens.WelcomeScreen
 
@@ -34,6 +35,10 @@ fun MainNavigation() {
         }
         composable<mainNavigation> {
             CustomScaffold(navController)
+        }
+
+        composable<ResetPasswordScreenNavigation> {
+            ResetPasswordScreen(navController)
         }
     }
 }

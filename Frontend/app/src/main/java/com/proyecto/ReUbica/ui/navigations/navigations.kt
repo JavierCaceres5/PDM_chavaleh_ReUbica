@@ -85,3 +85,6 @@ object ProductDetailNavigation {
 
 @Serializable
 object LocalInformationScreenNavigation
+
+@Serializable
+object ResetPasswordScreenNavigation

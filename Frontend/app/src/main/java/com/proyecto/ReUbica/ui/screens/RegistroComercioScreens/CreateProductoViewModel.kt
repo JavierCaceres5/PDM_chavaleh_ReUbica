@@ -55,7 +55,6 @@ class CreateProductoViewModel(
             "product_image" -> _producto.value.copy(product_image = value)
             else -> _producto.value
         }
-        Log.d(TAG, "Nuevo producto: ${_producto.value}")
     }
 
     fun crearProducto(context: Context) {
@@ -112,7 +111,7 @@ class CreateProductoViewModel(
             nombre = "",
             descripcion = "",
             precio = 0.0,
-            product_image = "",
+            product_image = null,
         )
         _imagenUri.value = null
     }

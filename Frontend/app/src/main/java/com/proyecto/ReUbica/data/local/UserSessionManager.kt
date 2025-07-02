@@ -26,11 +26,25 @@ class UserSessionManager(private val context: Context) {
         private val Context.dataStore by preferencesDataStore("user_prefs")
         private val TOKEN_KEY = stringPreferencesKey("TOKEN_KEY")
         private val USER_KEY = stringPreferencesKey("USER_KEY")
+        private val EMPRENDIMIENTO_ID_KEY = stringPreferencesKey("EMPRENDIMIENTO_ID")
     }
 
     private val gson = Gson()
     private val _userSession = MutableStateFlow<UserSession?>(null)
     val userSessionFlow: StateFlow<UserSession?> = _userSession
+
+
+    suspend fun saveEmprendimientoID(id: String) {
+        context.dataStore.edit { prefs ->
+            prefs[EMPRENDIMIENTO_ID_KEY] = id
+        }
+    }
+
+    suspend fun getEmprendimientoID(): String? {
+        return context.dataStore.data
+            .map { prefs -> prefs[EMPRENDIMIENTO_ID_KEY] }
+            .first()
+    }
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
