@@ -11,12 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 
 import com.proyecto.ReUbica.data.model.producto.ProductoResponse
 
@@ -51,10 +54,13 @@ fun ProductCard(
         )
     ) {
         Row(modifier = Modifier.padding(8.dp)) {
-            Box(
+            AsyncImage(
+                model = product.product_image,
+                contentDescription = "Imagen del producto",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(80.dp)
-                    .background(Color.LightGray)
+                    .clip(MaterialTheme.shapes.medium)
             )
 
             Spacer(Modifier.width(8.dp))
