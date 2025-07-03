@@ -6,34 +6,37 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.proyecto.ReUbica.ui.layouts.CustomScaffold
-import com.proyecto.ReUbica.ui.screens.LoginScreen
-import com.proyecto.ReUbica.ui.screens.RegisterScreen
+import com.proyecto.ReUbica.ui.screens.ComercioScreen.ProductDetailScreen
+import com.proyecto.ReUbica.ui.screens.LoginScreen.LoginScreen
+import com.proyecto.ReUbica.ui.screens.RegisterScreen.RegisterScreen
+import com.proyecto.ReUbica.ui.screens.SessionCheckScreen
 import com.proyecto.ReUbica.ui.screens.WelcomeScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainNavigation(){
-
+fun MainNavigation() {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = WelcomeScreenNavigation
-    ){
-        composable<WelcomeScreenNavigation>{
+        startDestination = SessionCheckNavigation
+    ) {
+        composable<SessionCheckNavigation> {
+            SessionCheckScreen(navController)
+        }
+        composable<WelcomeScreenNavigation> {
             WelcomeScreen(navController)
         }
-
-        composable<RegistroNavigation>{
+        composable<RegistroNavigation> {
             RegisterScreen(navController)
         }
-
-        composable<LoginScreenNavigation>{
+        composable<LoginScreenNavigation> {
             LoginScreen(navController)
         }
         composable<mainNavigation> {
-            CustomScaffold()
+            CustomScaffold(navController)
         }
+
 
     }
 }

@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.ui.screens.RegistroComercioScreens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,15 +19,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import com.proyecto.ReUbica.ui.navigations.HomeScreenNavigation
+import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 
 
 @Composable
-fun RegisterLocalScreen4(navController: NavHostController) {
+fun RegisterLocalScreen4(navController: NavHostController, viewModel: RegistroComercioViewModel) {
     RegisterLocalScreen4Content(
+        registroComercio = viewModel,
         navController = navController,
         onBack = { navController.popBackStack() }
     )
@@ -35,12 +39,14 @@ fun RegisterLocalScreen4(navController: NavHostController) {
 
 @Composable
 fun RegisterLocalScreen4Content(
+    registroComercio: RegistroComercioViewModel,
     navController: NavHostController,
     onBack: () -> Unit = {}
 ) {
     val abel = FontFamily(Font(R.font.abelregular))
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
     var showConfirmation by remember { mutableStateOf(false) }
+    val profileViewModel: ProfileScreenViewModel = viewModel()
 
     Column(modifier = Modifier.fillMaxSize()) {
         StepTopBar(step = 2, title = "Carta de productos", onBackClick = onBack)
@@ -101,12 +107,16 @@ fun RegisterLocalScreen4Content(
                 precio = "$3.50"
             )
 
-            Divider(color = Color(0xFF49724C), thickness = 2.dp, modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(color = Color(0xFF49724C), thickness = 2.dp, modifier = Modifier.padding(vertical = 8.dp))
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { showConfirmation = true },
+                onClick = { Log.e("error", "hola")
+                    registroComercio.initSessionManager(navController.context)
+                    registroComercio.createEmprendimiento(navController.context)
+                    navController.navigate(HomeScreenNavigation)
+                          },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
