@@ -116,16 +116,17 @@ class RegistroComercioViewModel : ViewModel() {
                     if (body != null) {
                         userSessionManager.saveEmprendimientoID(body.emprendimiento.id.toString())
                         Log.d(TAG, "EmprendimientoID guardado: ${body.emprendimiento.id}")
-
+                        
                         if (body.updatedToken.isNotBlank()) {
                             userSessionManager.actualizarSesionConNuevoToken(body.updatedToken)
                         }
                         _success.value = true
+                        Log.d(TAG, "Emprendimiento creado exitosamente: ${_emprendimiento.value}")
                     } else {
                         _error.value = "Respuesta vacía del servidor"
                     }
                 } else {
-                    _error.value = "Error de creación de emprendimiento: ${response.message()}"
+                    _error.value = "Error de creación de emprendimiento ${response.message()}"
                 }
             } catch (e: Exception) {
                 _error.value = "Error en la creación: ${e.localizedMessage}"

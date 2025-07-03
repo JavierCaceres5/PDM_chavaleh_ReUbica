@@ -52,6 +52,7 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
                     return@launch
                 }
                 val response = emprendimientoRepository.getMiEmprendimiento(token)
+                Log.e("EmprendimientoViewModel", _emprendimiento.value.toString())
                 if (response.isSuccessful) {
                     _emprendimiento.value = response.body()
                     _redesSociales.value = response.body()?.redes_sociales

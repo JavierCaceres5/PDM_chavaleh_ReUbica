@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.ui.Components
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -41,13 +42,9 @@ fun ProductCard(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable {
-                navController.navigate(
-                    ProductDetailNavigation.withArgs(
-                        product.id.toString(),
-                        token,
-                        emprendimientoID
-                    )
-                )
+                val encodedToken = Uri.encode(token)
+                val encodedEmprendimientoID = Uri.encode(emprendimientoID)
+                navController.navigate("product_detail/${product.id}?token=$encodedToken&emprendimientoID=$encodedEmprendimientoID")
             },
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
