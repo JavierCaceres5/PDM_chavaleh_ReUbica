@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.ui.screens.HomeScreen
 
+import android.Manifest
 import android.location.Location
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,6 +29,7 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.gson.Gson
 import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
@@ -61,7 +63,7 @@ fun HomeScreen(
     val todosLosEmprendimientos by homeViewModel.todosLosEmprendimientos.collectAsState()
 
     var userLocation by remember { mutableStateOf<Location?>(null) }
-    val locationPermissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     var buscadoByCategory by remember { mutableStateOf(false) }
     var categoriaSeleccionada by remember { mutableStateOf<String?>(null) }
@@ -329,16 +331,34 @@ fun SeccionRestaurantes(
                         )
                     },
                     onVerTiendaClick = {
+                        val gson = Gson()
+                        val redesJsonString = emprendimiento.redes_sociales?.let { redes ->
+                            gson.toJson(
+                                mapOf(
+                                    "Instagram" to (redes.Instagram ?: ""),
+                                    "Facebook" to (redes.Facebook ?: ""),
+                                    "TikTok" to (redes.TikTok ?: ""),
+                                    "Twitter" to (redes.Twitter ?: "")
+                                ).filterValues { it.isNotBlank() }
+                            )
+                        } ?: ""
+
                         navController.navigate(
                             ComercioNavigation(
                                 id = emprendimiento.id.toString(),
                                 nombre = emprendimiento.nombre ?: "Sin nombre",
                                 descripcion = emprendimiento.descripcion ?: "Sin descripción",
-                                categoria = emprendimiento.categoriasPrincipales?.firstOrNull() ?: "Sin categoría",
+                                categoriasPrincipales = emprendimiento.categoriasPrincipales?.map { it }?: emptyList(),
                                 direccion = emprendimiento.direccion ?: "Sin dirección",
                                 latitud = emprendimiento.latitud ?: 0.0,
                                 longitud = emprendimiento.longitud ?: 0.0,
-                                horario = "8:00 AM - 5:00 PM"
+                                categoriasSecundarias = emprendimiento.categoriasSecundarias?.map { it } ?: emptyList(),
+                                logo = emprendimiento.logo ?: "",
+                                emprendimientoPhone = emprendimiento.emprendimientoPhone ?: "",
+                                redessociales = redesJsonString,
+                                userID = emprendimiento.userID.toString(),
+                                createdat = emprendimiento.created_at.toString(),
+                                updatedat = emprendimiento.updated_at.toString()
                             )
                         )
                     }
