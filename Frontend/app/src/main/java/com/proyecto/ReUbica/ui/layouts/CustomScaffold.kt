@@ -248,6 +248,25 @@ fun CustomScaffold(rootNavController: NavHostController){
                     )
                 }
 
+                composable(
+                    route = "product_detail/{productId}?token={token}&emprendimientoID={emprendimientoID}",
+                    arguments = listOf(
+                        navArgument("productId") { type = NavType.StringType },
+                        navArgument("token") { type = NavType.StringType },
+                        navArgument("emprendimientoID") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val productId = backStackEntry.arguments?.getString("productId") ?: ""
+                    val token = backStackEntry.arguments?.getString("token") ?: ""
+                    val emprendimientoID = backStackEntry.arguments?.getString("emprendimientoID") ?: ""
+
+                    ProductDetailScreen(
+                        productId = productId,
+                        token = token,
+                        emprendimientoID = emprendimientoID,
+                        navController = navController
+                    )
+                }
 
             }
             Spacer(modifier = Modifier.padding(innerPadding))
