@@ -2,12 +2,16 @@ package com.proyecto.ReUbica.ui.screens.RegisterScreen
 
 import android.app.Application
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -141,21 +145,34 @@ fun RegisterScreen(navController: NavHostController) {
                 modifier = Modifier.padding(4.dp).padding(top = 20.dp)
             )
 
-            Box(
-                modifier = Modifier
-                    .height(46.dp)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = errorMessage ?: "",
-                    color = Color.Red,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = abel,
-                    textAlign = TextAlign.Center
-                )
+            if (errorMessage != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .background(Color(0xFFFFE6E6), shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFFD32F2F), shape = RoundedCornerShape(8.dp))
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Error,
+                        contentDescription = "Error",
+                        tint = Color(0xFFD32F2F),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = errorMessage!!,
+                        color = Color(0xFFD32F2F),
+                        fontSize = 14.sp,
+                        fontFamily = abel,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
+
             Column(
                 modifier = Modifier.padding(top = 15.dp).padding(bottom = 20.dp)
             ) {

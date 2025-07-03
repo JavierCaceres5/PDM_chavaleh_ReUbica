@@ -175,21 +175,16 @@ fun ProfileScreen(
                     icon = Icons.Filled.ArrowOutward
                 )
 
-                Text(
-                    text = "Actividad",
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF5A3C1D),
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(start = 16.dp, top = 15.dp)
-                )
-
-                ListItemRow(
-                    "Notificaciones",
-                    onClick = { navController.navigate(NotificationsNavigation) },
-                    icon = Icons.Filled.ArrowOutward
-                )
-
                 if (rol == "cliente") {
+
+                    Text(
+                        text = "Actividad",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF5A3C1D),
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(start = 16.dp, top = 15.dp)
+                    )
+
                     ListItemRow(
                         text = "Registrar negocio",
                         onClick = { navController.navigate(RegisterLocalNavigation) },

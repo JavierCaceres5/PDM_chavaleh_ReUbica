@@ -65,7 +65,6 @@ fun RegisterLocalScreen3Content(
     val coroutineScope = rememberCoroutineScope()
 
     var showDialog by remember { mutableStateOf(false) }
-    var contadorProductos by remember { mutableStateOf(0) }
 
     val abel = FontFamily(Font(R.font.abelregular))
     val poppins = FontFamily(Font(R.font.poppinsextrabold))
@@ -84,6 +83,16 @@ fun RegisterLocalScreen3Content(
         if (uri != null) {
             createProducto.setImage(uri)
             createProducto.setValues("product_image", uri.toString())
+        }
+    }
+
+    val isSuccess by createProducto.success.collectAsState()
+
+    LaunchedEffect(isSuccess) {
+        if (isSuccess) {
+            showDialog = true
+            createProducto.clearProducto()
+            createProducto.setImage(null)
         }
     }
 
@@ -163,31 +172,6 @@ fun RegisterLocalScreen3Content(
             ) {
                 createProducto.setValues("precio", it)
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "Cantidad de Productos ingresados",
-                fontFamily = poppins,
-                fontSize = 14.sp,
-                color = Color(0xFF5A3C1D),
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = contadorProductos.toString(),
-                onValueChange = {},
-                enabled = false,
-                textStyle = LocalTextStyle.current.copy(fontFamily = abel, color = Color.Black),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFDFF2E1), RoundedCornerShape(8.dp)),
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = Color.Black,
-                    disabledBorderColor = Color.Transparent,
-                    disabledContainerColor = Color(0xFFDFF2E1)
-                ),
-                singleLine = true
-            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -280,14 +264,6 @@ fun RegisterLocalScreen3Content(
                             descripcionInvalida = false
                             coroutineScope.launch {
                                 createProducto.crearProducto(context)
-                                createProducto.success.collect { isSuccess ->
-                                    if (isSuccess) {
-                                        contadorProductos++
-                                        showDialog = true
-                                        createProducto.clearProducto()
-                                        createProducto.setImage(null)
-                                    }
-                                }
                             }
                         }
                     },

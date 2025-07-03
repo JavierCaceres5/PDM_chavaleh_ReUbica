@@ -13,6 +13,7 @@ import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.user.UserProfile
 import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
+import com.proyecto.ReUbica.data.repository.ProductoRepository
 import com.proyecto.ReUbica.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,9 +24,9 @@ import kotlinx.coroutines.launch
 
 class ProfileScreenViewModel(application: Application): AndroidViewModel(application) {
 
-
     private val repository = UserRepository()
     private val emprendimientoRepository = EmprendimientoRepository()
+    private val productoRepository = ProductoRepository()
     private val sessionManager = UserSessionManager(application)
 
     private val _emprendimiento = MutableStateFlow<EmprendimientoModel?>(null)

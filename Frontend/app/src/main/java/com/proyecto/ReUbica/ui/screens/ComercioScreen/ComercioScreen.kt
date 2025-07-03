@@ -46,9 +46,11 @@ fun ComercioScreen(
 ) {
     val context = LocalContext.current
     val userSessionManager = remember { UserSessionManager(context) }
+
     val business by businessViewModel.business.collectAsState()
     val favoritosViewModel: FavoritosViewModel = viewModel()
     val markerState = remember { MarkerState(position = business.location) }
+
 
     LaunchedEffect(Unit) {
         businessViewModel.setBusinessInfo(navArgs, userSessionManager)

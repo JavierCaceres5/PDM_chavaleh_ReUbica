@@ -84,6 +84,7 @@ class CreateProductoViewModel(
                 if (response.isSuccessful) {
                     val productoCreadoResponse = response.body()
                     if (productoCreadoResponse != null) {
+                        userSessionManager.saveProductoID(productoCreadoResponse.producto.id.toString())
                         Log.d(TAG, " Producto creado exitosamente: ${productoCreadoResponse.producto}")
                         _success.value = true
                         clearProducto()
