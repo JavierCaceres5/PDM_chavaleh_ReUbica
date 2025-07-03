@@ -67,11 +67,17 @@ data class ComercioNavigation(
     val id: String,
     val nombre: String,
     val descripcion: String,
-    val categoria: String,
+    val categoriasSecundarias: List<String>,
+    val categoriasPrincipales: List<String>,
+    val logo: String,
     val direccion: String,
+    val emprendimientoPhone: String,
+    val redessociales: String?,
+    val userID: String,
     val latitud: Double,
     val longitud: Double,
-    val horario: String
+    val createdat: String,
+    val updatedat: String
 )
 object ProductDetailNavigation {
     const val route = "product_detail"

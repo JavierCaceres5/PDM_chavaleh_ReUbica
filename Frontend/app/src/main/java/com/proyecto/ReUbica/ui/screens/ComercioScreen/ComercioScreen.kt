@@ -1,6 +1,11 @@
 package com.proyecto.ReUbica.ui.screens.ComercioScreen
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,6 +35,7 @@ import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.ui.Components.ProductCard
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
+import com.proyecto.ReUbica.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,10 +157,73 @@ fun ComercioScreen(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Icon(Icons.Default.Facebook, contentDescription = null)
-                Icon(Icons.Default.Facebook, contentDescription = null)
-                Icon(Icons.Default.Facebook, contentDescription = null)
-                Icon(Icons.Default.Facebook, contentDescription = null)
+
+                val instagramUrl = business.redes_sociales?.Instagram
+                if (!instagramUrl.isNullOrBlank()) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.instagram),
+                        contentDescription = "Instagram",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                val uri = Uri.parse(instagramUrl)
+                                val webIntent = Intent(Intent.ACTION_VIEW, uri)
+                                context.startActivity(webIntent)
+                            }
+                    )
+                }
+
+                val facebookUrl = business.redes_sociales?.Facebook
+                if (!facebookUrl.isNullOrBlank()) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.facebook),
+                        contentDescription = "Facebook",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                val uri = Uri.parse(facebookUrl)
+                                val webIntent = Intent(Intent.ACTION_VIEW, uri)
+                                context.startActivity(webIntent)
+                            }
+                    )
+                }
+
+                val tiktokUrl = business.redes_sociales?.TikTok
+                if (!tiktokUrl.isNullOrBlank()) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.tiktok),
+                        contentDescription = "Tiktok",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                val uri = Uri.parse(tiktokUrl)
+                                val webIntent = Intent(Intent.ACTION_VIEW, uri)
+                                context.startActivity(webIntent)
+                            }
+                    )
+                }
+
+                val twitterUrl = business.redes_sociales?.Twitter
+                if (!twitterUrl.isNullOrBlank()) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.x),
+                        contentDescription = "X",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable {
+                                val uri = Uri.parse(twitterUrl)
+                                val webIntent = Intent(Intent.ACTION_VIEW, uri)
+                                context.startActivity(webIntent)
+                            }
+                    )
+                }
+
+
+
 
             }
 
