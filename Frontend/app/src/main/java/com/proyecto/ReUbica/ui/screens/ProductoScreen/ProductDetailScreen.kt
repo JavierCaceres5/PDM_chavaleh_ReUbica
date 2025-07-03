@@ -118,98 +118,90 @@ fun ProductDetailScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            product.nombre.toString(),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF5A3C1D)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            product.descripcion.toString(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF5A3C1D)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            "$${product.precio}",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF5A3C1D)
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row {
-            Column(modifier = Modifier.fillMaxWidth(0.6f)) {
-                InfoRow(Icons.Outlined.SettingsPhone, "8874-7387")
-                InfoRow(Icons.Outlined.Schedule, "Horario 2-5 pm")
-                InfoRow(Icons.Outlined.LocationOn, "Universidad José Simeón Cañas")
-                InfoRow(Icons.Outlined.Email, "correo@ejemplo.com")
-            }
-
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .weight(1f)
+                    .padding(end = 12.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color(0xFF5A3C1D), CircleShape)
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = String.format("%.1f", promedioRating),
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF5D4F30)
-                        )
-                        Row(horizontalArrangement = Arrangement.Center) {
-                            val fullStars = floor(promedioRating).toInt()
-                            val hasHalfStar = (promedioRating - fullStars) >= 0.5
+                Text(
+                    text = product.nombre.orEmpty(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF5A3C1D),
+                    maxLines = 2
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = product.descripcion.orEmpty(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF5A3C1D),
+                    maxLines = 3
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "$${product.precio}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF5A3C1D)
+                )
+            }
 
-                            repeat(fullStars) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = Color(0xFFFFD700),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                            if (hasHalfStar) {
-                                Icon(
-                                    imageVector = Icons.Default.StarHalf, // Usa tu ícono de media estrella aquí si tienes uno
-                                    contentDescription = null,
-                                    tint = Color(0xFFFFD700),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                            repeat(5 - fullStars - if (hasHalfStar) 1 else 0) {
-                                Icon(
-                                    imageVector = Icons.Default.StarOutline,
-                                    contentDescription = null,
-                                    tint = Color.Gray,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
+            Box(
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(CircleShape)
+                    .border(2.dp, Color(0xFF5A3C1D), CircleShape)
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = String.format("%.1f", promedioRating),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF5D4F30)
+                    )
+                    Row(horizontalArrangement = Arrangement.Center) {
+                        val fullStars = floor(promedioRating).toInt()
+                        val hasHalfStar = (promedioRating - fullStars) >= 0.5
+
+                        repeat(fullStars) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = Color(0xFFFFD700),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                        if (hasHalfStar) {
+                            Icon(
+                                imageVector = Icons.Default.StarHalf,
+                                contentDescription = null,
+                                tint = Color(0xFFFFD700),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                        repeat(5 - fullStars - if (hasHalfStar) 1 else 0) {
+                            Icon(
+                                imageVector = Icons.Default.StarOutline,
+                                contentDescription = null,
+                                tint = Color.Gray,
+                                modifier = Modifier.size(14.dp)
+                            )
                         }
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(30.dp))
-        Divider(color = Color(0xFF5A3C1D), thickness = 2.dp)
+        Spacer(modifier = Modifier.height(12.dp))
+        HorizontalDivider(color = Color(0xFF5A3C1D), thickness = 2.dp)
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
@@ -218,112 +210,97 @@ fun ProductDetailScreen(
             color = Color(0xFF5D4F30)
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .fillMaxHeight()
-            ) {
-                if (reviewLoading) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFF5A3C1D))
-                    }
-                } else if (filteredReviews.isEmpty()) {
-                    Text(
-                        "Aún no hay reseñas de este producto.",
-                        color = Color.Gray,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(filteredReviews) { review ->
-                            ReviewItem(
-                                review = review,
-                                token = token,
-                                reviewUserViewModel = reviewUserViewModel
-                            )
-                        }
-                    }
+            if (reviewLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFF5A3C1D))
                 }
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(horizontalArrangement = Arrangement.Center) {
-                    repeat(5) { index ->
-                        Icon(
-                            imageVector = if (index < ratingSeleccionado) Icons.Default.Star else Icons.Default.StarOutline,
-                            contentDescription = "Estrella ${index + 1}",
-                            tint = Color(0xFFFFD700),
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clickable { ratingSeleccionado = index + 1 }
+            } else if (filteredReviews.isEmpty()) {
+                Text(
+                    "Aún no hay reseñas de este producto.",
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filteredReviews) { review ->
+                        ReviewItem(
+                            review = review,
+                            token = token,
+                            reviewUserViewModel = reviewUserViewModel
                         )
                     }
                 }
+            }
+        }
 
-                OutlinedTextField(
-                    value = comentario,
-                    onValueChange = { comentario = it },
-                    label = { Text("Escribe tu comentario") },
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .height(60.dp),
-                )
+        Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedButton(
-                    onClick = {
-                        if (comentario.isNotBlank() && ratingSeleccionado > 0) {
-                            reviewViewModel.postReview(
-                                token = token,
-                                productoID = productId,
-                                comentario = comentario,
-                                rating = ratingSeleccionado.toDouble(),
-                                emprendimientoID = emprendimientoID,
-                                onConflict = {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("Ya has calificado este producto.")
-                                    }
-                                }
-                            )
-                            comentario = ""
-                            ratingSeleccionado = 0
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                ) {
-                    Text("Enviar", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(horizontalArrangement = Arrangement.Center) {
+                repeat(5) { index ->
+                    Icon(
+                        imageVector = if (index < ratingSeleccionado) Icons.Default.Star else Icons.Default.StarOutline,
+                        contentDescription = "Estrella ${index + 1}",
+                        tint = Color(0xFFFFD700),
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clickable { ratingSeleccionado = index + 1 }
+                    )
                 }
+            }
+
+            OutlinedTextField(
+                value = comentario,
+                onValueChange = { comentario = it },
+                label = { Text("Escribe tu comentario") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+            )
+
+            OutlinedButton(
+                onClick = {
+                    if (comentario.isNotBlank() && ratingSeleccionado > 0) {
+                        reviewViewModel.postReview(
+                            token = token,
+                            productoID = productId,
+                            comentario = comentario,
+                            rating = ratingSeleccionado.toDouble(),
+                            emprendimientoID = emprendimientoID,
+                            onConflict = {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Ya has calificado este producto.")
+                                }
+                            }
+                        )
+                        comentario = ""
+                        ratingSeleccionado = 0
+                    }
+                },
+                modifier = Modifier.padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+            ) {
+                Text("Enviar", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold)
             }
         }
     }
 }
-
-
-@Composable
-fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null)
-        Spacer(Modifier.width(6.dp))
-        Text(text = text, color = Color(0xFF5A3C1D))
-    }
-}
-
 @Composable
 fun ReviewItem(
     review: ReviewModel,
