@@ -2,6 +2,8 @@ package com.proyecto.ReUbica.ui.screens.LoginScreen
 
 import android.app.Application
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -98,7 +101,7 @@ fun LoginScreen(
             .verticalScroll(scrollState)
             .padding(horizontal = 20.dp)
             .padding(top = 35.dp)
-            .padding(25.dp),
+            .padding(15.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -219,17 +222,35 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(20.dp))
+
         val showError = errorMessage ?: error
         if (showError != null) {
-            Text(
-                text = showError,
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                fontFamily = abel,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(vertical = 8.dp).padding(top = 10.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .background(Color(0xFFFFE6E6), shape = RoundedCornerShape(8.dp))
+                    .border(1.dp, Color(0xFFD32F2F), shape = RoundedCornerShape(8.dp))
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Error,
+                    contentDescription = "Error",
+                    tint = Color(0xFFD32F2F),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = showError,
+                    color = Color(0xFFD32F2F),
+                    fontSize = 14.sp,
+                    fontFamily = abel,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(28.dp))

@@ -115,6 +115,7 @@ class RegistroComercioViewModel : ViewModel() {
                     val body = response.body()
                     if (body != null) {
                         userSessionManager.saveEmprendimientoID(body.emprendimiento.id.toString())
+                        Log.d(TAG, "EmprendimientoID guardado: ${body.emprendimiento.id}")
 
                         if (body.updatedToken.isNotBlank()) {
                             userSessionManager.actualizarSesionConNuevoToken(body.updatedToken)

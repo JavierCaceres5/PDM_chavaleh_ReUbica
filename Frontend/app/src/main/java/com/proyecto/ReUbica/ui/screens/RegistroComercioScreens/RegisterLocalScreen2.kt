@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.ui.screens.RegistroComercioScreens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -77,6 +78,8 @@ fun RegisterLocalScreen2Content(
 
     val emprendimiento by registroComercio.emprendimiento.collectAsState()
     val redesSociales = emprendimiento.redes_sociales
+
+    var showDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val placesClient = remember {
@@ -460,6 +463,7 @@ fun RegisterLocalScreen2Content(
                             registroComercio.initSessionManager(navController.context)
                             registroComercio.createEmprendimiento()
                             publicarExitoso = true
+                            showDialog = true
                         }
                     }
                 },
@@ -494,6 +498,52 @@ fun RegisterLocalScreen2Content(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(
+                    "¡Todo listo!",
+                    fontFamily = poppins,
+                    fontSize = 20.sp,
+                    color = Color.Black,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Text(
+                    "Tu emprendimiento ha sido publicado con éxito.",
+                    fontFamily = abel,
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { showDialog = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text("Aceptar", fontFamily = poppins)
+                }
+            },
+            containerColor = Color.White,
+            tonalElevation = 6.dp,
+            shape = RoundedCornerShape(12.dp)
+        )
+    }
+
 }
 
 suspend fun getCoordinatesFromAddress(address: String): LatLng? = withContext(Dispatchers.IO) {
