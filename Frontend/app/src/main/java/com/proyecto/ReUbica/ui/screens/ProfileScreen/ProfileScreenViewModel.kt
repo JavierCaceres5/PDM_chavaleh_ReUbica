@@ -8,7 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Tag
-import com.android.volley.VolleyLog.e
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.user.UserProfile
@@ -43,6 +42,9 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
     private val _negocioEliminado = MutableStateFlow(false)
     val negocioEliminado: StateFlow<Boolean> = _negocioEliminado
 
+    private val _hasProductos = MutableStateFlow(false)
+    val hasProductos: StateFlow<Boolean> = _hasProductos
+
     val user: StateFlow<UserProfile?> = sessionManager.userSessionFlow
         .map { it?.userProfile }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -66,6 +68,7 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                     Log.d(TAG, "Cuenta eliminada correctamente")
                 } else {
                     _error.value = "Error al eliminar cuenta: ${response.message()}"
+                    Log.e(TAG, "Error al eliminar cuenta: ${response.message()}")
                 }
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Error deleting account", e)
@@ -80,11 +83,28 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
             _loading.value = true
             _error.value = null
             _negocioEliminado.value = false
+            _hasProductos.value = false
 
             try {
                 val token = sessionManager.getToken()
-                if (token.isNullOrBlank()) {
-                    _error.value = "Token no encontrado. Por favor, inicie sesión nuevamente."
+                val emprendimientoID = sessionManager.getEmprendimientoID()
+
+                if (token.isNullOrBlank() || emprendimientoID.isNullOrBlank()) {
+                    _error.value = "Token o ID de emprendimiento no disponible."
+                    _loading.value = false
+                    return@launch
+                }
+
+                val productosResponse = productoRepository.getProductosByEmprendimiento(token, emprendimientoID)
+                if (productosResponse.isSuccessful) {
+                    val productos = productosResponse.body() ?: emptyList()
+                    if (productos.isNotEmpty()) {
+                        _hasProductos.value = true
+                        _loading.value = false
+                        return@launch
+                    }
+                } else {
+                    _error.value = "Error al verificar productos: ${productosResponse.message()}"
                     _loading.value = false
                     return@launch
                 }
@@ -92,21 +112,25 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                 val response = emprendimientoRepository.deleteMiEmprendimiento(token)
                 if (response.isSuccessful) {
                     val body = response.body()
-                    if (body != null) {
-                        val updatedToken = body.updatedToken
+                    val updatedToken = body?.updatedToken
+                    if (!updatedToken.isNullOrBlank()) {
                         sessionManager.actualizarSesionConNuevoToken(updatedToken)
-                        Log.d(TAG, "Emprendimiento eliminado correctamente. Nuevo token: $updatedToken")
                     }
                     _negocioEliminado.value = true
                 } else {
                     _error.value = "Error al eliminar emprendimiento: ${response.message()}"
                 }
+
             } catch (e: Exception) {
                 _error.value = "Error de red: ${e.message}"
             } finally {
                 _loading.value = false
             }
         }
+    }
+
+    fun resetHasProductos() {
+        _hasProductos.value = false
     }
 
     fun resetNegocioEliminado() {

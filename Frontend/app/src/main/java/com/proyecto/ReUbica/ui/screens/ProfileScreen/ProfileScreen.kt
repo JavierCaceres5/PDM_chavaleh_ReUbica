@@ -86,6 +86,8 @@ fun ProfileScreen(
     val rol = user?.user_role
 
     val negocioEliminado by profileViewModel.negocioEliminado.collectAsState()
+    val hasProductos by profileViewModel.hasProductos.collectAsState()
+    val showHasProductosDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(negocioEliminado) {
         if (negocioEliminado) {
@@ -369,6 +371,48 @@ fun ProfileScreen(
                 }
             )
         }
+
+        if (hasProductos) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { profileViewModel.resetHasProductos() },
+                confirmButton = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            onClick = { profileViewModel.resetHasProductos() },
+                            modifier = Modifier.width(130.dp),
+                            shape = RoundedCornerShape(0.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF8E210B),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text("Entendido", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                },
+                title = {
+                    Text(
+                        "No puedes eliminar tu negocio",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
+                    )
+                },
+                text = {
+                    Text(
+                        "Para eliminar tu negocio primero debes eliminar todos los productos asociados.",
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
+                    )
+                }
+            )
+        }
+
 
         if (showBlockedDeleteAccountDialog.value) {
             AlertDialog(
