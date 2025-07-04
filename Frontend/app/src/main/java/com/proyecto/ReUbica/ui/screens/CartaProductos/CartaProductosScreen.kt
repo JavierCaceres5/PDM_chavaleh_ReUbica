@@ -84,7 +84,6 @@ fun CartaProductosScreen(
     var imagenEditada by remember { mutableStateOf("") }
     var nuevaImagenUri by remember { mutableStateOf<Uri?>(null) }
 
-// Picker:
     val pickImageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { nuevaImagenUri = it }
     }
@@ -144,7 +143,8 @@ fun CartaProductosScreen(
                 .padding(start = 16.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { navController.navigate(RegisterLocalScreen3Navigation) }) {
+            IconButton(onClick = { navController.navigate(RegisterLocalScreen3Navigation.withArgs(true))
+            }) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = "Agregar",
@@ -217,7 +217,7 @@ fun CartaProductosScreen(
                     onClick = {
                         showDialogDelete = false
                         confirmEliminando?.let {
-                            viewModel.eliminarProducto(it.id.toString())  // <-- AQUÍ
+                            viewModel.eliminarProducto(it.id.toString())
                         }
                         confirmEliminando = null
                     },
@@ -300,7 +300,7 @@ fun CartaProductosScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Imagen actual o nueva
+
                     if (nuevaImagenUri != null) {
                         AsyncImage(
                             model = nuevaImagenUri,
@@ -341,7 +341,7 @@ fun CartaProductosScreen(
                             )
                         }
                         productoParaEditar = null
-                        nuevaImagenUri = null // <- Limpia selección al guardar
+                        nuevaImagenUri = null
                     },
                     modifier = Modifier
                         .width(130.dp)
@@ -359,7 +359,7 @@ fun CartaProductosScreen(
                     onClick = {
                         showDialogEditar = false
                         productoParaEditar = null
-                        nuevaImagenUri = null // <- Limpia selección al cancelar
+                        nuevaImagenUri = null
                     },
                     modifier = Modifier
                         .width(130.dp)

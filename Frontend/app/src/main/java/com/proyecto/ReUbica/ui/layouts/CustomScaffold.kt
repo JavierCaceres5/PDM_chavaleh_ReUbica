@@ -66,7 +66,6 @@ import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.navigations.TerminosYCondicionesNavigation
 import com.proyecto.ReUbica.ui.screens.CartaProductos.CartaProductosScreen
 import com.proyecto.ReUbica.ui.screens.CartaProductos.CartaProductosViewModel
-import com.proyecto.ReUbica.ui.screens.ComercioScreen.ChatComercioScreen
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen1
 import com.proyecto.ReUbica.ui.screens.RegistroComercioScreens.RegisterLocalScreen2
 import com.proyecto.ReUbica.ui.screens.ComercioScreen.ComercioScreen
@@ -136,16 +135,16 @@ fun CustomScaffold(rootNavController: NavHostController){
                 currentRoute != LocalInformationScreenNavigation::class.qualifiedName &&
                 currentRoute != CartaProductosScreenNavigation::class.qualifiedName &&
                 !currentRoute.orEmpty().startsWith("chat_comercio")
-                ){
+            ){
                 TopBar(navController)
             }
         },
-            bottomBar = {
-                if (showBars){
-                    BottomBar(
-                        navItems = navItems,
-                        selectedItem = selectedItem,
-                        onItemSelected = { onItemSelected(it) }
+        bottomBar = {
+            if (showBars){
+                BottomBar(
+                    navItems = navItems,
+                    selectedItem = selectedItem,
+                    onItemSelected = { onItemSelected(it) }
                 )
             }
         },
@@ -207,8 +206,24 @@ fun CustomScaffold(rootNavController: NavHostController){
                 composable<RegisterLocalScreen2Navigation> {
                     RegisterLocalScreen2(navController, registroComercioViewModel)
                 }
-                composable<RegisterLocalScreen3Navigation> {
-                    RegisterLocalScreen3(navController, registroComercioViewModel, createProductoViewModel)
+
+
+                composable(
+                    route = "${RegisterLocalScreen3Navigation.route}?${RegisterLocalScreen3Navigation.argIsAddingMore}={${RegisterLocalScreen3Navigation.argIsAddingMore}}",
+                    arguments = listOf(
+                        navArgument(RegisterLocalScreen3Navigation.argIsAddingMore) {
+                            type = NavType.BoolType
+                            defaultValue = false
+                        }
+                    )
+                ) { backStackEntry ->
+                    val isAddingMore = backStackEntry.arguments?.getBoolean(RegisterLocalScreen3Navigation.argIsAddingMore) == true
+                    RegisterLocalScreen3(
+                        navController = navController,
+                        registroComercioViewModel = registroComercioViewModel,
+                        createProductoViewModel = createProductoViewModel,
+                        isAddingMoreProducts = isAddingMore
+                    )
                 }
 
                 composable(LoadingScreenNavigation::class.qualifiedName ?: "") {
@@ -234,16 +249,7 @@ fun CustomScaffold(rootNavController: NavHostController){
                 }
 
                 composable<CartaProductosScreenNavigation>{
-                     CartaProductosScreen(navController)
-                }
-
-                composable("chat_comercio/{name}/{phone}") { backStackEntry ->
-                    val name = backStackEntry.arguments?.getString("name") ?: ""
-                    val phone = backStackEntry.arguments?.getString("phone") ?: ""
-                    ChatComercioScreen(
-                        navController = navController,
-                        businessName = name,
-                    )
+                    CartaProductosScreen(navController)
                 }
 
                 composable(

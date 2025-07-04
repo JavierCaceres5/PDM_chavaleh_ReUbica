@@ -85,6 +85,7 @@ fun RegisterLocalScreen2Content(
     val error by registroComercio.error.collectAsState()
     val showError = errorMessage ?: error
 
+    // --- Mantén el mapa centrado al marker actual
     LaunchedEffect(markerPosition, mapLoaded) {
         markerPosition?.let {
             if (mapLoaded) {
@@ -104,6 +105,7 @@ fun RegisterLocalScreen2Content(
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // --- Dirección cambiada por texto (no coordenada manual) actualiza markerPosition
             LaunchedEffect(emprendimiento.direccion, mapLoaded) {
                 if (emprendimiento.direccion.isNotBlank() && mapLoaded && !isByCoordinates) {
                     coroutineScope.launch {
@@ -192,12 +194,14 @@ fun RegisterLocalScreen2Content(
                     onValueChange = { input ->
                         registroComercio.setValues("direccion", input)
                         showDropdown = true
+                        // Aquí SOLO actualiza texto y dropdown
                         if (input.isBlank()) {
                             registroComercio.setValues("latitud", "")
                             registroComercio.setValues("longitud", "")
                             suggestions.clear()
                             markerPosition = null
                         } else {
+                            // Solo buscar sugerencias (NUNCA buscar coordenadas aquí)
                             coroutineScope.launch {
                                 val request = FindAutocompletePredictionsRequest.builder()
                                     .setQuery(input)
@@ -236,6 +240,7 @@ fun RegisterLocalScreen2Content(
                                         return@launch
                                     }
                                 }
+                                // Es dirección
                                 val coords = getCoordinatesFromAddress(emprendimiento.direccion)
                                 coords?.let {
                                     markerPosition = it

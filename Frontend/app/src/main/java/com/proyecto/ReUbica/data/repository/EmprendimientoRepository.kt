@@ -19,18 +19,16 @@ class EmprendimientoRepository {
 
     private val api = RetrofitInstance.emprendimientoApi
 
-    suspend fun createEmprendimiento(
-        token: String,
-        data: EmprendimientoCreateRequest,
-        logoFile: File?
-    ): Response<EmprendimientoResponse> {
+    suspend fun createEmprendimiento(token: String, data: EmprendimientoCreateRequest): Response<EmprendimientoResponse> {
         val gson = Gson()
 
-        fun String.toBody() = this.toRequestBody("text/plain".toMediaTypeOrNull())
+        fun String.toBody(): RequestBody =
+            this.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        val logoPart = logoFile?.let {
-            val requestFile = it.asRequestBody("image/*".toMediaTypeOrNull())
-            MultipartBody.Part.createFormData("logo", it.name, requestFile)
+        val logoPart = data.logo?.let { path ->
+            val file = File(path)
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("logo", file.name, requestFile)
         }
 
         return api.registrarEmprendimiento(
@@ -45,6 +43,7 @@ class EmprendimientoRepository {
             lat = data.latitud.toString().toBody(),
             lng = data.longitud.toString().toBody(),
             logo = logoPart
+
         )
     }
 

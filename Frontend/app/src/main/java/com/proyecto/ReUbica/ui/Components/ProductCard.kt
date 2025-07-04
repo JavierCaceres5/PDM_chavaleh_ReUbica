@@ -21,10 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-
 import com.proyecto.ReUbica.data.model.producto.ProductoResponse
-
-import com.proyecto.ReUbica.ui.navigations.ProductDetailNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 
 @Composable

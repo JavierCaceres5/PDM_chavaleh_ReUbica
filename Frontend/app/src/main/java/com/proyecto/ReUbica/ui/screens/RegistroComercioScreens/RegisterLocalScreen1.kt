@@ -292,11 +292,9 @@ fun RegisterLocalScreen1Content(
             }
 
 
-
             Button(
                 onClick = {
-                    registroComercio.createEmprendimiento(context)
-                    onNext()
+
                     val descripcionValida = emprendimiento.descripcion.length <= 500
 
                     if (
@@ -332,6 +330,7 @@ fun RegisterLocalScreen1Content(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+
 }
 
 @Composable

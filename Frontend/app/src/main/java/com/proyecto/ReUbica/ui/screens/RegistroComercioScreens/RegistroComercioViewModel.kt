@@ -8,17 +8,21 @@ import androidx.lifecycle.viewModelScope
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
+import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
+import com.proyecto.ReUbica.data.repository.ProductoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.UUID
 
 class RegistroComercioViewModel : ViewModel() {
 
     private lateinit var userSessionManager: UserSessionManager
     private val repository = EmprendimientoRepository()
-
+    private val productoRepository = ProductoRepository()
+    private val _emprendimientoId = MutableStateFlow<UUID?>(null)
     private val _emprendimiento = MutableStateFlow(
         EmprendimientoCreateRequest(
             nombre = "",
@@ -88,50 +92,63 @@ class RegistroComercioViewModel : ViewModel() {
         }
         _emprendimiento.value = _emprendimiento.value.copy(redes_sociales = nuevasRedes)
     }
+    suspend fun obtenerProductosDelEmprendimiento(): List<ProductoModel> {
+        if (!::userSessionManager.isInitialized) return emptyList()
+        val token = userSessionManager.getToken() ?: return emptyList()
+        val idEmprendimiento = _emprendimientoId.value ?: return emptyList()
 
-    fun createEmprendimiento(context: Context) {
+        return try {
+            val response = productoRepository.getProductosByEmprendimiento(token, idEmprendimiento.toString())
+            if (response.isSuccessful) {
+                response.body() ?: emptyList()
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun createEmprendimiento() {
         viewModelScope.launch {
             if (!::userSessionManager.isInitialized) {
                 _error.value = "Session manager no inicializado"
                 return@launch
             }
-            _loading.value = true
+
             val token = userSessionManager.getToken()
+
             if (token.isNullOrBlank()) {
                 _error.value = "No se encontró token de sesión"
-                _loading.value = false
                 return@launch
             }
 
-            val logoUri = _emprendimiento.value.logo?.let { Uri.parse(it) }
-            val logoFile = logoUri?.let { getFileFromUri(context, it) }
+            try {
+                val response = repository.createEmprendimiento(token, _emprendimiento.value)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null) {
+                        userSessionManager.saveEmprendimientoID(body.emprendimiento.id.toString())
+                        Log.d(TAG, "EmprendimientoID guardado: ${body.emprendimiento.id}")
 
-            val response = repository.createEmprendimiento(token, _emprendimiento.value, logoFile)
-            Log.e(TAG, response.toString())
-            if (!response.isSuccessful) {
-                _error.value = "Error de creación de emprendimiento: ${response.message()}"
-                _loading.value = false
-                Log.e(TAG, "Error de emprendimiento: ${_emprendimiento.value}")
-                Log.e(TAG, token)
-                return@launch
-            }
-
-            val body = response.body()
-            if (body != null) {
-                if (!body.updatedToken.isNullOrBlank()) {
-                    userSessionManager.actualizarSesionConNuevoToken(body.updatedToken)
+                        if (body.updatedToken.isNotBlank()) {
+                            userSessionManager.actualizarSesionConNuevoToken(body.updatedToken)
+                        }
+                        _success.value = true
+                        Log.d(TAG, "Emprendimiento creado exitosamente: ${_emprendimiento.value}")
+                    } else {
+                        _error.value = "Respuesta vacía del servidor"
+                    }
+                } else {
+                    _error.value = "Error de creación de emprendimiento ${response.message()}"
                 }
-                Log.d("RegistroComercioVM", "Token actualizado: ${body.updatedToken}")
-                Log.d("RegistroComercioVM", "Emprendimiento creado: ${body.emprendimiento}")
+            } catch (e: Exception) {
+                _error.value = "Error en la creación: ${e.localizedMessage}"
             }
-
-            Log.e(TAG, "Emprendimiento creado exitosamente: ${_emprendimiento.value}")
-            _error.value = null
-            _success.value = true
-            _loading.value = false
         }
     }
 
+    // ------------ HELPER PARA URI → FILE ------------
     fun getFileFromUri(context: Context, uri: Uri): File? {
         val inputStream = context.contentResolver.openInputStream(uri) ?: return null
         val file = File(context.cacheDir, "logo_temp")

@@ -51,7 +51,14 @@ object RegisterLocalScreen1Navigation
 object RegisterLocalScreen2Navigation
 
 @Serializable
-object RegisterLocalScreen3Navigation
+object RegisterLocalScreen3Navigation {
+    const val route = "register_local_screen_3"
+    const val argIsAddingMore = "isAddingMoreProducts"
+
+    fun withArgs(isAddingMoreProducts: Boolean): String {
+        return "$route?$argIsAddingMore=$isAddingMoreProducts"
+    }
+}
 
 @Serializable
 object SessionCheckNavigation
@@ -79,15 +86,6 @@ data class ComercioNavigation(
     val createdat: String,
     val updatedat: String
 )
-object ProductDetailNavigation {
-    const val route = "product_detail"
-    const val tokenArg = "token"
-    const val emprendimientoIdArg = "emprendimientoID"
-
-    fun withArgs(productId: String, token: String, emprendimientoID: String): String {
-        return "$route/$productId?$tokenArg=$token&$emprendimientoIdArg=$emprendimientoID"
-    }
-}
 
 @Serializable
 object LocalInformationScreenNavigation
