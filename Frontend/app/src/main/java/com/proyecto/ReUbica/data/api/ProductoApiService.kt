@@ -51,7 +51,7 @@ interface ProductoApiService {
         @Part("descripcion") descripcion: RequestBody,
         @Part("precio") precio: RequestBody,
         @Part product_image: MultipartBody.Part? = null
-    ): Response<ProductoModel> // Si tu backend retorna el producto actualizado
+    ): Response<ProductoModel>
 
 
 }

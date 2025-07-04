@@ -58,6 +58,7 @@ class EmprendimientoRepository {
         return api.deleteMiEmprendimiento("Bearer $token")
     }
 
+
     suspend fun getMiEmprendimiento(token: String): Response<EmprendimientoModel> {
         return api.getMiEmprendimiento("Bearer $token")
     }

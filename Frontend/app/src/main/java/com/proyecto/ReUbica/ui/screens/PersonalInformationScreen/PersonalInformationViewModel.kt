@@ -3,17 +3,17 @@ package com.proyecto.ReUbica.ui.screens.PersonalInformationScreen
 import android.app.Application
 import android.content.Context
 import android.net.Uri
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.proyecto.ReUbica.data.local.UserSession
 import com.proyecto.ReUbica.data.local.UserSessionManager
-import com.proyecto.ReUbica.data.model.user.UpdateProfileRequest
 import com.proyecto.ReUbica.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 
 class PersonalInformationViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -32,8 +32,6 @@ class PersonalInformationViewModel(application: Application) : AndroidViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    private val TAG = "PersonalInformationViewModel"
-
     init {
         viewModelScope.launch {
             sessionManager.userSessionFlow.collect { session ->
@@ -42,31 +40,57 @@ class PersonalInformationViewModel(application: Application) : AndroidViewModel(
         }
     }
 
-    fun updateProfile(updatedProfile: UpdateProfileRequest) {
+    fun updateProfile(
+        firstname: String?,
+        lastname: String?,
+        email: String?,
+        phone: String?,
+        uri: Uri? = null,
+        context: Context
+    ) {
         viewModelScope.launch {
             try {
+                _loading.value = true
                 val token = sessionManager.getToken() ?: return@launch
-                val response = repository.updateAccount(token, updatedProfile)
 
-                if (response.isSuccessful) {
-                    val currentSession = _userSession.value
-                    if (currentSession != null) {
-                        val newUserProfile = currentSession.userProfile.copy(
-                            firstname = updatedProfile.firstname,
-                            lastname = updatedProfile.lastname,
-                            email = updatedProfile.email,
-                            phone = updatedProfile.phone,
-                            user_icon = updatedProfile.user_icon ?: currentSession.userProfile.user_icon
-                        )
-                        sessionManager.saveUserSession(token, newUserProfile)
-                        Log.e(TAG, "Profile updated successfully: $newUserProfile")
+                val user = _userSession.value?.userProfile ?: return@launch
+
+                val finalFirstname = firstname?.takeIf { it.isNotBlank() } ?: user.firstname ?: ""
+                val finalLastname = lastname?.takeIf { it.isNotBlank() } ?: user.lastname ?: ""
+                val finalEmail = email?.takeIf { it.isNotBlank() } ?: user.email ?: ""
+                val finalPhone = phone?.takeIf { it.isNotBlank() } ?: user.phone ?: ""
+
+                val imageFile = uri?.let {
+                    File.createTempFile("profile", ".jpg", context.cacheDir).apply {
+                        context.contentResolver.openInputStream(uri)?.use { input ->
+                            FileOutputStream(this).use { output -> input.copyTo(output) }
+                        }
                     }
                 }
+
+                val result = repository.updateProfileWithImage(
+                    token = token,
+                    firstname = finalFirstname,
+                    lastname = finalLastname,
+                    email = finalEmail,
+                    phone = finalPhone,
+                    imageFile = imageFile
+                )
+
+                result.onSuccess { newUser ->
+                    sessionManager.saveUserSession(token, newUser)
+                    _userSession.value = UserSession(token, newUser)
+                    _success.value = true
+                }.onFailure { ex ->
+                    _error.value = "Error al actualizar perfil: ${ex.message}"
+                }
             } catch (e: Exception) {
-                e.message
+                Log.e("updateProfile", "Error: ${e.message}")
+                _error.value = e.message
+            } finally {
+                _loading.value = false
             }
         }
     }
-
 
 }
