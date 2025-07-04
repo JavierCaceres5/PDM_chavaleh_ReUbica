@@ -110,5 +110,31 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
+    fun updateEmprendimientoLogo(filePath: String) {
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
+            _success.value = null
+            try {
+                val token = sessionManager.getToken()
+                if (token.isNullOrBlank()) {
+                    _error.value = "Token no disponible, inicia sesión de nuevo"
+                    _loading.value = false
+                    return@launch
+                }
+                val response = emprendimientoRepository.updateEmprendimientoLogo(token, filePath)
+                _success.value = response.isSuccessful
+                if (response.isSuccessful) {
+                    cargarMiEmprendimiento() // Recarga la info actualizada del emprendimiento
+                }
+            } catch (e: Exception) {
+                _error.value = "Error de red: ${e.message}"
+                _success.value = false
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+
 
 }

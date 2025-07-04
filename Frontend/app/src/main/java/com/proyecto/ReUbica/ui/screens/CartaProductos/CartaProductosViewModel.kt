@@ -1,6 +1,7 @@
 package com.proyecto.ReUbica.ui.screens.CartaProductos
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -74,6 +75,7 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    /*** CARGA INSTANTÁNEA AL ELIMINAR ***/
     fun eliminarProducto(productoID: String) {
         viewModelScope.launch {
             _eliminando.value = true
@@ -85,10 +87,9 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
                     _error.value = "Token no encontrado"
                     return@launch
                 }
-                val response = productoRepository.deleteProducto("$token", productoID)
+                val response = productoRepository.deleteProducto(token, productoID)
                 if (response.isSuccessful) {
-                    Log.d(TAG, "Producto eliminado exitosamente: $productoID")
-                    cargarProductos()
+                    _productos.value = _productos.value.filterNot { it.id.toString() == productoID }
                 } else {
                     _error.value = "Error al eliminar producto: ${response.code()}"
                 }
@@ -99,26 +100,26 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
-
-    fun actualizarProducto(productoId: String, nombre: String, descripcion: String, precio: Double) {
+    fun actualizarProducto(
+        productoId: String,
+        nombre: String,
+        descripcion: String,
+        precio: Double,
+        nuevaImagenUri: Uri?
+    ) {
         viewModelScope.launch {
             try {
                 val token = userSessionManager.getToken() ?: return@launch
-                val updateData = UpdateProductoRequest(
-                    nombre = nombre,
-                    descripcion = descripcion,
-                    precio = precio,
+                val context = getApplication<Application>().applicationContext
+                val response = productoRepository.updateProducto(
+                    context, token, productoId, nombre, descripcion, precio, nuevaImagenUri
                 )
-                val response = productoRepository.updateProducto(token, productoId, updateData)
                 if (response.isSuccessful) {
-                    Log.d(TAG, "Producto actualizado exitosamente")
                     cargarProductos()
                 } else {
-                    Log.e(TAG, "Error al actualizar producto: ${response.code()}")
                     _error.value = "Error al actualizar producto: ${response.code()}"
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error al actualizar producto: ${e.message}")
                 _error.value = "Excepción: ${e.localizedMessage}"
             }
         }

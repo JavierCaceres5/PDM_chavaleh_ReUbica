@@ -14,6 +14,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 class EmprendimientoRepository {
 
@@ -70,6 +71,13 @@ class EmprendimientoRepository {
 
     suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
         return api.getAllEmprendimientos("Bearer $token")
+    }
+
+    suspend fun updateEmprendimientoLogo(token: String, filePath: String): Response<Any> {
+        val file = java.io.File(filePath)
+        val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), file)
+        val logo = MultipartBody.Part.createFormData("logo", file.name, requestFile)
+        return api.updateEmprendimientoLogo("Bearer $token", logo)
     }
 
 

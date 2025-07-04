@@ -128,7 +128,6 @@ fun SearchScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            // Buscador
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

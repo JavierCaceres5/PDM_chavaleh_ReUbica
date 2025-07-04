@@ -1,6 +1,7 @@
 package com.proyecto.ReUbica.ui.screens.PersonalInformationScreen
 
 import android.app.Application
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,6 +59,18 @@ fun LocalInformationScreen(
         factory = ViewModelFactory(application) { EmprendimientoViewModel(application) }
     )
 
+    var selectedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            selectedImageUri = uri
+            val realPath = com.proyecto.ReUbica.utils.getRealPathFromUri(context, uri)
+            viewModel.updateEmprendimientoLogo(realPath)
+        }
+    }
+
     val scrollState = rememberScrollState()
     var showRedes by remember { mutableStateOf(false) }
     val emprendimiento by viewModel.emprendimiento.collectAsState()
@@ -65,8 +78,8 @@ fun LocalInformationScreen(
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    val logoUri = emprendimiento?.logo?.toUri()
-    val imageUri = remember { mutableStateOf(logoUri) }
+    val logoPath = emprendimiento?.logo
+
 
     var editField by remember { mutableStateOf<String?>(null) }
     var editValue by remember { mutableStateOf(TextFieldValue("")) }
@@ -129,26 +142,39 @@ fun LocalInformationScreen(
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                if (imageUri.value != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(imageUri.value),
-                        contentDescription = "Emprendimiento Image",
-                        modifier = Modifier
-                            .size(140.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Filled.Store,
-                        contentDescription = "Default Emprendimiento Icon",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(120.dp)
-                    )
+                when {
+                    selectedImageUri != null -> {
+                        Image(
+                            painter = rememberAsyncImagePainter(selectedImageUri),
+                            contentDescription = "Nueva Imagen",
+                            modifier = Modifier
+                                .size(140.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    !logoPath.isNullOrBlank() -> {
+                        Image(
+                            painter = rememberAsyncImagePainter(logoPath),
+                            contentDescription = "Emprendimiento Image",
+                            modifier = Modifier
+                                .size(140.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    else -> {
+                        Icon(
+                            imageVector = Icons.Filled.Store,
+                            contentDescription = "Default Emprendimiento Icon",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(120.dp)
+                        )
+                    }
                 }
 
                 IconButton(
-                    onClick = { },
+                    onClick = { launcher.launch("image/*") },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = (-20).dp, y = (-36).dp)
@@ -162,6 +188,7 @@ fun LocalInformationScreen(
                     )
                 }
             }
+
         }
 
         Spacer(modifier = Modifier.height(35.dp))
