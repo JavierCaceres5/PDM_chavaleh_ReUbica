@@ -17,6 +17,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
 import androidx.core.net.toUri
+import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.UpdateEmprendimientoRequest
 import com.proyecto.ReUbica.data.model.producto.DeleteProductoResponse
 import com.proyecto.ReUbica.data.model.producto.ProductoModel

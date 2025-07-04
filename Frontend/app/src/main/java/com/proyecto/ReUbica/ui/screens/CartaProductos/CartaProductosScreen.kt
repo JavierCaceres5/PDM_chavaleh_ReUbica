@@ -136,7 +136,8 @@ fun CartaProductosScreen(
                 .padding(start = 16.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { navController.navigate(RegisterLocalScreen3Navigation) }) {
+            IconButton(onClick = { navController.navigate(RegisterLocalScreen3Navigation.withArgs(true))
+            }) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = "Agregar",

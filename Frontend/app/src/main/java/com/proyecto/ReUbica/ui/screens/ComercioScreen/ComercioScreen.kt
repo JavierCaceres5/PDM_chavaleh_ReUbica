@@ -36,6 +36,7 @@ import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.ui.Components.ProductCard
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.R
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,17 +58,6 @@ fun ComercioScreen(
     }
 
     Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    navController.navigate("chat_comercio/${business.nombre}/")
-                },
-                containerColor = Color(0xFF5A3C1D),
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Default.Email, contentDescription = "Chat")
-            }
-        },
         containerColor = Color.White
     ) { innerPadding ->
         Column(
@@ -75,7 +65,6 @@ fun ComercioScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
-                .padding(10.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -115,13 +104,13 @@ fun ComercioScreen(
 
                     Row {
                         Icon(
-                            imageVector = Icons.Default.Schedule,
+                            imageVector = Icons.Default.Phone,
                             contentDescription = null,
                             tint = Color.Black,
                             modifier = Modifier.padding(end = 4.dp)
                         )
                         Text(
-                            "8:00 AM - 5:00 PM",
+                            "Contacto: ${business.emprendimientoPhone}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF5A3C1D),
                             textAlign = TextAlign.Justify
@@ -167,7 +156,7 @@ fun ComercioScreen(
                         modifier = Modifier
                             .size(24.dp)
                             .clickable {
-                                val uri = Uri.parse(instagramUrl)
+                                val uri = instagramUrl.toUri()
                                 val webIntent = Intent(Intent.ACTION_VIEW, uri)
                                 context.startActivity(webIntent)
                             }
@@ -183,7 +172,7 @@ fun ComercioScreen(
                         modifier = Modifier
                             .size(24.dp)
                             .clickable {
-                                val uri = Uri.parse(facebookUrl)
+                                val uri = facebookUrl.toUri()
                                 val webIntent = Intent(Intent.ACTION_VIEW, uri)
                                 context.startActivity(webIntent)
                             }
@@ -199,7 +188,7 @@ fun ComercioScreen(
                         modifier = Modifier
                             .size(24.dp)
                             .clickable {
-                                val uri = Uri.parse(tiktokUrl)
+                                val uri = tiktokUrl.toUri()
                                 val webIntent = Intent(Intent.ACTION_VIEW, uri)
                                 context.startActivity(webIntent)
                             }
@@ -215,7 +204,7 @@ fun ComercioScreen(
                         modifier = Modifier
                             .size(24.dp)
                             .clickable {
-                                val uri = Uri.parse(twitterUrl)
+                                val uri = twitterUrl.toUri()
                                 val webIntent = Intent(Intent.ACTION_VIEW, uri)
                                 context.startActivity(webIntent)
                             }

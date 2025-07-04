@@ -41,7 +41,18 @@ class CreateProductoViewModel(
     private val _imagenUri = MutableStateFlow<Uri?>(null)
     val imagenUri = _imagenUri.asStateFlow()
 
+    private val _productosExistentes = MutableStateFlow<List<ProductoModel>>(emptyList())
+    val productosExistentes = _productosExistentes.asStateFlow()
+
     private val TAG = "CreateProductoViewModel"
+
+    fun setProductosExistentes(lista: List<ProductoModel>) {
+        _productosExistentes.value = lista
+    }
+
+    fun nombreProductoExiste(nombre: String): Boolean {
+        return productosExistentes.value.any { it.nombre.equals(nombre.trim(), ignoreCase = true) }
+    }
 
     fun setImage(uri: Uri?) {
         _imagenUri.value = uri
@@ -116,4 +127,10 @@ class CreateProductoViewModel(
         )
         _imagenUri.value = null
     }
+
+
+    fun resetSuccess() {
+        _success.value = false
+    }
+
 }

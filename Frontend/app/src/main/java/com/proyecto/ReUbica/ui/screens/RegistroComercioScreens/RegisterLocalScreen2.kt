@@ -481,7 +481,7 @@ fun RegisterLocalScreen2Content(
 
             Button(
                 onClick = {
-                    navController.navigate(RegisterLocalScreen3Navigation)
+                    navController.navigate(RegisterLocalScreen3Navigation.route)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
