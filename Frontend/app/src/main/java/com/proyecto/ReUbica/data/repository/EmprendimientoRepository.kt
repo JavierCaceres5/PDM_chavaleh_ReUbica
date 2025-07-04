@@ -71,4 +71,6 @@ class EmprendimientoRepository {
     suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
         return api.getAllEmprendimientos("Bearer $token")
     }
+
+
 }

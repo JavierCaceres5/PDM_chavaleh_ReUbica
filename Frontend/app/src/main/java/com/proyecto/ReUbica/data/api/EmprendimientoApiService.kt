@@ -64,4 +64,11 @@ interface EmprendimientoApiService {
         @Header("Authorization") token: String
     ): Response<List<EmprendimientoModel>>
 
+    @POST("emprendimientos/by-ids")
+    suspend fun getEmprendimientosByIds(
+        @Header("Authorization") token: String,
+        @Body ids: List<String>
+    ): Response<List<EmprendimientoModel>>
+
+
 }

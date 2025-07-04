@@ -1,62 +1,53 @@
 package com.proyecto.ReUbica.ui.screens.FavoriteScreen
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.proyecto.ReUbica.data.local.UserSessionManager
+import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
+import com.proyecto.ReUbica.data.repository.FavoritoRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
-sealed class Favorito {
-    data class Comercio(
-        val nombre: String,
-        val departamento: String,
-        val categoria: String,
-        val logo: String?
-    ) : Favorito()
+class FavoritosViewModel(application: Application) : AndroidViewModel(application) {
 
-    data class Producto(
-        val id: String,
-        val nombre: String,
-        val precio: Double?
-    ) : Favorito()
-}
+    private lateinit var userSessionManager: UserSessionManager
 
-class FavoritosViewModel : ViewModel() {
-    private val _favoritos = mutableStateListOf<Favorito>()
-    val favoritos: List<Favorito> = _favoritos
+    fun setUserSessionManager(manager: UserSessionManager) {
+        userSessionManager = manager
+    }
 
-    // ✅ Para comercios
-    fun toggleFavoritoComercio(nombre: String, departamento: String, categoria: String, logo: String?) {
-        val exists = _favoritos.any {
-            it is Favorito.Comercio &&
-                    it.nombre == nombre &&
-                    it.departamento == departamento &&
-                    it.categoria == categoria
-        }
-        if (exists) {
-            _favoritos.removeIf {
-                it is Favorito.Comercio &&
-                        it.nombre == nombre &&
-                        it.departamento == departamento &&
-                        it.categoria == categoria
+    private val _favoritosEmprendimientos = MutableStateFlow<List<EmprendimientoModel>>(emptyList())
+    val favoritosEmprendimientos: StateFlow<List<EmprendimientoModel>> = _favoritosEmprendimientos
+
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
+    fun cargarFavoritos() {
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                val token = userSessionManager.getToken() ?: return@launch
+                val favoritos = FavoritoRepository.getFavoritos(token, "emprendimiento")
+                val emprendimientos = FavoritoRepository.getEmprendimientosFavoritos(token)
+                _favoritosEmprendimientos.value = emprendimientos
+
+            } catch (e: Exception) {
+                _favoritosEmprendimientos.value = emptyList()
+            } finally {
+                _loading.value = false
             }
-        } else {
-            _favoritos.add(Favorito.Comercio(nombre, departamento, categoria, logo))
         }
     }
 
-    fun isFavoritoComercio(nombre: String): Boolean {
-        return _favoritos.any { it is Favorito.Comercio && it.nombre == nombre }
-    }
-
-    // Para productos
-    fun toggleFavoritoProducto(id: String, nombre: String, precio: Double?) {
-        val exists = _favoritos.any { it is Favorito.Producto && it.id == id }
-        if (exists) {
-            _favoritos.removeIf { it is Favorito.Producto && it.id == id }
-        } else {
-            _favoritos.add(Favorito.Producto(id, nombre, precio))
+    fun toggleFavorito(id: String) {
+        viewModelScope.launch {
+            val token = userSessionManager.getToken() ?: return@launch
+            val success = FavoritoRepository.toggleFavorito(token, "emprendimiento", id)
+            if (success) {
+                cargarFavoritos()
+            }
         }
-    }
-
-    fun isFavoritoProducto(id: String): Boolean {
-        return _favoritos.any { it is Favorito.Producto && it.id == id }
     }
 }
