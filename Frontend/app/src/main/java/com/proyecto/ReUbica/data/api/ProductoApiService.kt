@@ -42,21 +42,16 @@ interface ProductoApiService {
         @Path("id") productoID: String
     ): Response<DeleteProductoResponse>
 
-
     @Multipart
-
     @PUT("productos/actualizarProducto/{id}")
     suspend fun updateProducto(
         @Header("Authorization") token: String,
         @Path("id") productoID: String,
-
         @Part("nombre") nombre: RequestBody,
         @Part("descripcion") descripcion: RequestBody,
         @Part("precio") precio: RequestBody,
         @Part product_image: MultipartBody.Part? = null
-    ): Response<ProductoModel> 
+    ): Response<ProductoModel> // Si tu backend retorna el producto actualizado
 
-        @Body updateData: UpdateProductoRequest
-    ): Response<Unit>
 
 }

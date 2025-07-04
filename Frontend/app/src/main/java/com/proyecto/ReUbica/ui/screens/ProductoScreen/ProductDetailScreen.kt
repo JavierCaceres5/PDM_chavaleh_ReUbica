@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.model.review.ReviewModel
 import kotlinx.coroutines.launch
 import kotlin.math.floor
@@ -210,97 +211,120 @@ fun ProductDetailScreen(
             color = Color(0xFF5D4F30)
         )
 
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+                .fillMaxSize()
+                .padding(top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (reviewLoading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Color(0xFF5A3C1D))
-                }
-            } else if (filteredReviews.isEmpty()) {
-                Text(
-                    "Aún no hay reseñas de este producto.",
-                    color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(filteredReviews) { review ->
-                        ReviewItem(
-                            review = review,
-                            token = token,
-                            reviewUserViewModel = reviewUserViewModel
-                        )
+                item {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFF5A3C1D))
                     }
                 }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(horizontalArrangement = Arrangement.Center) {
-                repeat(5) { index ->
-                    Icon(
-                        imageVector = if (index < ratingSeleccionado) Icons.Default.Star else Icons.Default.StarOutline,
-                        contentDescription = "Estrella ${index + 1}",
-                        tint = Color(0xFFFFD700),
-                        modifier = Modifier
-                            .size(30.dp)
-                            .clickable { ratingSeleccionado = index + 1 }
+            } else if (filteredReviews.isEmpty()) {
+                item {
+                    Text(
+                        "Aún no hay reseñas de este producto.",
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+            } else {
+                items(filteredReviews) { review ->
+                    ReviewItem(
+                        review = review,
+                        token = token,
+                        reviewUserViewModel = reviewUserViewModel
                     )
                 }
             }
 
-            OutlinedTextField(
-                value = comentario,
-                onValueChange = { comentario = it },
-                label = { Text("Escribe tu comentario") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-            )
-
-            OutlinedButton(
-                onClick = {
-                    if (comentario.isNotBlank() && ratingSeleccionado > 0) {
-                        reviewViewModel.postReview(
-                            token = token,
-                            productoID = productId,
-                            comentario = comentario,
-                            rating = ratingSeleccionado.toDouble(),
-                            emprendimientoID = emprendimientoID,
-                            onConflict = {
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("Ya has calificado este producto.")
-                                }
-                            }
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            "Deja tu reseña",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF5A3C1D)
                         )
-                        comentario = ""
-                        ratingSeleccionado = 0
+
+                        Row(horizontalArrangement = Arrangement.Center) {
+                            repeat(5) { index ->
+                                Icon(
+                                    imageVector = if (index < ratingSeleccionado) Icons.Default.Star else Icons.Default.StarOutline,
+                                    contentDescription = "Estrella ${index + 1}",
+                                    tint = Color(0xFFFFD700),
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .clickable { ratingSeleccionado = index + 1 }
+                                )
+                            }
+                        }
+
+                        OutlinedTextField(
+                            value = comentario,
+                            onValueChange = { comentario = it },
+                            label = { Text("Escribe tu comentario") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            maxLines = 4,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFF5A3C1D),
+                                unfocusedBorderColor = Color.Gray,
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black,
+                                cursorColor = Color(0xFF5A3C1D),
+                                focusedLabelColor = Color(0xFF5A3C1D),
+                                unfocusedLabelColor = Color(0xFF5A3C1D)
+                            )
+                        )
+
+                        Button(
+                            onClick = {
+                                if (comentario.isNotBlank() && ratingSeleccionado > 0) {
+                                    reviewViewModel.postReview(
+                                        token = token,
+                                        productoID = productId,
+                                        comentario = comentario,
+                                        rating = ratingSeleccionado.toDouble(),
+                                        emprendimientoID = emprendimientoID,
+                                        onConflict = {
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar("Ya has calificado este producto.")
+                                            }
+                                        }
+                                    )
+                                    comentario = ""
+                                    ratingSeleccionado = 0
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5A3C1D)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Enviar", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
                     }
-                },
-                modifier = Modifier.padding(horizontal = 8.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-            ) {
-                Text("Enviar", color = Color(0xFF5A3C1D), fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
 }
+
 @Composable
 fun ReviewItem(
     review: ReviewModel,
@@ -309,7 +333,6 @@ fun ReviewItem(
 ) {
     val userProfiles by reviewUserViewModel.userProfiles.collectAsState()
 
-    // Trigger fetch on load
     LaunchedEffect(review.userID) {
         reviewUserViewModel.getUserById(token, review.userID.toString())
     }

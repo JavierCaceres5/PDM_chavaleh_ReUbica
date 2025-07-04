@@ -1,10 +1,5 @@
 package com.proyecto.ReUbica.ui.screens.RegistroComercioScreens
 
-import android.content.Context
-import android.net.Uri
-import android.util.Log
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -18,16 +13,10 @@ import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
 import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
 import com.proyecto.ReUbica.data.repository.ProductoRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import java.io.File
-
 import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
 import java.util.UUID
 
 class RegistroComercioViewModel : ViewModel() {
@@ -37,11 +26,7 @@ class RegistroComercioViewModel : ViewModel() {
     private val productoRepository = ProductoRepository()
 
     private val _emprendimientoId = MutableStateFlow<UUID?>(null)
-
-
-    private val _emprendimientoId = MutableStateFlow<UUID?>(null)
     val emprendimientoId = _emprendimientoId.asStateFlow()
-
 
     private val _emprendimiento = MutableStateFlow(
         EmprendimientoCreateRequest(
@@ -151,7 +136,7 @@ class RegistroComercioViewModel : ViewModel() {
                     if (body != null) {
                         userSessionManager.saveEmprendimientoID(body.emprendimiento.id.toString())
                         Log.d(TAG, "EmprendimientoID guardado: ${body.emprendimiento.id}")
-
+                        
                         if (body.updatedToken.isNotBlank()) {
                             userSessionManager.actualizarSesionConNuevoToken(body.updatedToken)
                         }
@@ -168,14 +153,5 @@ class RegistroComercioViewModel : ViewModel() {
             }
         }
     }
-
-    fun getFileFromUri(context: Context, uri: Uri): File? {
-        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
-        val file = File(context.cacheDir, "logo_temp")
-        file.outputStream().use { inputStream.copyTo(it) }
-        return file
-    }
-}
-
 
 }

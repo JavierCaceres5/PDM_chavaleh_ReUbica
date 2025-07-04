@@ -1,16 +1,10 @@
 package com.proyecto.ReUbica.ui.screens.LocalInformationScreen
 
 import android.app.Application
-
-import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
-
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Tag
-
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
@@ -20,9 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
-import java.io.File
-
 
 class EmprendimientoViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -61,9 +52,7 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
                     return@launch
                 }
                 val response = emprendimientoRepository.getMiEmprendimiento(token)
-
                 Log.e("EmprendimientoViewModel", _emprendimiento.value.toString())
-
                 if (response.isSuccessful) {
                     _emprendimiento.value = response.body()
                     _redesSociales.value = response.body()?.redes_sociales
@@ -79,26 +68,6 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
-
-
-    fun updateLogoEmprendimiento(context: android.content.Context, uri: Uri, onFinish: () -> Unit) {
-        viewModelScope.launch {
-            try {
-                val inputStream = context.contentResolver.openInputStream(uri) ?: throw Exception("No se pudo abrir el archivo")
-                val file = File(context.cacheDir, "logo_temp")
-                file.outputStream().use { inputStream.copyTo(it) }
-
-                val token = sessionManager.getToken()
-                if (token.isNullOrBlank()) throw Exception("Token no encontrado.")
-
-                emprendimientoRepository.updateEmprendimientoLogo(token, file)
-                cargarMiEmprendimiento()
-            } catch (_: Exception) {}
-            onFinish()
-        }
-    }
-
-
 
     private fun EmprendimientoModel.toUpdateRequest(): UpdateEmprendimientoRequest {
         return UpdateEmprendimientoRequest(
@@ -129,12 +98,35 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
 
                 _success.value = response.isSuccessful
 
-
                 if(response.isSuccessful){
                     cargarMiEmprendimiento()
                     Log.d(TAG, "Emprendimiento actualizado correctamente")
                 }
-
+            } catch (e: Exception) {
+                _error.value = "Error de red: ${e.message}"
+                _success.value = false
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+    fun updateEmprendimientoLogo(filePath: String) {
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
+            _success.value = null
+            try {
+                val token = sessionManager.getToken()
+                if (token.isNullOrBlank()) {
+                    _error.value = "Token no disponible, inicia sesión de nuevo"
+                    _loading.value = false
+                    return@launch
+                }
+                val response = emprendimientoRepository.updateEmprendimientoLogo(token, filePath)
+                _success.value = response.isSuccessful
+                if (response.isSuccessful) {
+                    cargarMiEmprendimiento() // Recarga la info actualizada del emprendimiento
+                }
             } catch (e: Exception) {
                 _error.value = "Error de red: ${e.message}"
                 _success.value = false
@@ -146,6 +138,3 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
 
 
 }
-
-}
-

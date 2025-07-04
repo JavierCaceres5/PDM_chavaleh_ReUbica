@@ -59,17 +59,17 @@ interface EmprendimientoApiService {
         @Body updateData: UpdateEmprendimientoRequest
     ): Response<Unit>
 
+    @GET("emprendimientos/")
+    suspend fun getAllEmprendimientos(
+        @Header("Authorization") token: String
+    ): Response<List<EmprendimientoModel>>
 
     @Multipart
     @PUT("emprendimientos/actualizarMiEmprendimiento")
     suspend fun updateEmprendimientoLogo(
         @Header("Authorization") token: String,
         @Part logo: MultipartBody.Part
-    ): Response<Unit>
+    ): Response<Any>
 
-    @GET("emprendimientos/")
-    suspend fun getAllEmprendimientos(
-        @Header("Authorization") token: String
-    ): Response<List<EmprendimientoModel>>
 
 }

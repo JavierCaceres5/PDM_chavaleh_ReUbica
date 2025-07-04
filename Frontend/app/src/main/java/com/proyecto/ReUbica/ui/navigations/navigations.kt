@@ -92,6 +92,3 @@ object LocalInformationScreenNavigation
 
 @Serializable
 object ResetPasswordScreenNavigation
-
-
-
