@@ -59,4 +59,10 @@ interface UserApiService {
         @Body request: ResetPasswordRequest
     ): Response<GenericResponse>
 
+    @PUT("users/updateProfile")
+    suspend fun updateProfile(
+        @Header("Authorization") token: String,
+        @Body updateData: UpdateProfileRequest
+    ): Response<Unit>
+
 }

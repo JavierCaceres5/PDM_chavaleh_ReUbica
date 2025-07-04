@@ -3,10 +3,13 @@ package com.proyecto.ReUbica.ui.screens.PersonalInformationScreen
 import android.app.Application
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,29 +18,54 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
-import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.Components.ListItemRow
+import com.proyecto.ReUbica.R
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
+import com.proyecto.ReUbica.data.local.UserSessionManager
+import com.proyecto.ReUbica.data.model.user.UpdateProfileRequest
 import com.proyecto.ReUbica.utils.ViewModelFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.net.URI
+import androidx.core.net.toUri
 
 @Composable
 fun PersonalInformationScreen(
     navController: NavHostController
 ) {
+
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val application = context.applicationContext as Application
@@ -47,8 +75,6 @@ fun PersonalInformationScreen(
             PersonalInformationViewModel(app)
         }
     )
-    val success by personalInformationViewModel.success.collectAsState()
-    val error by personalInformationViewModel.error.collectAsState()
 
     val session by personalInformationViewModel.userSession.collectAsState()
 
@@ -56,16 +82,6 @@ fun PersonalInformationScreen(
     var editValue by remember { mutableStateOf("") }
 
     val imageUri = remember { mutableStateOf<Uri?>(null) }
-    val showConfirmImageDialog = remember { mutableStateOf(false) }
-
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            imageUri.value = it
-            showConfirmImageDialog.value = true
-        }
-    }
 
     fun openEditDialog(field: String, currentValue: String) {
         editField = field
@@ -77,11 +93,13 @@ fun PersonalInformationScreen(
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(260.dp)
         ) {
+
             Image(
                 painter = painterResource(id = R.drawable.profile),
                 contentDescription = "Profile Image",
@@ -109,26 +127,26 @@ fun PersonalInformationScreen(
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
-                val imagePainter = rememberAsyncImagePainter(
-                    model = imageUri.value ?: session?.userProfile?.user_icon,
-                    placeholder = painterResource(R.drawable.profile),
-                    error = painterResource(R.drawable.profile)
-                )
-
-
-                Image(
-                    painter = imagePainter,
-                    contentDescription = "Profile Image",
-                    modifier = Modifier
-                        .size(140.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                if (imageUri.value != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUri.value),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = "Default Profile Icon",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(120.dp)
+                    )
+                }
 
                 IconButton(
-                    onClick = {
-                        imagePickerLauncher.launch("image/*")
-                    },
+                    onClick = {  },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = (-20).dp, y = (-36).dp)
@@ -146,7 +164,7 @@ fun PersonalInformationScreen(
 
         Spacer(modifier = Modifier.height(35.dp))
 
-        Column(
+        Column (
             modifier = Modifier.padding(15.dp)
         ) {
             Text(
@@ -199,10 +217,12 @@ fun PersonalInformationScreen(
                 },
                 icon = Icons.Filled.Edit
             )
+
         }
     }
 
     if (editField != null) {
+
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
         AlertDialog(
@@ -214,14 +234,39 @@ fun PersonalInformationScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        personalInformationViewModel.updateProfile(
-                            firstname = if (editField == "firstname") editValue else null,
-                            lastname  = if (editField == "lastname")  editValue else null,
-                            email     = if (editField == "email")     editValue else null,
-                            phone     = if (editField == "phone")     editValue else null,
-                            uri = null,
-                            context = context
+                        val user = session?.userProfile ?: return@Button
+
+                        when (editField) {
+                            "firstname", "lastname" -> {
+                                if (editValue.isBlank() || !editValue.all { it.isLetter() || it.isWhitespace() }) {
+                                    errorMessage = "Solo se permiten letras en tu nombre y/o apellido"
+                                    return@Button
+                                }
+                            }
+                            "email" -> {
+                                val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+                                if (!emailRegex.matches(editValue)) {
+                                    errorMessage = "Correo inválido"
+                                    return@Button
+                                }
+                            }
+                            "phone" -> {
+                                val phoneRegex = "^\\d{4}-\\d{4}$".toRegex()
+                                if (!phoneRegex.matches(editValue)) {
+                                    errorMessage = "Teléfono inválido. Formato esperado: XXXX-XXXX"
+                                    return@Button
+                                }
+                            }
+                        }
+
+                        val updated = UpdateProfileRequest(
+                            firstname = if (editField == "firstname") editValue else user.firstname ?: "",
+                            lastname = if (editField == "lastname") editValue else user.lastname ?: "",
+                            email = if (editField == "email") editValue else user.email ?: "",
+                            phone = if (editField == "phone") editValue else user.phone ?: "",
+                            user_icon = user.user_icon
                         )
+                        personalInformationViewModel.updateProfile(updated)
                         editField = null
                         errorMessage = null
                     },
@@ -301,60 +346,4 @@ fun PersonalInformationScreen(
         )
     }
 
-    if (showConfirmImageDialog.value && imageUri.value != null) {
-        AlertDialog(
-            containerColor = Color.White,
-            onDismissRequest = { showConfirmImageDialog.value = false },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        personalInformationViewModel.updateProfile(
-                            firstname = null,
-                            lastname = null,
-                            email = null,
-                            phone = null,
-                            uri = imageUri.value,
-                            context = context
-                        )
-                        showConfirmImageDialog.value = false
-                        imageUri.value = null
-                    },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5A3C1D), contentColor = Color.White)
-                ) {
-                    Text("Guardar foto", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        showConfirmImageDialog.value = false
-                        imageUri.value = null
-                    },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray, contentColor = Color.Black)
-                ) {
-                    Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                }
-            },
-            title = {
-                Text(
-                    text = "Actualizar foto de perfil",
-                    color = Color.Black,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(
-                    "¿Estás seguro que deseas actualizar tu foto de perfil?",
-                    color = Color.Black
-                )
-            }
-        )
-    }
-
 }
-

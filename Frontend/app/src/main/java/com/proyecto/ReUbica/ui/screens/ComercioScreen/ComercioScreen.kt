@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -87,12 +88,23 @@ fun ComercioScreen(
                         .background(Color(0xFFEAEAEA)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Store,
-                        contentDescription = "Logo del comercio",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(40.dp)
-                    )
+                    val logoUrl = business.logo
+                    if (!logoUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = logoUrl,
+                            contentDescription = "Logo del comercio",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(12.dp))
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.Store,
+                            contentDescription = "Logo del comercio",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
                 }
 
                 Column(modifier = Modifier.weight(1f)) {

@@ -99,4 +99,8 @@ class UserRepository {
         return api.resetPassword(request)
     }
 
+    suspend fun updateAccount(token: String, updateData: UpdateProfileRequest): Response<Unit> {
+        return api.updateProfile("Bearer $token", updateData)
+    }
+
 }
