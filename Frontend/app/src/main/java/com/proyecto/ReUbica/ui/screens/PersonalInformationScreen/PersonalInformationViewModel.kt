@@ -93,8 +93,5 @@ class PersonalInformationViewModel(application: Application) : AndroidViewModel(
         }
     }
 
-    fun clearMessages() {
-        _success.value = null
-        _error.value = null
-    }
+
 }

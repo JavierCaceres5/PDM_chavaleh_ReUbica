@@ -1,5 +1,7 @@
     package com.proyecto.ReUbica.data.api
 
+    import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
+    import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoDeleteResponse
     import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
     import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoResponse
     import com.proyecto.ReUbica.data.model.emprendimiento.UpdateEmprendimientoRequest
@@ -16,10 +18,6 @@ interface EmprendimientoApiService {
             @Query("categoria") categoria: String
         ): Response<List<EmprendimientoModel>>
 
-        @GET("emprendimientos/nombre")
-        suspend fun getEmprendimientosByNombre(
-            @Query("nombre") nombre: String
-        ): Response<List<EmprendimientoModel>>
 
         @Multipart
         @POST("emprendimientos/registrarEmprendimiento")
@@ -40,12 +38,20 @@ interface EmprendimientoApiService {
     @DELETE("emprendimientos/eliminarMiEmprendimiento")
     suspend fun deleteMiEmprendimiento(
         @Header("Authorization") token: String
-    ) : Response<Unit>
+    ): Response<EmprendimientoDeleteResponse>
+
+    @GET("emprendimientos/nombre")
+    suspend fun getEmprendimientosByNombre(
+        @Header("Authorization") token: String,
+        @Query("nombre") nombre: String
+    ): Response<List<EmprendimientoModel>>
+
 
     @GET("emprendimientos/miEmprendimiento")
     suspend fun getMiEmprendimiento(
         @Header("Authorization") token: String
     ): Response<EmprendimientoModel>
+
 
     @PUT("emprendimientos/actualizarMiEmprendimiento")
     suspend fun updateEmprendimiento(
@@ -60,5 +66,9 @@ interface EmprendimientoApiService {
         @Part logo: MultipartBody.Part
     ): Response<Unit>
 
-}
+    @GET("emprendimientos/")
+    suspend fun getAllEmprendimientos(
+        @Header("Authorization") token: String
+    ): Response<List<EmprendimientoModel>>
 
+}

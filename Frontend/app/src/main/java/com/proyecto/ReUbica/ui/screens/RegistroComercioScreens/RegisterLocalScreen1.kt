@@ -109,7 +109,6 @@ fun RegisterLocalScreen1Content(
     var descripcionInvalida by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-// ...dentro del launcher
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         imageUri = it
         registroComercio.setValues("logo", it?.toString() ?: "")

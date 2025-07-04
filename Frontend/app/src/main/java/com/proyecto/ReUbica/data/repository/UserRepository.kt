@@ -1,6 +1,9 @@
 package com.proyecto.ReUbica.data.repository
 
 import android.util.Log
+import com.proyecto.ReUbica.data.model.password.GenericResponse
+import com.proyecto.ReUbica.data.model.password.ResetPasswordRequest
+import com.proyecto.ReUbica.data.model.password.SendResetCodeRequest
 import com.proyecto.ReUbica.data.model.user.UpdateProfileRequest
 import retrofit2.Response
 import com.proyecto.ReUbica.data.model.user.UserLoginRequest
@@ -50,7 +53,6 @@ class UserRepository {
             MultipartBody.Part.createFormData("user_icon", it.name, reqFile)
         }
 
-        // Log todos los datos enviados
         Log.d(TAG, "Enviando updateProfileWithImage:")
         Log.d(TAG, "Token: Bearer $token")
         Log.d(TAG, "firstname: $firstname")
@@ -73,7 +75,7 @@ class UserRepository {
             return Result.failure(e)
         }
 
-        // Log el response crudo
+
         Log.d(TAG, "HTTP code: ${response.code()}")
         Log.d(TAG, "isSuccessful: ${response.isSuccessful}")
         Log.d(TAG, "body: ${response.body()}")
@@ -85,4 +87,16 @@ class UserRepository {
             Result.failure(Exception("Error HTTP ${response.code()}: ${response.errorBody()?.string()}"))
         }
     }
+    suspend fun getUserById(token: String, userId: String): Response<UserProfile> {
+        return api.getUserById("Bearer $token", userId)
+    }
+
+    suspend fun sendResetCode(request: SendResetCodeRequest): Response<GenericResponse> {
+        return api.sendResetCode(request)
+    }
+
+    suspend fun resetPassword(request: ResetPasswordRequest): Response<GenericResponse> {
+        return api.resetPassword(request)
+    }
+
 }

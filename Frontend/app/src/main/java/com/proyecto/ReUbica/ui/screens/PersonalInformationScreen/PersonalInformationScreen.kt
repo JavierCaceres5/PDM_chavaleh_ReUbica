@@ -111,8 +111,8 @@ fun PersonalInformationScreen(
             ) {
                 val imagePainter = rememberAsyncImagePainter(
                     model = imageUri.value ?: session?.userProfile?.user_icon,
-                    placeholder = painterResource(R.drawable.profile), // Tu imagen default
-                    error = painterResource(R.drawable.profile) // Lo mismo si hay error
+                    placeholder = painterResource(R.drawable.profile),
+                    error = painterResource(R.drawable.profile)
                 )
 
 

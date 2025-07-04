@@ -1,15 +1,20 @@
 package com.proyecto.ReUbica.data.api
 
+import com.proyecto.ReUbica.data.model.password.GenericResponse
+import com.proyecto.ReUbica.data.model.password.ResetPasswordRequest
+import com.proyecto.ReUbica.data.model.password.SendResetCodeRequest
 import com.proyecto.ReUbica.data.model.user.*
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.Path
 
 interface UserApiService {
 
@@ -26,7 +31,7 @@ interface UserApiService {
     @DELETE("users/deleteProfile")
     suspend fun deleteProfile(
         @Header("Authorization") token: String)
-    : Response<Unit>
+            : Response<Unit>
 
     @Multipart
     @PUT("users/updateProfile")
@@ -38,5 +43,21 @@ interface UserApiService {
         @Part("phone") phone: okhttp3.RequestBody,
         @Part user_icon: MultipartBody.Part?
     ): Response<UserProfile>
+
+    @GET("users/{id}")
+    suspend fun getUserById(
+        @Header("Authorization") token: String,
+        @Path("id") userId: String
+    ): Response<UserProfile>
+
+    @POST("users/sendResetCode")
+    suspend fun sendResetCode(
+        @Body request: SendResetCodeRequest
+    ): Response<GenericResponse>
+
+    @POST("users/resetPassword")
+    suspend fun resetPassword(
+        @Body request: ResetPasswordRequest
+    ): Response<GenericResponse>
 
 }

@@ -29,6 +29,8 @@ class LoginScreenViewModel(application: Application) : AndroidViewModel(applicat
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
+    private val TAG = "LoginScreenViewModel"
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _loading.value = true
@@ -41,6 +43,7 @@ class LoginScreenViewModel(application: Application) : AndroidViewModel(applicat
                     _token.value = tokenResponse
                     _error.value = null
                     sessionManager.saveUserSession(tokenResponse, userResponse)
+                    Log.d(TAG, "Login exitoso: ${_user.value}, Token: $tokenResponse")
                 } else {
                     _error.value = "Error: datos de usuario o token nulos"
                 }

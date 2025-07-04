@@ -9,9 +9,7 @@ import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
 import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
-import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
@@ -91,7 +89,6 @@ class RegistroComercioViewModel : ViewModel() {
         _emprendimiento.value = _emprendimiento.value.copy(redes_sociales = nuevasRedes)
     }
 
-    // ------------ FUNCIÓN MODIFICADA ------------
     fun createEmprendimiento(context: Context) {
         viewModelScope.launch {
             if (!::userSessionManager.isInitialized) {
@@ -105,11 +102,10 @@ class RegistroComercioViewModel : ViewModel() {
                 _loading.value = false
                 return@launch
             }
-            // Convertir el logo Uri a File
+
             val logoUri = _emprendimiento.value.logo?.let { Uri.parse(it) }
             val logoFile = logoUri?.let { getFileFromUri(context, it) }
 
-            // Pasar el logoFile al repo (ya maneja multipart)
             val response = repository.createEmprendimiento(token, _emprendimiento.value, logoFile)
             Log.e(TAG, response.toString())
             if (!response.isSuccessful) {
@@ -122,11 +118,11 @@ class RegistroComercioViewModel : ViewModel() {
 
             val body = response.body()
             if (body != null) {
-                val nuevoToken = body.token
-                val nuevoUsuario = body.user
-                Log.d("RegistroComercioVM", "Nuevo token: ${body.token}")
-                Log.d("RegistroComercioVM", "Nuevo usuario: ${body.user}")
-                userSessionManager.saveUserSession(nuevoToken, nuevoUsuario)
+                if (!body.updatedToken.isNullOrBlank()) {
+                    userSessionManager.actualizarSesionConNuevoToken(body.updatedToken)
+                }
+                Log.d("RegistroComercioVM", "Token actualizado: ${body.updatedToken}")
+                Log.d("RegistroComercioVM", "Emprendimiento creado: ${body.emprendimiento}")
             }
 
             Log.e(TAG, "Emprendimiento creado exitosamente: ${_emprendimiento.value}")
@@ -136,7 +132,6 @@ class RegistroComercioViewModel : ViewModel() {
         }
     }
 
-    // ------------ HELPER PARA URI → FILE ------------
     fun getFileFromUri(context: Context, uri: Uri): File? {
         val inputStream = context.contentResolver.openInputStream(uri) ?: return null
         val file = File(context.cacheDir, "logo_temp")

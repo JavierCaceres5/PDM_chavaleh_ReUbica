@@ -78,9 +78,8 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
                 val token = sessionManager.getToken()
                 if (token.isNullOrBlank()) throw Exception("Token no encontrado.")
 
-                // Debes tener este método en el repositorio, revisa abajo
                 emprendimientoRepository.updateEmprendimientoLogo(token, file)
-                cargarMiEmprendimiento() // refresca el logo después de subir
+                cargarMiEmprendimiento()
             } catch (_: Exception) {}
             onFinish()
         }

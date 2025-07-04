@@ -63,6 +63,10 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
+
+
 
     // Supabase
     implementation(platform(libs.supabase.bom))
@@ -92,6 +96,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json.v160)
     implementation(libs.material3)
     implementation(libs.coil.compose.v240)
+    implementation (libs.jwtdecode)
 
 
     // DataStore
@@ -124,4 +129,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.gson)
+
+    implementation(libs.accompanist.permissions.v0301)
+
 }

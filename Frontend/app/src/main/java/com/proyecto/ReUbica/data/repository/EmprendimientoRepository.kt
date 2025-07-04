@@ -2,6 +2,7 @@ package com.proyecto.ReUbica.data.repository
 
 import com.google.gson.Gson
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
+import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoDeleteResponse
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoResponse
 import com.proyecto.ReUbica.data.model.emprendimiento.UpdateEmprendimientoRequest
@@ -47,17 +48,19 @@ class EmprendimientoRepository {
         )
     }
 
-    suspend fun searchByName(nombre: String): Response<List<EmprendimientoModel>> {
-        return api.getEmprendimientosByNombre(nombre)
+    suspend fun searchByName(token: String, nombre: String): Response<List<EmprendimientoModel>> {
+        return api.getEmprendimientosByNombre("Bearer $token", nombre)
     }
+
 
     suspend fun searchByCategory(categoria: String): Response<List<EmprendimientoModel>> {
         return api.getEmprendimientosByCategoria(categoria)
     }
 
-    suspend fun deleteMiEmprendimiento(token: String): Response<Unit> {
+    suspend fun deleteMiEmprendimiento(token: String): Response<EmprendimientoDeleteResponse> {
         return api.deleteMiEmprendimiento("Bearer $token")
     }
+
 
     suspend fun getMiEmprendimiento(token: String): Response<EmprendimientoModel> {
         return api.getMiEmprendimiento("Bearer $token")
@@ -70,8 +73,10 @@ class EmprendimientoRepository {
         val logoPart = MultipartBody.Part.createFormData(
             "logo", logoFile.name, logoFile.asRequestBody("image/*".toMediaTypeOrNull())
         )
-        // Este endpoint debe aceptar Multipart solo con el logo
         api.updateEmprendimientoLogo("Bearer $token", logoPart)
     }
 
+    suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
+        return api.getAllEmprendimientos("Bearer $token")
+    }
 }

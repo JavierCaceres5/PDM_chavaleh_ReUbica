@@ -85,7 +85,7 @@ fun LocalInformationScreen(
     var uploadingLogo by remember { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
-            localLogoUri = uri // <-- Mostrar instantáneo mientras sube
+            localLogoUri = uri
             uploadingLogo = true
             viewModel.updateLogoEmprendimiento(context, uri) {
                 uploadingLogo = false
@@ -396,13 +396,10 @@ fun LocalInformationScreen(
                         value = editValue,
                         onValueChange = {
                             if (editField == "emprendimientoPhone") {
-                                // Permitir solo dígitos y guion
                                 val filtered = it.filter { c -> c.isDigit() || c == '-' }
 
-                                // Limitar longitud máxima a 9 (XXXX-XXXX)
                                 val limited = if (filtered.length > 9) filtered.take(9) else filtered
 
-                                // Formatear para asegurar que el guion esté en posición 4
                                 val digitsOnly = limited.filter { c -> c.isDigit() }
                                 val formatted = if (digitsOnly.length > 4) {
                                     digitsOnly.take(4) + "-" + digitsOnly.drop(4).take(4)

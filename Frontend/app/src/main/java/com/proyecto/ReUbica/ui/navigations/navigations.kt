@@ -54,38 +54,43 @@ object RegisterLocalScreen2Navigation
 object RegisterLocalScreen3Navigation
 
 @Serializable
-object RegisterLocalScreen4Navigation
-
-@Serializable
 object SessionCheckNavigation
 
 @Serializable
 object LoadingScreenNavigation
 
 @Serializable
+object CartaProductosScreenNavigation
 
+@Serializable
 data class ComercioNavigation(
     val id: String,
     val nombre: String,
     val descripcion: String,
-    val categoria: String,
+    val categoriasSecundarias: List<String>,
+    val categoriasPrincipales: List<String>,
+    val logo: String,
     val direccion: String,
+    val emprendimientoPhone: String,
+    val redessociales: String?,
+    val userID: String,
     val latitud: Double,
     val longitud: Double,
-    val horario: String
+    val createdat: String,
+    val updatedat: String
 )
 object ProductDetailNavigation {
     const val route = "product_detail"
-    const val productIdArg = "productId"
+    const val tokenArg = "token"
+    const val emprendimientoIdArg = "emprendimientoID"
 
-    fun withArgs(productId: String) = "$route/$productId"
+    fun withArgs(productId: String, token: String, emprendimientoID: String): String {
+        return "$route/$productId?$tokenArg=$token&$emprendimientoIdArg=$emprendimientoID"
+    }
 }
-
-@Serializable
-object EmprendedorProfileScreenNavigation
 
 @Serializable
 object LocalInformationScreenNavigation
 
 @Serializable
-object CartaProductosScreenNavigation
+object ResetPasswordScreenNavigation
