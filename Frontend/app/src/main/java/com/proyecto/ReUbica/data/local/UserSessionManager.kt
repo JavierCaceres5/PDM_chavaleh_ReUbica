@@ -34,6 +34,10 @@ class UserSessionManager(private val context: Context) {
 
     private val _userSession = MutableStateFlow<UserSession?>(null)
 
+    private val gson = Gson()
+    private val _userSession = MutableStateFlow<UserSession?>(null)
+    val userSessionFlow: StateFlow<UserSession?> = _userSession
+
     suspend fun saveEmprendimientoID(id: String) {
         context.dataStore.edit { prefs ->
             prefs[EMPRENDIMIENTO_ID_KEY] = id
@@ -70,11 +74,13 @@ class UserSessionManager(private val context: Context) {
 
     private val gson = Gson()
 
+
     suspend fun saveUserSession(token: String, user: UserProfile) {
         context.dataStore.edit { prefs ->
             prefs[TOKEN_KEY] = token
             prefs[USER_KEY] = gson.toJson(user)
         }
+
     }
 
     val userSessionFlow: Flow<UserSession?> = context.dataStore.data.map { prefs ->
@@ -84,6 +90,9 @@ class UserSessionManager(private val context: Context) {
             val user = gson.fromJson(userJson, UserProfile::class.java)
             UserSession(token, user)
         } else null
+
+        _userSession.emit(UserSession(token, user))
+
     }
 
     suspend fun clearSession() {

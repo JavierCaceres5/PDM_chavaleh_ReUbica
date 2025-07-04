@@ -5,6 +5,13 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.app.Application
+import android.content.Context
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
@@ -15,6 +22,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+
+import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
 import java.util.UUID
 
 class RegistroComercioViewModel : ViewModel() {
@@ -22,7 +35,14 @@ class RegistroComercioViewModel : ViewModel() {
     private lateinit var userSessionManager: UserSessionManager
     private val repository = EmprendimientoRepository()
     private val productoRepository = ProductoRepository()
+
     private val _emprendimientoId = MutableStateFlow<UUID?>(null)
+
+
+    private val _emprendimientoId = MutableStateFlow<UUID?>(null)
+    val emprendimientoId = _emprendimientoId.asStateFlow()
+
+
     private val _emprendimiento = MutableStateFlow(
         EmprendimientoCreateRequest(
             nombre = "",
@@ -92,6 +112,7 @@ class RegistroComercioViewModel : ViewModel() {
         }
         _emprendimiento.value = _emprendimiento.value.copy(redes_sociales = nuevasRedes)
     }
+
     suspend fun obtenerProductosDelEmprendimiento(): List<ProductoModel> {
         if (!::userSessionManager.isInitialized) return emptyList()
         val token = userSessionManager.getToken() ?: return emptyList()
@@ -148,11 +169,13 @@ class RegistroComercioViewModel : ViewModel() {
         }
     }
 
-    // ------------ HELPER PARA URI → FILE ------------
     fun getFileFromUri(context: Context, uri: Uri): File? {
         val inputStream = context.contentResolver.openInputStream(uri) ?: return null
         val file = File(context.cacheDir, "logo_temp")
         file.outputStream().use { inputStream.copyTo(it) }
         return file
     }
+}
+
+
 }

@@ -17,6 +17,13 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 
 interface UserApiService {
+
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
+
+interface UserApiService {
+
     @POST("users/register")
     suspend fun register(
         @Body request: UserRegisterRequest
@@ -30,6 +37,7 @@ interface UserApiService {
     @DELETE("users/deleteProfile")
     suspend fun deleteProfile(
         @Header("Authorization") token: String)
+
             : Response<Unit>
 
     @Multipart
@@ -42,6 +50,15 @@ interface UserApiService {
         @Part("phone") phone: okhttp3.RequestBody,
         @Part user_icon: MultipartBody.Part?
     ): Response<UserProfile>
+
+    : Response<Unit>
+
+    @PUT("users/updateProfile")
+    suspend fun updateProfile(
+        @Header("Authorization") token: String,
+        @Body updateData: UpdateProfileRequest
+    ): Response<Unit>
+
 
     @GET("users/{id}")
     suspend fun getUserById(

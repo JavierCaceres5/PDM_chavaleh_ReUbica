@@ -3,6 +3,7 @@ package com.proyecto.ReUbica.ui.screens.PersonalInformationScreen
 import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -22,11 +23,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -41,6 +44,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.net.Uri
 import java.io.File
+import com.google.maps.android.compose.*
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
+import com.proyecto.ReUbica.data.model.emprendimiento.UpdateEmprendimientoRequest
 
 @Composable
 fun LocalInformationScreen(
@@ -60,20 +71,32 @@ fun LocalInformationScreen(
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+
     val logoUrl = emprendimiento?.logo
-// Justo antes del Composable
+
     var localLogoUri by remember { mutableStateOf<Uri?>(null) }
 
 
     var editField by remember { mutableStateOf<String?>(null) }
     var editValue by remember { mutableStateOf("") }
+
+    val logoUri = emprendimiento?.logo?.toUri()
+    val imageUri = remember { mutableStateOf(logoUri) }
+
+    var editField by remember { mutableStateOf<String?>(null) }
+    var editValue by remember { mutableStateOf(TextFieldValue("")) }
+
     var errorUrl by remember { mutableStateOf(false) }
     var errorCampoVacio by remember { mutableStateOf(false) }
     var errorFormatoTelefono by remember { mutableStateOf(false) }
 
     fun openEditDialog(field: String, currentValue: String) {
         editField = field
+
         editValue = currentValue
+
+        editValue = TextFieldValue(currentValue)
+
         errorUrl = false
         errorCampoVacio = false
         errorFormatoTelefono = false
@@ -82,6 +105,7 @@ fun LocalInformationScreen(
     fun esUrlValida(url: String): Boolean {
         return url.startsWith("http://") || url.startsWith("https://")
     }
+
     var uploadingLogo by remember { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
@@ -92,6 +116,7 @@ fun LocalInformationScreen(
             }
         }
     }
+
 
     LaunchedEffect(Unit) {
         viewModel.cargarMiEmprendimiento()
@@ -136,6 +161,7 @@ fun LocalInformationScreen(
                     .background(Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
+
                 when {
                     localLogoUri != null -> {
                         Image(
@@ -165,6 +191,27 @@ fun LocalInformationScreen(
 
                 IconButton(
                     onClick = { launcher.launch("image/*") },
+
+                if (imageUri.value != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUri.value),
+                        contentDescription = "Emprendimiento Image",
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.Store,
+                        contentDescription = "Default Emprendimiento Icon",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(120.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = { },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = (-20).dp, y = (-36).dp)
@@ -176,6 +223,7 @@ fun LocalInformationScreen(
                         contentDescription = "Edit Photo",
                         tint = Color.White
                     )
+
                     if (uploadingLogo) {
                         CircularProgressIndicator(
                             color = Color.White,
@@ -188,6 +236,9 @@ fun LocalInformationScreen(
                 }
             }
 
+
+                }
+            }
 
         }
 
@@ -215,7 +266,16 @@ fun LocalInformationScreen(
                 EditableTextSection(
                     title = "Descripción del local",
                     text = emprendimiento?.descripcion ?: "",
+
                     onEditClick = { openEditDialog("descripcion", emprendimiento?.descripcion ?: "") }
+
+                    onEditClick = {
+                        openEditDialog(
+                            "descripcion",
+                            emprendimiento?.descripcion ?: ""
+                        )
+                    }
+
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -240,12 +300,22 @@ fun LocalInformationScreen(
                     text = emprendimiento?.direccion ?: "",
                     onEditClick = { openEditDialog("direccion", emprendimiento?.direccion ?: "") }
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 EditableTextSection(
                     title = "Teléfono del local",
                     text = emprendimiento?.emprendimientoPhone ?: "",
+
                     onEditClick = { openEditDialog("emprendimientoPhone", emprendimiento?.emprendimientoPhone ?: "") }
+
+                    onEditClick = {
+                        openEditDialog(
+                            "emprendimientoPhone",
+                            emprendimiento?.emprendimientoPhone ?: ""
+                        )
+                    }
+
                 )
 
                 Row(
@@ -275,7 +345,16 @@ fun LocalInformationScreen(
                             url = redesSociales?.Instagram,
                             nombreRed = "Instagram",
                             iconId = R.drawable.instagram,
+
                             onEditarClick = { openEditDialog("instagram", redesSociales?.Instagram ?: "") }
+
+                            onEditarClick = {
+                                openEditDialog(
+                                    "instagram",
+                                    redesSociales?.Instagram ?: ""
+                                )
+                            }
+
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -284,7 +363,16 @@ fun LocalInformationScreen(
                             url = redesSociales?.Facebook,
                             nombreRed = "Facebook",
                             iconId = R.drawable.facebook,
+
                             onEditarClick = { openEditDialog("facebook", redesSociales?.Facebook ?: "") }
+
+                            onEditarClick = {
+                                openEditDialog(
+                                    "facebook",
+                                    redesSociales?.Facebook ?: ""
+                                )
+                            }
+
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -293,7 +381,16 @@ fun LocalInformationScreen(
                             url = redesSociales?.TikTok,
                             nombreRed = "TikTok",
                             iconId = R.drawable.tiktok,
+
                             onEditarClick = { openEditDialog("tiktok", redesSociales?.TikTok ?: "") }
+
+                            onEditarClick = {
+                                openEditDialog(
+                                    "tiktok",
+                                    redesSociales?.TikTok ?: ""
+                                )
+                            }
+
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -302,7 +399,16 @@ fun LocalInformationScreen(
                             url = redesSociales?.Twitter,
                             nombreRed = "X",
                             iconId = R.drawable.x,
+
                             onEditarClick = { openEditDialog("twitter", redesSociales?.Twitter ?: "") }
+
+                            onEditarClick = {
+                                openEditDialog(
+                                    "twitter",
+                                    redesSociales?.Twitter ?: ""
+                                )
+                            }
+
                         )
                     }
                 }
@@ -324,25 +430,42 @@ fun LocalInformationScreen(
                     onClick = {
                         val current = emprendimiento
                         if (current != null) {
+
                             if (editValue.isBlank()) {
+
+                            if (editValue.text.isBlank()) {
+
                                 errorCampoVacio = true
                                 return@Button
                             }
 
+
                             if (editField in listOf("instagram", "facebook", "tiktok", "twitter") && !esUrlValida(editValue)) {
-                                errorUrl = true
+
+                            if (editField in listOf(
+                                    "instagram",
+                                    "facebook",
+                                    "tiktok",
+                                    "twitter"
+                                ) && !esUrlValida(editValue.text)
+                            ) {
+               errorUrl = true
                                 return@Button
                             }
 
                             if (editField == "emprendimientoPhone") {
                                 val phoneRegex = "^\\d{4}-\\d{4}$".toRegex()
-                                if (!phoneRegex.matches(editValue)) {
+
+                                if (!phoneRegex.matches(editValue)) 
+                                if (!phoneRegex.matches(editValue.text)) {
+
                                     errorFormatoTelefono = true
                                     return@Button
                                 }
                             }
 
                             val nuevasRedes = current.redes_sociales?.copy(
+
                                 Instagram = if (editField == "instagram") editValue else current.redes_sociales.Instagram,
                                 Facebook = if (editField == "facebook") editValue else current.redes_sociales.Facebook,
                                 TikTok = if (editField == "tiktok") editValue else current.redes_sociales.TikTok,
@@ -356,6 +479,25 @@ fun LocalInformationScreen(
                                 categoriasSecundarias = current.categoriasSecundarias,
                                 direccion = if (editField == "direccion") editValue else current.direccion ?: "",
                                 emprendimientoPhone = if (editField == "emprendimientoPhone") editValue else current.emprendimientoPhone ?: "",
+
+                                Instagram = if (editField == "instagram") editValue.text else current.redes_sociales.Instagram,
+                                Facebook = if (editField == "facebook") editValue.text else current.redes_sociales.Facebook,
+                                TikTok = if (editField == "tiktok") editValue.text else current.redes_sociales.TikTok,
+                                Twitter = if (editField == "twitter") editValue.text else current.redes_sociales.Twitter
+                            ) ?: RedesSociales()
+
+                            val updated = UpdateEmprendimientoRequest(
+                                nombre = if (editField == "nombre") editValue.text else current.nombre
+                                    ?: "",
+                                descripcion = if (editField == "descripcion") editValue.text else current.descripcion
+                                    ?: "",
+                                categoriasPrincipales = current.categoriasPrincipales,
+                                categoriasSecundarias = current.categoriasSecundarias,
+                                direccion = if (editField == "direccion") editValue.text else current.direccion
+                                    ?: "",
+                                emprendimientoPhone = if (editField == "emprendimientoPhone") editValue.text else current.emprendimientoPhone
+                                    ?: "",
+
                                 redes_sociales = nuevasRedes
                             )
 
@@ -368,7 +510,14 @@ fun LocalInformationScreen(
                     },
                     modifier = Modifier.width(130.dp),
                     shape = RoundedCornerShape(0.dp),
+
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    ),
+
                     border = ButtonDefaults.outlinedButtonBorder
                 ) {
                     Text("Guardar")
@@ -384,7 +533,14 @@ fun LocalInformationScreen(
                     },
                     modifier = Modifier.width(130.dp),
                     shape = RoundedCornerShape(0.dp),
+
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E210B), contentColor = Color.White)
+
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8E210B),
+                        contentColor = Color.White
+                    )
+
                 ) {
                     Text("Cancelar")
                 }
@@ -396,6 +552,7 @@ fun LocalInformationScreen(
                         value = editValue,
                         onValueChange = {
                             if (editField == "emprendimientoPhone") {
+
                                 val filtered = it.filter { c -> c.isDigit() || c == '-' }
 
                                 val limited = if (filtered.length > 9) filtered.take(9) else filtered
@@ -410,6 +567,29 @@ fun LocalInformationScreen(
                             } else {
                                 editValue = it
                             }
+
+                                val digits = it.text.filter { c -> c.isDigit() }.take(8)
+                                val formatted = if (digits.length > 4) {
+                                    digits.substring(0, 4) + "-" + digits.substring(4)
+                                } else {
+                                    digits
+                                }
+
+                                val newCursor = if (formatted.length > editValue.text.length) {
+                                    formatted.length
+                                } else {
+                                    it.selection.start
+                                }
+
+                                editValue = TextFieldValue(
+                                    text = formatted,
+                                    selection = TextRange(newCursor.coerceAtMost(formatted.length))
+                                )
+                            } else {
+                                editValue = it
+                            }
+
+
                             errorUrl = false
                             errorCampoVacio = false
                             errorFormatoTelefono = false
@@ -417,7 +597,12 @@ fun LocalInformationScreen(
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         textStyle = LocalTextStyle.current.copy(color = Color.Black),
+
                         keyboardOptions = if (editField == "emprendimientoPhone") KeyboardOptions(keyboardType = KeyboardType.Number) else KeyboardOptions.Default
+
+                        keyboardOptions = if (editField == "emprendimientoPhone")
+                            KeyboardOptions(keyboardType = KeyboardType.Number)
+                        else KeyboardOptions.Default
                     )
 
                     if (errorCampoVacio) {
@@ -491,4 +676,8 @@ fun EditableTextSection(
             }
         }
     }
+
 }
+
+}
+

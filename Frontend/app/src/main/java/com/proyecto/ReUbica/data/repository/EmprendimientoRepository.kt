@@ -60,7 +60,6 @@ class EmprendimientoRepository {
         return api.deleteMiEmprendimiento("Bearer $token")
     }
 
-
     suspend fun getMiEmprendimiento(token: String): Response<EmprendimientoModel> {
         return api.getMiEmprendimiento("Bearer $token")
     }
@@ -68,6 +67,7 @@ class EmprendimientoRepository {
     suspend fun updateEmprendimiento(token: String, updateData: UpdateEmprendimientoRequest): Response<Unit> {
         return api.updateEmprendimiento("Bearer $token", updateData)
     }
+
     suspend fun updateEmprendimientoLogo(token: String, logoFile: File) {
         val logoPart = MultipartBody.Part.createFormData(
             "logo", logoFile.name, logoFile.asRequestBody("image/*".toMediaTypeOrNull())
@@ -78,4 +78,7 @@ class EmprendimientoRepository {
     suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
         return api.getAllEmprendimientos("Bearer $token")
     }
+
 }
+}
+

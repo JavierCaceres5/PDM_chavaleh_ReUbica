@@ -44,10 +44,18 @@ import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
 import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 
 @Composable
+
 fun RegisterLocalScreen1(navController: NavHostController, viewModel: RegistroComercioViewModel) {
 
     RegisterLocalScreen1Content(
         registroComercio = viewModel,
+
+fun RegisterLocalScreen1(navController: NavHostController, viewModelComercio: RegistroComercioViewModel, viewModelProducto: CreateProductoViewModel) {
+
+    RegisterLocalScreen1Content(
+        registroComercio = viewModelComercio,
+        createProducto = viewModelProducto,
+
         onNext = { navController.navigate(RegisterLocalScreen2Navigation) },
         onBack = { navController.popBackStack() }
     )
@@ -55,6 +63,8 @@ fun RegisterLocalScreen1(navController: NavHostController, viewModel: RegistroCo
 
 @Composable
 fun RegisterLocalScreen1Content(
+
+    createProducto: CreateProductoViewModel,
     registroComercio: RegistroComercioViewModel,
     onNext: () -> Unit = {},
     onBack: () -> Unit = {}
@@ -107,7 +117,9 @@ fun RegisterLocalScreen1Content(
     var expandedCategoria by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
     var descripcionInvalida by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
+
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         imageUri = it

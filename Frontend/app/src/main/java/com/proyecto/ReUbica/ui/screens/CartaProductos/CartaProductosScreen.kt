@@ -1,6 +1,7 @@
 package com.proyecto.ReUbica.ui.screens.CartaProductos
 
 import android.app.Application
+
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -50,8 +51,10 @@ import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.repository.ProductoRepository
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.utils.ViewModelFactory
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+
 
 @Composable
 fun CartaProductosScreen(
@@ -87,6 +90,7 @@ fun CartaProductosScreen(
     val pickImageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { nuevaImagenUri = it }
     }
+
     LaunchedEffect(Unit) {
         viewModel.cargarProductos()
     }
@@ -205,6 +209,7 @@ fun CartaProductosScreen(
             }
         }
     }
+
     if (showDialogDelete && confirmEliminando != null) {
         AlertDialog(
             containerColor = Color.White,
@@ -257,7 +262,9 @@ fun CartaProductosScreen(
             onDismissRequest = {
                 showDialogEditar = false
                 productoParaEditar = null
+
                 nuevaImagenUri = null
+
             },
             title = {
                 Text(
@@ -298,6 +305,7 @@ fun CartaProductosScreen(
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
+
                     Spacer(modifier = Modifier.height(16.dp))
 
 
@@ -325,6 +333,7 @@ fun CartaProductosScreen(
                     ) {
                         Text("Cambiar imagen", color = Color(0xFF49724C))
                     }
+
                 }
             },
             confirmButton = {
@@ -337,11 +346,17 @@ fun CartaProductosScreen(
                                 nombre = nombreEditado,
                                 descripcion = descripcionEditada,
                                 precio = precioEditado.toDoubleOrNull() ?: 0.0,
+
                                 nuevaImagenUri = nuevaImagenUri
                             )
                         }
                         productoParaEditar = null
                         nuevaImagenUri = null
+
+                            )
+                        }
+                        productoParaEditar = null
+
                     },
                     modifier = Modifier
                         .width(130.dp)
@@ -359,7 +374,10 @@ fun CartaProductosScreen(
                     onClick = {
                         showDialogEditar = false
                         productoParaEditar = null
+
                         nuevaImagenUri = null
+
+
                     },
                     modifier = Modifier
                         .width(130.dp)
@@ -371,6 +389,51 @@ fun CartaProductosScreen(
         )
     }
 
+
+
+    if (showDialogDelete && confirmEliminando != null) {
+        AlertDialog(
+            containerColor = Color.White,
+            onDismissRequest = { showDialogDelete = false },
+            title = { Text("Confirmar eliminación", color = Color.Black, textAlign = TextAlign.Justify) },
+            text = { Text("¿Seguro que quieres eliminar el producto \"${confirmEliminando!!.nombre}\"?"
+                , color = Color.Black, textAlign = TextAlign.Justify ) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialogDelete = false
+                        confirmEliminando?.let { viewModel.eliminarProducto(it.id.toString()) }
+                        confirmEliminando = null
+                    },
+                    modifier = Modifier.width(130.dp),
+                    shape = RoundedCornerShape(0.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8E210B),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Aceptar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDialogDelete = false
+                        confirmEliminando = null
+                    },
+                    modifier = Modifier.width(130.dp),
+                    shape = RoundedCornerShape(0.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
 
 }

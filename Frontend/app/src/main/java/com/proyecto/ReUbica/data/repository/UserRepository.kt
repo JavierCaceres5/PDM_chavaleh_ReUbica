@@ -1,5 +1,6 @@
 package com.proyecto.ReUbica.data.repository
 
+
 import android.util.Log
 import com.proyecto.ReUbica.data.model.password.GenericResponse
 import com.proyecto.ReUbica.data.model.password.ResetPasswordRequest
@@ -16,6 +17,10 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import com.proyecto.ReUbica.data.model.user.UserProfile
 import okhttp3.RequestBody.Companion.toRequestBody
+import com.proyecto.ReUbica.data.model.user.UserProfile
+import com.proyecto.ReUbica.data.model.user.UserRegisterRequest
+import com.proyecto.ReUbica.network.RetrofitInstance
+
 
 class UserRepository {
 
@@ -87,6 +92,11 @@ class UserRepository {
             Result.failure(Exception("Error HTTP ${response.code()}: ${response.errorBody()?.string()}"))
         }
     }
+    suspend fun updateAccount(token: String, updateData: UpdateProfileRequest): Response<Unit> {
+        return api.updateProfile("Bearer $token", updateData)
+    }
+
+
     suspend fun getUserById(token: String, userId: String): Response<UserProfile> {
         return api.getUserById("Bearer $token", userId)
     }

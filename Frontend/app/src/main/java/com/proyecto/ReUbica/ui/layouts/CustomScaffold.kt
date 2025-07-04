@@ -135,6 +135,7 @@ fun CustomScaffold(rootNavController: NavHostController){
                 currentRoute != LocalInformationScreenNavigation::class.qualifiedName &&
                 currentRoute != CartaProductosScreenNavigation::class.qualifiedName &&
                 !currentRoute.orEmpty().startsWith("chat_comercio")
+
             ){
                 TopBar(navController)
             }
@@ -145,6 +146,16 @@ fun CustomScaffold(rootNavController: NavHostController){
                     navItems = navItems,
                     selectedItem = selectedItem,
                     onItemSelected = { onItemSelected(it) }
+                ){
+                TopBar(navController)
+            }
+        },
+            bottomBar = {
+                if (showBars){
+                    BottomBar(
+                        navItems = navItems,
+                        selectedItem = selectedItem,
+                        onItemSelected = { onItemSelected(it) }
                 )
             }
         },
@@ -201,10 +212,20 @@ fun CustomScaffold(rootNavController: NavHostController){
                 }
 
                 composable<RegisterLocalScreen1Navigation> {
+
                     RegisterLocalScreen1(navController, registroComercioViewModel)
+
+                    RegisterLocalScreen1(navController, registroComercioViewModel, createProductoViewModel)
+
                 }
                 composable<RegisterLocalScreen2Navigation> {
+
                     RegisterLocalScreen2(navController, registroComercioViewModel)
+                }
+
+
+
+                    RegisterLocalScreen2(navController, registroComercioViewModel, createProductoViewModel)
                 }
 
 
@@ -233,6 +254,7 @@ fun CustomScaffold(rootNavController: NavHostController){
                     ) {
                         CircularProgressIndicator(color = Color(0xFF49724C))
                     }
+
                 }
 
                 composable<LocalInformationScreenNavigation> {
@@ -250,6 +272,25 @@ fun CustomScaffold(rootNavController: NavHostController){
 
                 composable<CartaProductosScreenNavigation>{
                     CartaProductosScreen(navController)
+
+                }
+
+                composable<LocalInformationScreenNavigation> {
+                    LocalInformationScreen(navController)
+                }
+
+                composable<ComercioNavigation> { backStackEntry ->
+                    val navArgs = backStackEntry.toRoute<ComercioNavigation>()
+
+                    ComercioScreen(
+                        navController = navController,
+                        navArgs = navArgs.toEmprendimientoModel()
+                    )
+                }
+
+                composable<CartaProductosScreenNavigation>{
+                     CartaProductosScreen(navController)
+
                 }
 
                 composable(

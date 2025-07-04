@@ -28,6 +28,10 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
+
+    private val _success = MutableStateFlow(false)
+    val success: StateFlow<Boolean> = _success.asStateFlow()
+
     private val _eliminando = MutableStateFlow(false)
     val eliminando = _eliminando.asStateFlow()
 
@@ -75,7 +79,7 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    /*** CARGA INSTANTÁNEA AL ELIMINAR ***/
+
     fun eliminarProducto(productoID: String) {
         viewModelScope.launch {
             _eliminando.value = true
@@ -87,9 +91,16 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
                     _error.value = "Token no encontrado"
                     return@launch
                 }
+
                 val response = productoRepository.deleteProducto(token, productoID)
                 if (response.isSuccessful) {
                     _productos.value = _productos.value.filterNot { it.id.toString() == productoID }
+
+                val response = productoRepository.deleteProducto("$token", productoID)
+                if (response.isSuccessful) {
+                    Log.d(TAG, "Producto eliminado exitosamente: $productoID")
+                    cargarProductos()
+
                 } else {
                     _error.value = "Error al eliminar producto: ${response.code()}"
                 }
@@ -100,6 +111,7 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
+
     fun actualizarProducto(
         productoId: String,
         nombre: String,
@@ -120,6 +132,28 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
                     _error.value = "Error al actualizar producto: ${response.code()}"
                 }
             } catch (e: Exception) {
+
+
+    fun actualizarProducto(productoId: String, nombre: String, descripcion: String, precio: Double) {
+        viewModelScope.launch {
+            try {
+                val token = userSessionManager.getToken() ?: return@launch
+                val updateData = UpdateProductoRequest(
+                    nombre = nombre,
+                    descripcion = descripcion,
+                    precio = precio,
+                )
+                val response = productoRepository.updateProducto(token, productoId, updateData)
+                if (response.isSuccessful) {
+                    Log.d(TAG, "Producto actualizado exitosamente")
+                    cargarProductos()
+                } else {
+                    Log.e(TAG, "Error al actualizar producto: ${response.code()}")
+                    _error.value = "Error al actualizar producto: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error al actualizar producto: ${e.message}")
+
                 _error.value = "Excepción: ${e.localizedMessage}"
             }
         }

@@ -59,6 +59,7 @@ interface EmprendimientoApiService {
         @Body updateData: UpdateEmprendimientoRequest
     ): Response<Unit>
 
+
     @Multipart
     @PUT("emprendimientos/actualizarMiEmprendimiento")
     suspend fun updateEmprendimientoLogo(

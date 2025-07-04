@@ -17,6 +17,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
 import androidx.core.net.toUri
+import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.UpdateEmprendimientoRequest
 import com.proyecto.ReUbica.data.model.producto.DeleteProductoResponse
 import com.proyecto.ReUbica.data.model.producto.ProductoModel
@@ -74,6 +75,7 @@ class ProductoRepository {
         return api.deleteProducto(token = "Bearer $token", productoID = productoID)
     }
 
+
     suspend fun updateProducto(
         context: Context,
         token: String,
@@ -111,6 +113,11 @@ class ProductoRepository {
             precio = precio.toBody(),
             product_image = imagenPart
         )
+    }
+
+
+    suspend fun updateProducto(token: String, productoId: String, updateData: UpdateProductoRequest): Response<Unit> {
+        return api.updateProducto("Bearer $token", productoId, updateData)
     }
 
 }

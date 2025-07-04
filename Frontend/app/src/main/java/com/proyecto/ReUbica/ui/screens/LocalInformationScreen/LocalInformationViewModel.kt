@@ -1,9 +1,16 @@
 package com.proyecto.ReUbica.ui.screens.LocalInformationScreen
 
 import android.app.Application
+
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Tag
+
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
@@ -13,8 +20,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 
+import java.io.File
 
 
 class EmprendimientoViewModel(application: Application) : AndroidViewModel(application) {
@@ -40,6 +47,8 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
     private val _success = MutableStateFlow<Boolean?>(null)
     val success: StateFlow<Boolean?> = _success.asStateFlow()
 
+    private val TAG = "EmprendimientoViewModel"
+
     fun cargarMiEmprendimiento() {
         viewModelScope.launch {
             _loading.value = true
@@ -52,6 +61,9 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
                     return@launch
                 }
                 val response = emprendimientoRepository.getMiEmprendimiento(token)
+
+                Log.e("EmprendimientoViewModel", _emprendimiento.value.toString())
+
                 if (response.isSuccessful) {
                     _emprendimiento.value = response.body()
                     _redesSociales.value = response.body()?.redes_sociales
@@ -67,6 +79,7 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
+
 
     fun updateLogoEmprendimiento(context: android.content.Context, uri: Uri, onFinish: () -> Unit) {
         viewModelScope.launch {
@@ -84,6 +97,7 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
             onFinish()
         }
     }
+
 
 
     private fun EmprendimientoModel.toUpdateRequest(): UpdateEmprendimientoRequest {
@@ -114,6 +128,13 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
                 val response = emprendimientoRepository.updateEmprendimiento(token, updateData)
 
                 _success.value = response.isSuccessful
+
+
+                if(response.isSuccessful){
+                    cargarMiEmprendimiento()
+                    Log.d(TAG, "Emprendimiento actualizado correctamente")
+                }
+
             } catch (e: Exception) {
                 _error.value = "Error de red: ${e.message}"
                 _success.value = false
@@ -123,4 +144,8 @@ class EmprendimientoViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+
 }
+
+}
+
