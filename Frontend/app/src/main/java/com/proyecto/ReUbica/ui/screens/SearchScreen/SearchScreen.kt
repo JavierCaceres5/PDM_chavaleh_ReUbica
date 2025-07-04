@@ -44,13 +44,16 @@ import kotlin.math.pow
 @Composable
 fun SearchScreen(
     navController: NavHostController,
-    favoritosViewModel: FavoritosViewModel = viewModel(),
+
     searchViewModel: SearchScreenViewModel = viewModel(),
     homeViewModel: HomeScreenViewModel = viewModel()
 ) {
     val resultadosApi by searchViewModel.resultadosByNombre.collectAsState()
     val loading by searchViewModel.loading.collectAsState()
     val error by searchViewModel.error.collectAsState()
+    val favoritos by searchViewModel.favoritos.collectAsState()
+
+
 
     val context = LocalContext.current
     val userSessionManager = remember { UserSessionManager(context) }
@@ -70,7 +73,9 @@ fun SearchScreen(
     LaunchedEffect(Unit) {
         userSessionManager.getToken()?.let { homeViewModel.obtenerTodosLosEmprendimientos(it) }
         searchViewModel.setUserSessionManager(userSessionManager)
+        searchViewModel.cargarFavoritos()
     }
+
 
     var searchQuery by remember { mutableStateOf("") }
     var searchHistory by remember { mutableStateOf(listOf<String>()) }
@@ -222,7 +227,8 @@ fun SearchScreen(
                     SeccionRestaurantes(
                         titulo = "Resultados de búsqueda",
                         emprendimientos = resultadosApi,
-                        favoritosViewModel = favoritosViewModel,
+                        favoritos = favoritos,
+                        onToggleFavorito = { id -> searchViewModel.toggleFavorito(id) },
                         navController = navController
                     )
                 }
@@ -234,7 +240,8 @@ fun SearchScreen(
                         SeccionRestaurantes(
                             titulo = "Nuevos en la plataforma",
                             emprendimientos = nuevosEmprendimientos,
-                            favoritosViewModel = favoritosViewModel,
+                            favoritos = favoritos,
+                            onToggleFavorito = { id -> searchViewModel.toggleFavorito(id) },
                             navController = navController
                         )
                     }
@@ -244,7 +251,8 @@ fun SearchScreen(
                         SeccionRestaurantes(
                             titulo = "Locales cerca de ti",
                             emprendimientos = comerciosCercanos,
-                            favoritosViewModel = favoritosViewModel,
+                            favoritos = favoritos,
+                            onToggleFavorito = { id -> searchViewModel.toggleFavorito(id) },
                             navController = navController
                         )
                     }

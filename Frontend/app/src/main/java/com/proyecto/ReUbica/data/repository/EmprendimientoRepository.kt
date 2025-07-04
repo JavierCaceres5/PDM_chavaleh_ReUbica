@@ -72,11 +72,13 @@ class EmprendimientoRepository {
     suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
         return api.getAllEmprendimientos("Bearer $token")
     }
+
     suspend fun updateEmprendimientoLogo(token: String, filePath: String): Response<Any> {
         val file = java.io.File(filePath)
         val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), file)
         val logo = MultipartBody.Part.createFormData("logo", file.name, requestFile)
         return api.updateEmprendimientoLogo("Bearer $token", logo)
     }
+
 
 }

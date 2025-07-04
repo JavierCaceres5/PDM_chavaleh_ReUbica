@@ -32,7 +32,7 @@ fun ProductCard(
     token: String,
     emprendimientoID: String
 ) {
-    val isFavorito = favoritosViewModel.isFavoritoProducto(product.id.toString())
+   // val isFavorito = favoritosViewModel.isFavoritoProducto(product.id.toString())
 
     Card(
         modifier = Modifier
@@ -81,18 +81,18 @@ fun ProductCard(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Icon(
-                        imageVector = if (isFavorito) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Favorito",
-                        tint = Color(0xFF5A3C1D),
-                        modifier = Modifier.clickable {
-                            favoritosViewModel.toggleFavoritoProducto(
-                                id = product.id.toString(),
-                                nombre = product.nombre.toString(),
-                                precio = product.precio
-                            )
+//                    Icon(
+//                        imageVector = if (isFavorito) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+//                        contentDescription = "Favorito",
+//                        tint = Color(0xFF5A3C1D),
+//                        modifier = Modifier.clickable {
+////                            favoritosViewModel.toggleFavoritoProducto(
+////                                id = product.id.toString(),
+////                                nombre = product.nombre.toString(),
+////                                precio = product.precio
+//                            )
                         }
-                    )
+                   // )
 
                     Spacer(modifier = Modifier.width(8.dp))
 
@@ -105,4 +105,4 @@ fun ProductCard(
             }
         }
     }
-}
+//}

@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.proyecto.ReUbica.data.repository.FavoritoRepository
+import com.proyecto.ReUbica.data.local.UserSessionManager
+
 
 
 class HomeScreenViewModel(application: Application) : AndroidViewModel(application) {
@@ -79,4 +82,30 @@ class HomeScreenViewModel(application: Application) : AndroidViewModel(applicati
             _loading.value = false
         }
     }
+    val favoritos = MutableStateFlow<List<String>>(emptyList())
+
+    fun cargarFavoritos(sessionManager: UserSessionManager) {
+        viewModelScope.launch {
+            val token = sessionManager.getToken() ?: return@launch
+            val favs = FavoritoRepository.getFavoritos(token, "emprendimiento")
+            favoritos.value = favs
+        }
+    }
+
+    fun toggleFavorito(sessionManager: UserSessionManager, id: String) {
+        viewModelScope.launch {
+            val token = sessionManager.getToken() ?: return@launch
+            val success = FavoritoRepository.toggleFavorito(token, "emprendimiento", id)
+            if (success) {
+                val actual = favoritos.value.toMutableList()
+                if (actual.contains(id)) {
+                    actual.remove(id)
+                } else {
+                    actual.add(id)
+                }
+                favoritos.value = actual
+            }
+        }
+    }
+
 }

@@ -158,15 +158,19 @@ fun CustomScaffold(rootNavController: NavHostController){
             ) {
 
                 composable<HomeScreenNavigation> {
-                    HomeScreen(navController = navController, favoritosViewModel = favoritosViewModel)
+                    HomeScreen(navController = navController)
                 }
 
                 composable<FavoritesScreenNavigation> {
-                    FavoriteScreen(favoritosViewModel = favoritosViewModel)
+                    FavoriteScreen(
+                        navController = navController,
+                        favoritosViewModel = favoritosViewModel
+                    )
                 }
 
+
                 composable<SearchScreenNavigation>{
-                    SearchScreen(navController = navController, favoritosViewModel = favoritosViewModel)
+                    SearchScreen(navController = navController)
                 }
 
                 composable<ProfileScreenNavigation>{

@@ -1,6 +1,7 @@
 package com.proyecto.ReUbica.network
 
 import com.proyecto.ReUbica.data.api.EmprendimientoApiService
+import com.proyecto.ReUbica.data.api.FavoritoApiService
 import com.proyecto.ReUbica.data.api.ProductoApiService
 
 import com.proyecto.ReUbica.data.api.ReviewApiService
@@ -40,6 +41,7 @@ object RetrofitInstance {
 
     }
 
+
     val reviewApi: ReviewApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -47,4 +49,14 @@ object RetrofitInstance {
             .build()
             .create(ReviewApiService::class.java)
     }
+
+    val favoritoApi: FavoritoApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(FavoritoApiService::class.java)
+    }
+
+
 }

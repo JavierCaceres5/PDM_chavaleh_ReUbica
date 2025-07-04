@@ -52,9 +52,12 @@ import kotlin.math.sqrt
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    favoritosViewModel: FavoritosViewModel = viewModel(),
     homeViewModel: HomeScreenViewModel = viewModel()
 ) {
+    val favoritos by homeViewModel.favoritos.collectAsState()
+
+
+
     val context = LocalContext.current
     val userSessionManager = remember { UserSessionManager(context) }
 
@@ -77,7 +80,10 @@ fun HomeScreen(
         }
 
         val token = userSessionManager.getToken()
-        token?.let { homeViewModel.obtenerTodosLosEmprendimientos(it) }
+        token?.let {
+            homeViewModel.obtenerTodosLosEmprendimientos(it)
+            homeViewModel.cargarFavoritos(userSessionManager)
+        }
     }
 
     val categorias1 = listOf(
@@ -120,7 +126,6 @@ fun HomeScreen(
             homeViewModel.searchEmprendimientoByCategory("Servicios")
         }
     )
-
 
     val userLat = userLocation?.latitude ?: 0.0
     val userLon = userLocation?.longitude ?: 0.0
@@ -202,10 +207,15 @@ fun HomeScreen(
                 }
             }
         } else {
-
             if (resultados.isNotEmpty()) {
                 item {
-                    SeccionRestaurantes("Descubrimientos para $categoriaSeleccionada", resultados, favoritosViewModel, navController)
+                    SeccionRestaurantes(
+                        titulo = "Descubrimientos para $categoriaSeleccionada",
+                        emprendimientos = resultados,
+                        favoritos = favoritos,
+                        onToggleFavorito = { id -> homeViewModel.toggleFavorito(userSessionManager, id) },
+                        navController = navController
+                    )
                 }
             } else if (buscadoByCategory) {
                 item {
@@ -255,13 +265,27 @@ fun HomeScreen(
 
         if (comerciosCercanos.isNotEmpty()) {
             item {
-                SeccionRestaurantes("Locales cerca de ti", comerciosCercanos, favoritosViewModel, navController)
+                SeccionRestaurantes(
+                    titulo = "Locales cerca de ti",
+                    emprendimientos = comerciosCercanos,
+                    favoritos = favoritos,
+                    onToggleFavorito = { id -> homeViewModel.toggleFavorito(userSessionManager, id) },
+                    navController = navController
+                )
+
             }
         }
 
         if (nuevosEmprendimientos.isNotEmpty()) {
             item {
-                SeccionRestaurantes("Nuevos en la plataforma", nuevosEmprendimientos, favoritosViewModel, navController)
+                SeccionRestaurantes(
+                    titulo = "Nuevos en la plataforma",
+                    emprendimientos = nuevosEmprendimientos,
+                    favoritos = favoritos,
+                    onToggleFavorito = { id -> homeViewModel.toggleFavorito(userSessionManager, id) },
+                    navController = navController
+                )
+
             }
         }
 
@@ -288,7 +312,6 @@ fun HomeScreen(
     }
 }
 
-
 fun isValidUrl(url: String?): Boolean =
     url != null && (url.startsWith("http://") || url.startsWith("https://"))
 
@@ -296,9 +319,13 @@ fun isValidUrl(url: String?): Boolean =
 fun SeccionRestaurantes(
     titulo: String,
     emprendimientos: List<EmprendimientoModel>,
-    favoritosViewModel: FavoritosViewModel,
+    favoritos: List<String>,
+    onToggleFavorito: (String) -> Unit,
     navController: NavHostController
 ) {
+
+
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             titulo,
@@ -314,7 +341,7 @@ fun SeccionRestaurantes(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(emprendimientos) { emprendimiento ->
-
+                val id = emprendimiento.id?.toString() ?: return@items
                 val logoUrl = if (isValidUrl(emprendimiento.logo)) emprendimiento.logo else null
 
                 RestaurantCard(
@@ -322,15 +349,9 @@ fun SeccionRestaurantes(
                     departamento = emprendimiento.direccion ?: "Sin dirección",
                     categoria = emprendimiento.categoriasPrincipales?.firstOrNull() ?: "Sin categoría",
                     imagenRes = logoUrl,
-                    isFavorito = favoritosViewModel.isFavoritoComercio(emprendimiento.nombre ?: ""),
-                    onFavoritoClick = {
-                        favoritosViewModel.toggleFavoritoComercio(
-                            nombre = emprendimiento.nombre ?: "",
-                            departamento = emprendimiento.direccion ?: "",
-                            categoria = emprendimiento.categoriasPrincipales?.firstOrNull() ?: "",
-                            logo = emprendimiento.logo ?: ""
-                        )
-                    },
+                    isFavorito = favoritos.contains(id),
+                    onFavoritoClick = { onToggleFavorito(id) },
+
                     onVerTiendaClick = {
                         val gson = Gson()
                         val redesJsonString = emprendimiento.redes_sociales?.let { redes ->
@@ -349,7 +370,7 @@ fun SeccionRestaurantes(
                                 id = emprendimiento.id.toString(),
                                 nombre = emprendimiento.nombre ?: "Sin nombre",
                                 descripcion = emprendimiento.descripcion ?: "Sin descripción",
-                                categoriasPrincipales = emprendimiento.categoriasPrincipales?.map { it }?: emptyList(),
+                                categoriasPrincipales = emprendimiento.categoriasPrincipales?.map { it } ?: emptyList(),
                                 direccion = emprendimiento.direccion ?: "Sin dirección",
                                 latitud = emprendimiento.latitud ?: 0.0,
                                 longitud = emprendimiento.longitud ?: 0.0,
@@ -395,4 +416,3 @@ fun CategoriaBox(categoria: CategoriaItem, modifier: Modifier = Modifier) {
         Text(text = categoria.label, fontSize = 12.sp, color = Color.Black)
     }
 }
-

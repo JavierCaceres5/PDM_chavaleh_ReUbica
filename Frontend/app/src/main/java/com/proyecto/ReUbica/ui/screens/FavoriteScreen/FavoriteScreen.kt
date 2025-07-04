@@ -15,29 +15,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.proyecto.ReUbica.ui.Components.RestaurantCard
+import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 
 @Composable
-fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
+fun FavoriteScreen(
+    navController: NavHostController,
+    favoritosViewModel: FavoritosViewModel = viewModel()
+) {
     var selectedTab by remember { mutableStateOf("Puestos") }
     var searchQuery by remember { mutableStateOf("") }
 
-    val favoritos = favoritosViewModel.favoritos
+    val favoritos by favoritosViewModel.favoritosEmprendimientos.collectAsState()
+    val context = LocalContext.current
 
-    val comercios = favoritos.filterIsInstance<Favorito.Comercio>()
-    val productos = favoritos.filterIsInstance<Favorito.Producto>()
+    LaunchedEffect(Unit) {
+        favoritosViewModel.setUserSessionManager(
+            com.proyecto.ReUbica.data.local.UserSessionManager(context)
+        )
+        favoritosViewModel.cargarFavoritos()
+    }
 
     val comerciosFiltrados = if (searchQuery.isBlank()) {
-        comercios
+        favoritos
     } else {
-        comercios.filter {
-            it.nombre.contains(searchQuery, ignoreCase = true) ||
-                    it.departamento.contains(searchQuery, ignoreCase = true) ||
-                    it.categoria.contains(searchQuery, ignoreCase = true)
+        favoritos.filter {
+            (it.nombre?.contains(searchQuery, ignoreCase = true) == true) ||
+                    (it.direccion?.contains(searchQuery, ignoreCase = true) == true) ||
+                    (it.categoriasPrincipales?.any { cat -> cat.contains(searchQuery, ignoreCase = true) } == true)
         }
     }
 
@@ -47,7 +58,9 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
             .padding(16.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 15.dp, end = 20.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 15.dp, end = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -60,8 +73,16 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
             value = searchQuery,
             onValueChange = { searchQuery = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Buscar por nombre, categoría o localidad", fontSize = 14.sp, color = Color.DarkGray) },
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Buscar", tint = Color.DarkGray) },
+            placeholder = {
+                Text(
+                    "Buscar por nombre, categoría o localidad",
+                    fontSize = 14.sp,
+                    color = Color.DarkGray
+                )
+            },
+            leadingIcon = {
+                Icon(Icons.Filled.Search, contentDescription = "Buscar", tint = Color.DarkGray)
+            },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = Color(0xFFF7F8EF),
@@ -91,62 +112,35 @@ fun FavoriteScreen(favoritosViewModel: FavoritosViewModel = viewModel()) {
 
         if (selectedTab == "Puestos") {
             if (comerciosFiltrados.isEmpty()) {
-                Text("Aún no tienes puestos guardados.", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+                Text(
+                    "Aún no tienes puestos guardados.",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(8.dp)
+                )
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(comerciosFiltrados.size) { index ->
                         val favorito = comerciosFiltrados[index]
                         RestaurantCard(
-                            nombre = favorito.nombre,
-                            departamento = favorito.departamento,
-                            categoria = favorito.categoria,
-                            imagenRes = if (favorito.logo?.isNotBlank() == true) favorito.logo else null,
+                            nombre = favorito.nombre ?: "Sin nombre",
+                            departamento = favorito.direccion ?: "Sin dirección",
+                            categoria = favorito.categoriasPrincipales?.firstOrNull() ?: "Sin categoría",
+                            imagenRes = favorito.logo,
                             isFavorito = true,
                             onFavoritoClick = {
-                                favoritosViewModel.toggleFavoritoComercio(
-                                    favorito.nombre,
-                                    favorito.departamento,
-                                    favorito.categoria,
-                                    favorito.logo
-                                )
+                                favoritosViewModel.toggleFavorito(favorito.id.toString())
                             },
-                            onVerTiendaClick = {}
+                            onVerTiendaClick = {
+                                navController.navigate(
+                                    "comercio/${favorito.nombre}"
+                                )
+                            }
                         )
                     }
                 }
             }
         } else {
-            if (productos.isEmpty()) {
-                Text("Aún no tienes productos guardados.", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(productos.size) { index ->
-                        val producto = productos[index]
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F8EF)),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Column(Modifier.padding(16.dp)) {
-                                Text(producto.nombre, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                                Text("Precio: \$${producto.precio}", fontSize = 14.sp)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Button(onClick = {
-                                    favoritosViewModel.toggleFavoritoProducto(
-                                        producto.id,
-                                        producto.nombre,
-                                        producto.precio
-                                    )
-                                }) {
-                                    Text("Eliminar de favoritos")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // Pendiente implementar Productos
         }
     }
 }
@@ -161,7 +155,8 @@ fun FavoriteTab(title: String, isSelected: Boolean, onClick: () -> Unit) {
             .clip(RoundedCornerShape(12.dp))
             .background(bgColor)
             .clickable { onClick() }
-            .width(200.dp).height(45.dp)
+            .width(200.dp)
+            .height(45.dp)
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
