@@ -2,6 +2,7 @@ package com.proyecto.ReUbica.ui.screens.ProfileScreen
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -25,7 +26,9 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
 
     private val repository = UserRepository()
     private val emprendimientoRepository = EmprendimientoRepository()
+
     private val productoRepository = ProductoRepository()
+
     private val sessionManager = UserSessionManager(application)
 
     private val _emprendimiento = MutableStateFlow<EmprendimientoModel?>(null)
@@ -39,6 +42,42 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
 
     private val TAG = "ProfileScreenViewModel"
 
+
+    val userSession = sessionManager.userSessionFlow
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            null
+        )
+
+    init {
+        refreshUserData()
+    }
+
+    fun refreshUserData() {
+        viewModelScope.launch {
+            try {
+                val token = sessionManager.getToken()
+                if (token == null) {
+                    _error.value = "Token no encontrado"
+                    return@launch
+                }
+
+                // Solo lee el usuario actual de la sesión
+                val userProfile = sessionManager.getUserProfile(token)
+                if (userProfile != null) {
+                    Log.d(TAG, "Datos de usuario obtenidos localmente: ${userProfile.user_role}")
+                } else {
+                    Log.e("ProfileVM", "Perfil no encontrado en almacenamiento local")
+                    _error.value = "Perfil no encontrado en almacenamiento local"
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileVM", "Error actualizando datos: ${e.message}")
+                _error.value = "Error al actualizar datos: ${e.message}"
+            }
+        }
+    }
+
     private val _negocioEliminado = MutableStateFlow(false)
     val negocioEliminado: StateFlow<Boolean> = _negocioEliminado
 
@@ -48,6 +87,7 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
     val user: StateFlow<UserProfile?> = sessionManager.userSessionFlow
         .map { it?.userProfile }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
 
     fun deleteAccount(onSuccess: () -> Unit) {
         viewModelScope.launch {
@@ -61,6 +101,16 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                     return@launch
                 }
                 val response = repository.deleteAccount(token)
+
+                if (response.isSuccessful) {
+                    sessionManager.clearSession()
+                    onSuccess()
+                } else {
+                    _error.value = "Error al eliminar cuenta: ${response.message()}"
+                }
+            } catch (e: Exception) {
+                _error.value = "Error de red: ${e.message}"
+
                 Log.d("ProfileViewModel", "Delete account response: ${response.code()} - ${response.body()}")
                 if (response.isSuccessful) {
                     sessionManager.clearSession()
@@ -72,11 +122,22 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                 }
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Error deleting account", e)
+
             } finally {
                 _loading.value = false
             }
         }
     }
+
+
+    fun deleteMiEmprendimiento(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
+            try {
+                val token = sessionManager.getToken()
+                if (token.isNullOrBlank()) {
+                    _error.value = "Token no encontrado. Por favor, inicie sesión nuevamente."
 
     fun deleteMiEmprendimiento() {
         viewModelScope.launch {
@@ -105,12 +166,26 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
                     }
                 } else {
                     _error.value = "Error al verificar productos: ${productosResponse.message()}"
+
                     _loading.value = false
                     return@launch
                 }
 
                 val response = emprendimientoRepository.deleteMiEmprendimiento(token)
                 if (response.isSuccessful) {
+
+                    Log.d(TAG, "Emprendimiento eliminado correctamente")
+                    refreshUserData()
+                    _loading.value = false
+                    onSuccess()
+                } else {
+                    _error.value = "Error al eliminar emprendimiento: ${response.message()}"
+                    Log.e(TAG, "Error eliminando emprendimiento: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                _error.value = "Error de red: ${e.message}"
+                Log.e(TAG, "Error de red: ${e.message}")
+
                     val body = response.body()
                     val updatedToken = body?.updatedToken
                     if (!updatedToken.isNullOrBlank()) {
@@ -123,11 +198,15 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
 
             } catch (e: Exception) {
                 _error.value = "Error de red: ${e.message}"
+
             } finally {
                 _loading.value = false
             }
         }
     }
+
+
+}
 
     fun resetHasProductos() {
         _hasProductos.value = false
@@ -138,3 +217,4 @@ class ProfileScreenViewModel(application: Application): AndroidViewModel(applica
     }
 
 }
+

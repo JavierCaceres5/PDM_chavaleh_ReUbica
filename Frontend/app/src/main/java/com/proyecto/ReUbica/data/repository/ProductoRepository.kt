@@ -75,7 +75,49 @@ class ProductoRepository {
         return api.deleteProducto(token = "Bearer $token", productoID = productoID)
     }
 
+
+    suspend fun updateProducto(
+        context: Context,
+        token: String,
+        productoId: String,
+        nombre: String,
+        descripcion: String,
+        precio: Double,
+        nuevaImagenUri: Uri?
+    ): Response<ProductoModel> {
+        fun String.toBody(): RequestBody =
+            this.toRequestBody("text/plain".toMediaTypeOrNull())
+        fun Double.toBody(): RequestBody =
+            this.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
+        fun createMultipartFromUri(context: Context, uri: Uri, partName: String): MultipartBody.Part? {
+            val contentResolver = context.contentResolver
+            val mimeType = contentResolver.getType(uri) ?: "image/*"
+            val inputStream = contentResolver.openInputStream(uri) ?: return null
+            val fileBytes = inputStream.readBytes()
+            inputStream.close()
+            val requestBody = fileBytes.toRequestBody(mimeType.toMediaTypeOrNull())
+            val fileName = uri.lastPathSegment ?: "image.jpg"
+            return MultipartBody.Part.createFormData(partName, fileName, requestBody)
+        }
+
+        val imagenPart = nuevaImagenUri?.let { uri ->
+            createMultipartFromUri(context, uri, "product_image")
+        }
+
+        return api.updateProducto(
+            token = "Bearer $token",
+            productoID = productoId,
+            nombre = nombre.toBody(),
+            descripcion = descripcion.toBody(),
+            precio = precio.toBody(),
+            product_image = imagenPart
+        )
+    }
+
+
     suspend fun updateProducto(token: String, productoId: String, updateData: UpdateProductoRequest): Response<Unit> {
         return api.updateProducto("Bearer $token", productoId, updateData)
     }
+
 }

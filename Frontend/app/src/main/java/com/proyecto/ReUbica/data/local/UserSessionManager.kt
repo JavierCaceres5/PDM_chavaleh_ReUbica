@@ -9,6 +9,7 @@ import com.google.gson.Gson
 import com.proyecto.ReUbica.data.model.user.UserProfile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -29,6 +30,9 @@ class UserSessionManager(private val context: Context) {
         private val EMPRENDIMIENTO_ID_KEY = stringPreferencesKey("EMPRENDIMIENTO_ID")
         private val PRODUCTO_ID_KEY = stringPreferencesKey("PRODUCTO_ID")
     }
+
+
+    private val _userSession = MutableStateFlow<UserSession?>(null)
 
     private val gson = Gson()
     private val _userSession = MutableStateFlow<UserSession?>(null)
@@ -68,12 +72,27 @@ class UserSessionManager(private val context: Context) {
         }
     }
 
+    private val gson = Gson()
+
+
     suspend fun saveUserSession(token: String, user: UserProfile) {
         context.dataStore.edit { prefs ->
             prefs[TOKEN_KEY] = token
             prefs[USER_KEY] = gson.toJson(user)
         }
+
+    }
+
+    val userSessionFlow: Flow<UserSession?> = context.dataStore.data.map { prefs ->
+        val token = prefs[TOKEN_KEY]
+        val userJson = prefs[USER_KEY]
+        if (token != null && userJson != null) {
+            val user = gson.fromJson(userJson, UserProfile::class.java)
+            UserSession(token, user)
+        } else null
+
         _userSession.emit(UserSession(token, user))
+
     }
 
     suspend fun clearSession() {

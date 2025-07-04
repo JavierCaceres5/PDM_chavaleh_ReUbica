@@ -68,7 +68,17 @@ class EmprendimientoRepository {
         return api.updateEmprendimiento("Bearer $token", updateData)
     }
 
+    suspend fun updateEmprendimientoLogo(token: String, logoFile: File) {
+        val logoPart = MultipartBody.Part.createFormData(
+            "logo", logoFile.name, logoFile.asRequestBody("image/*".toMediaTypeOrNull())
+        )
+        api.updateEmprendimientoLogo("Bearer $token", logoPart)
+    }
+
     suspend fun getAllEmprendimientos(token: String): Response<List<EmprendimientoModel>> {
         return api.getAllEmprendimientos("Bearer $token")
     }
+
 }
+}
+

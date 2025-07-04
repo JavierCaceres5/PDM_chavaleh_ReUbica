@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -40,13 +41,21 @@ import coil.compose.rememberAsyncImagePainter
 import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
+import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 
 @Composable
+
+fun RegisterLocalScreen1(navController: NavHostController, viewModel: RegistroComercioViewModel) {
+
+    RegisterLocalScreen1Content(
+        registroComercio = viewModel,
+
 fun RegisterLocalScreen1(navController: NavHostController, viewModelComercio: RegistroComercioViewModel, viewModelProducto: CreateProductoViewModel) {
 
     RegisterLocalScreen1Content(
         registroComercio = viewModelComercio,
         createProducto = viewModelProducto,
+
         onNext = { navController.navigate(RegisterLocalScreen2Navigation) },
         onBack = { navController.popBackStack() }
     )
@@ -54,6 +63,7 @@ fun RegisterLocalScreen1(navController: NavHostController, viewModelComercio: Re
 
 @Composable
 fun RegisterLocalScreen1Content(
+
     createProducto: CreateProductoViewModel,
     registroComercio: RegistroComercioViewModel,
     onNext: () -> Unit = {},
@@ -108,10 +118,15 @@ fun RegisterLocalScreen1Content(
     var showError by remember { mutableStateOf(false) }
     var descripcionInvalida by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         imageUri = it
+        registroComercio.setValues("logo", it?.toString() ?: "")
     }
+
+    val profileViewModel: ProfileScreenViewModel = viewModel()
 
     val scrollState = rememberScrollState()
     val subcategorias = categoriasSecundarias[emprendimiento.categoriasPrincipales.firstOrNull()] ?: emptyList()
@@ -288,6 +303,7 @@ fun RegisterLocalScreen1Content(
                 }
             }
 
+
             Button(
                 onClick = {
 
@@ -326,6 +342,7 @@ fun RegisterLocalScreen1Content(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+
 }
 
 @Composable
