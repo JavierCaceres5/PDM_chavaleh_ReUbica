@@ -43,12 +43,14 @@ import kotlinx.coroutines.launch
 fun RegisterLocalScreen3(
     navController: NavHostController,
     registroComercioViewModel: RegistroComercioViewModel,
-    createProductoViewModel: CreateProductoViewModel
+    createProductoViewModel: CreateProductoViewModel,
+    isAddingMoreProducts: Boolean = false
 ) {
     RegisterLocalScreen3Content(
         createProducto = createProductoViewModel,
         registroComercio = registroComercioViewModel,
         navController = navController,
+        isAddingMoreProducts = isAddingMoreProducts,
         onNext = { navController.navigate(HomeScreenNavigation) },
         onBack = { navController.popBackStack() }
     )
@@ -59,6 +61,7 @@ fun RegisterLocalScreen3Content(
     createProducto: CreateProductoViewModel,
     registroComercio: RegistroComercioViewModel,
     navController: NavHostController,
+    isAddingMoreProducts: Boolean = false,
     onNext: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
@@ -75,9 +78,10 @@ fun RegisterLocalScreen3Content(
     var showError by remember { mutableStateOf(false) }
     var descripcionInvalida by remember { mutableStateOf(false) }
 
-    val camposValidos =
-        producto.nombre.isNotBlank() && producto.descripcion.isNotBlank() &&
-                producto.precio > 0.0 && imagenUri != null
+    var errorNombre by remember { mutableStateOf<String?>(null) }
+    var errorGeneral by remember { mutableStateOf<String?>(null) }
+
+    val isSuccess by createProducto.success.collectAsState()
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
@@ -86,18 +90,18 @@ fun RegisterLocalScreen3Content(
         }
     }
 
-    val isSuccess by createProducto.success.collectAsState()
-
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
+            errorNombre = null
+            errorGeneral = null
             showDialog = true
             createProducto.clearProducto()
             createProducto.setImage(null)
+            createProducto.resetSuccess()
         }
     }
 
     Column(Modifier.fillMaxSize()) {
-        StepTopBar(step = 2, title = "Carta de productos", onBackClick = onBack)
 
         Column(
             modifier = Modifier
@@ -106,25 +110,53 @@ fun RegisterLocalScreen3Content(
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "¡Comencemos con tus productos!",
-                fontFamily = poppins,
-                fontSize = 24.sp,
-                color = Color(0xFF5A3C1D),
-                textAlign = TextAlign.Center
-            )
+            if (!isAddingMoreProducts) {
 
-            Spacer(modifier = Modifier.height(8.dp))
+                StepTopBar(step = 2, title = "Carta de productos", onBackClick = onBack)
 
-            Text(
-                text = "Esta información será visible en tu perfil y permitirá a los clientes conocer lo que ofreces en tu negocio.",
-                fontFamily = abel,
-                fontSize = 14.sp,
-                color = Color.Black,
-                textAlign = TextAlign.Center
-            )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "¡Comencemos con tus productos!",
+                    fontFamily = poppins,
+                    fontSize = 24.sp,
+                    color = Color(0xFF5A3C1D),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Esta información será visible en tu perfil y permitirá a los clientes conocer lo que ofreces en tu negocio.",
+                    fontFamily = abel,
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            } else {
+
+                Spacer(modifier = Modifier.height(25.dp))
+
+                Text(
+                    text = "Agrega otro producto para tu carta",
+                    fontFamily = poppins,
+                    fontSize = 24.sp,
+                    color = Color(0xFF5A3C1D),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            errorNombre?.let {
+                ErrorMessageBox(message = it, modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            errorGeneral?.let {
+                ErrorMessageBox(message = it, modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -250,26 +282,28 @@ fun RegisterLocalScreen3Content(
             ) {
                 Button(
                     onClick = {
+                        errorNombre = null
+                        errorGeneral = null
+                        showError = false
+                        descripcionInvalida = false
+
+                        val nombreValido = producto.nombre.matches(Regex("^[A-Za-záéíóúÁÉÍÓÚñÑ ]+\$"))
                         val descripcionValida = producto.descripcion.length <= 150
                         val precioValido = producto.precio > 0.0
 
                         if (producto.nombre.isBlank() || producto.descripcion.isBlank() || !precioValido || imagenUri == null) {
-                            showError = true
-                            descripcionInvalida = false
-                        } else if (!descripcionValida) {
-                            showError = false
-                            descripcionInvalida = true
-                        } else {
-                            showError = false
-                            descripcionInvalida = false
+                            errorGeneral = "Por favor, complete todos los campos antes de continuar."
+                        } else if (!nombreValido) {
+                            errorNombre = "El nombre del producto solo puede contener letras y espacios."
+                        }  else {
                             coroutineScope.launch {
                                 createProducto.crearProducto(context)
                             }
                         }
                     },
-                    enabled = camposValidos,
+                    enabled = true,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (camposValidos) Color(0xFF49724C) else Color.Gray
+                        containerColor = Color(0xFF49724C)
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {

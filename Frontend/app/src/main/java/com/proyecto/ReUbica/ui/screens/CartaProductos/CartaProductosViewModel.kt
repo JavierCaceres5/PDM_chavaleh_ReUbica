@@ -27,6 +27,9 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
+    private val _success = MutableStateFlow(false)
+    val success: StateFlow<Boolean> = _success.asStateFlow()
+
     private val _eliminando = MutableStateFlow(false)
     val eliminando = _eliminando.asStateFlow()
 

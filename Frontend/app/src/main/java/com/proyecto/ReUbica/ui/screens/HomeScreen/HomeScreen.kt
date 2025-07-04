@@ -35,6 +35,7 @@ import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
 import com.proyecto.ReUbica.ui.Components.RestaurantCard
 import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
+import com.proyecto.ReUbica.ui.navigations.SearchScreenNavigation
 import com.proyecto.ReUbica.ui.screens.FavoriteScreen.FavoritosViewModel
 import com.proyecto.ReUbica.ui.screens.SearchScreen.CategoriaItem
 import com.proyecto.ReUbica.utils.LocationUtils
@@ -234,7 +235,7 @@ fun HomeScreen(
                     Text("Descubre las mejores opciones para empezar bien tu día.", fontSize = 13.sp, color = Color(0xFF5A3C1D), textAlign = TextAlign.Justify)
                     Spacer(Modifier.height(10.dp))
                     Button(
-                        onClick = {},
+                        onClick = { navController.navigate(SearchScreenNavigation) },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF49724C)),
                         shape = RoundedCornerShape(40)
                     ) {

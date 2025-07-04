@@ -116,4 +116,10 @@ class CreateProductoViewModel(
         )
         _imagenUri.value = null
     }
+
+
+    fun resetSuccess() {
+        _success.value = false
+    }
+
 }

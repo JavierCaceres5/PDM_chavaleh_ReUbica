@@ -133,4 +133,6 @@ class RegistroComercioViewModel : ViewModel() {
             }
         }
     }
+
+
 }
