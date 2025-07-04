@@ -97,11 +97,6 @@ fun FavoriteScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            Box(modifier = Modifier.weight(1f)) {
-                FavoriteTab("Productos", selectedTab == "Productos") {
-                    selectedTab = "Productos"
-                }
-            }
             Spacer(modifier = Modifier.width(8.dp))
             Box(modifier = Modifier.weight(1f)) {
                 FavoriteTab("Puestos", selectedTab == "Puestos") {
@@ -112,14 +107,6 @@ fun FavoriteScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (selectedTab == "Puestos") {
-            if (comerciosFiltrados.isEmpty()) {
-                Text(
-                    "Aún no tienes puestos guardados.",
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(8.dp)
-                )
-            } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(comerciosFiltrados.size) { index ->
                         val favorito = comerciosFiltrados[index]
@@ -169,19 +156,16 @@ fun FavoriteScreen(
                     }
                 }
             }
-        } else {
-            // Pendiente implementar Productos
         }
-    }
-}
 
 @Composable
 fun FavoriteTab(title: String, isSelected: Boolean, onClick: () -> Unit) {
     val bgColor = if (isSelected) Color(0xFFDFF2E1) else Color(0xFFF7F8EF)
-    val icon = if (title == "Productos") Icons.Filled.ShoppingBag else Icons.Filled.Store
+    val icon =  Icons.Filled.Store
 
     Row(
         modifier = Modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(bgColor)
             .clickable { onClick() }

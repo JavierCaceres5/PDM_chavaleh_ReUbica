@@ -171,6 +171,7 @@ fun CustomScaffold(rootNavController: NavHostController){
 
                 composable<SearchScreenNavigation>{
                     SearchScreen(navController = navController)
+
                 }
 
                 composable<ProfileScreenNavigation>{

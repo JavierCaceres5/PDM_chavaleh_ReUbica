@@ -77,349 +77,446 @@ fun ProfileScreen(
     val scrollState = rememberScrollState()
     val showBlockedDeleteAccountDialog = remember { mutableStateOf(false) }
     val loading by profileViewModel.loading.collectAsState()
-    var navigatedToLoading by remember { mutableStateOf(false) }
     val userSession by profileViewModel.userSession.collectAsState()
     val rol = userSession?.userProfile?.user_role
 
-    // Solo llamas al iniciar
-    LaunchedEffect(Unit) {
-        profileViewModel.refreshUserData()
-    }
+    val negocioEliminado by profileViewModel.negocioEliminado.collectAsState()
+    val hasProductos by profileViewModel.hasProductos.collectAsState()
+    val showHasProductosDialog = remember { mutableStateOf(false) }
 
-    LaunchedEffect(loading) {
-        if (loading && !navigatedToLoading) {
-            navController.navigate(LoadingScreenNavigation::class.qualifiedName ?: "") {
-                popUpTo(ProfileScreenNavigation::class.qualifiedName ?: "") { inclusive = true }
-            }
-            navigatedToLoading = true
-        } else if (!loading && navigatedToLoading) {
-            navController.navigate(ProfileScreenNavigation::class.qualifiedName ?: "") {
-                popUpTo(LoadingScreenNavigation::class.qualifiedName ?: "") { inclusive = true }
-            }
-            navigatedToLoading = false
+
+    LaunchedEffect(negocioEliminado) {
+        if (negocioEliminado) {
+            profileViewModel.resetNegocioEliminado()
         }
     }
 
-    if (loading) return
-
-    Column(modifier = Modifier.verticalScroll(scrollState)) {
+    if (loading) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(260.dp)
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0.7f)),
+            contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.profile),
-                contentDescription = "Profile Image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentScale = ContentScale.Crop
-            )
-            Box(
-                modifier = Modifier
-                    .size(140.dp)
-                    .align(Alignment.BottomCenter)
-                    .offset(y = 30.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray),
-                contentAlignment = Alignment.Center
-            ) {
-                val imageUrl = userSession?.userProfile?.user_icon
-                if (!imageUrl.isNullOrEmpty()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(imageUrl),
-                        contentDescription = "Foto de perfil",
-                        modifier = Modifier
-                            .size(140.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = "Profile Icon",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(120.dp)
-                    )
-                }
-            }
+            CircularProgressIndicator(color = Color(0xFF49724C))
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp)
-                .padding(bottom = 25.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = "Perfil",
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF5A3C1D),
-                fontSize = 18.sp,
-                modifier = Modifier.padding(start = 16.dp, top = 15.dp)
-            )
-            ListItemRow("Datos personales", onClick = { navController.navigate(PersonalDataNavigation) }, icon = Icons.Filled.ArrowOutward)
-            ListItemRow("Cerrar sesión",  onClick = { showConfirmLogOut.value = true },  icon = Icons.Filled.ArrowOutward)
-            ListItemRow("Eliminar cuenta",  onClick = {
-                if (rol == "emprendedor") {
-                    showBlockedDeleteAccountDialog.value = true
-                } else {
-                    showConfirmDeleteAccount.value = true
-                }
-            },
-                icon = Icons.Filled.ArrowOutward
-            )
-
-            Text(
-                text = "Actividad",
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF5A3C1D),
-                fontSize = 18.sp,
-                modifier = Modifier.padding(start = 16.dp, top = 15.dp)
-            )
-
-            ListItemRow("Notificaciones",  onClick = { navController.navigate(NotificationsNavigation) },  icon = Icons.Filled.ArrowOutward)
-            if (rol == "cliente") {
-                ListItemRow(
-                    text = "Registrar negocio",
-                    onClick = { navController.navigate(RegisterLocalNavigation) },
-                    icon = Icons.Filled.ArrowOutward
+        Column(modifier = Modifier.verticalScroll(scrollState)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "Profile Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
                 )
-            } else if (rol == "emprendedor") {
+                Box(
+                    modifier = Modifier
+                        .size(140.dp)
+                        .align(Alignment.BottomCenter)
+                        .offset(y = 30.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val imageUrl = userSession?.userProfile?.user_icon
+                    if (!imageUrl.isNullOrEmpty()) {
+                        Image(
+                            painter = rememberAsyncImagePainter(imageUrl),
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier
+                                .size(140.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.AccountCircle,
+                            contentDescription = "Profile Icon",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(120.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(15.dp)
+                    .padding(bottom = 25.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
                 Text(
-                    text = "Mi negocio",
+                    text = "Perfil",
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF5A3C1D),
                     fontSize = 18.sp,
                     modifier = Modifier.padding(start = 16.dp, top = 15.dp)
                 )
                 ListItemRow(
-                    text = "Información de local",
-                    onClick = { navController.navigate(LocalInformationScreenNavigation) },
+                    "Datos personales",
+                    onClick = { navController.navigate(PersonalDataNavigation) },
                     icon = Icons.Filled.ArrowOutward
                 )
                 ListItemRow(
-                    text = "Carta de productos",
-                    onClick = { navController.navigate(CartaProductosScreenNavigation) },
+                    "Cerrar sesión",
+                    onClick = { showConfirmLogOut.value = true },
                     icon = Icons.Filled.ArrowOutward
                 )
                 ListItemRow(
-                    text = "Eliminar negocio",
-                    onClick = { showConfirmDeleteEmprendimiento.value = true },
+                    "Eliminar cuenta", onClick = {
+                        if (rol == "emprendedor") {
+                            showBlockedDeleteAccountDialog.value = true
+                        } else {
+                            showConfirmDeleteAccount.value = true
+                        }
+                    },
+                    icon = Icons.Filled.ArrowOutward
+                )
+
+                if (rol == "cliente") {
+
+                    Text(
+                        text = "Actividad",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF5A3C1D),
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(start = 16.dp, top = 15.dp)
+                    )
+
+                    ListItemRow(
+                        text = "Registrar negocio",
+                        onClick = { navController.navigate(RegisterLocalNavigation) },
+                        icon = Icons.Filled.ArrowOutward
+                    )
+                } else if (rol == "emprendedor") {
+                    Text(
+                        text = "Mi negocio",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF5A3C1D),
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(start = 16.dp, top = 15.dp)
+                    )
+                    ListItemRow(
+                        text = "Información de local",
+                        onClick = { navController.navigate(LocalInformationScreenNavigation) },
+                        icon = Icons.Filled.ArrowOutward
+                    )
+                    ListItemRow(
+                        text = "Carta de productos",
+                        onClick = { navController.navigate(CartaProductosScreenNavigation) },
+                        icon = Icons.Filled.ArrowOutward
+                    )
+                    ListItemRow(
+                        text = "Eliminar negocio",
+                        onClick = { showConfirmDeleteEmprendimiento.value = true },
+                        icon = Icons.Filled.ArrowOutward
+                    )
+                }
+                Text(
+                    text = "Configuración",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF5A3C1D),
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(start = 16.dp, top = 15.dp)
+                )
+                ListItemRow(
+                    "Información legal",
+                    onClick = { navController.navigate(LegalInformationNavigation) },
                     icon = Icons.Filled.ArrowOutward
                 )
             }
-            Text(
-                text = "Configuración",
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF5A3C1D),
-                fontSize = 18.sp,
-                modifier = Modifier.padding(start = 16.dp, top = 15.dp)
-            )
-            ListItemRow("Información legal",  onClick = { navController.navigate(LegalInformationNavigation) },  icon = Icons.Filled.ArrowOutward)
         }
-    }
 
-    if (showConfirmLogOut.value) {
-        AlertDialog(
-            containerColor = Color.White,
-            onDismissRequest = { showConfirmLogOut.value = false },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showConfirmLogOut.value = false
-                        CoroutineScope(Dispatchers.IO).launch {
-                            sessionManager.clearSession()
-                            launch(Dispatchers.Main) {
-                                rootNavController.navigate(LoginScreenNavigation){
-                                    popUpTo(0) { inclusive = true}
+        if (showConfirmLogOut.value) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { showConfirmLogOut.value = false },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showConfirmLogOut.value = false
+                            CoroutineScope(Dispatchers.IO).launch {
+                                sessionManager.clearSession()
+                                launch(Dispatchers.Main) {
+                                    rootNavController.navigate(LoginScreenNavigation) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
                                 }
                             }
-                        }
-                        showSuccessLogOut.value = true
-                    },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E210B), contentColor = Color.White)
-                ) {
-                    Text("Cerrar sesión", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = { showConfirmLogOut.value = false },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    border = BorderStroke(1.dp, Color.Black),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
-                ) {
-                    Text("Cancelar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                }
-            },
-            title = { Text("¿Estás seguro que deseas cerrar sesión?", fontWeight = FontWeight.Bold, fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.Black) },
-            text = { Text("Tendrás que volver a iniciar sesión para realizar cualquier actividad.", textAlign = TextAlign.Center, color = Color.Black) }
-        )
-    }
-
-    if (showConfirmDeleteAccount.value) {
-        AlertDialog(
-            containerColor = Color.White,
-            onDismissRequest = { showConfirmDeleteAccount.value = false },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showConfirmDeleteAccount.value = false
-                        profileViewModel.deleteAccount {
-                            rootNavController.navigate(RegistroNavigation) {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }                    },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E210B), contentColor = Color.White)
-                ) {
-                    Text("Eliminar", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        showConfirmDeleteAccount.value = false
-                    },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    border = BorderStroke(1.dp, Color.Black),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
-                ) {
-                    Text("Cancelar", fontWeight = FontWeight.Bold)
-                }
-            },
-            title = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Eliminar cuenta", fontWeight = FontWeight.Bold, fontSize = 24.sp, textAlign = TextAlign.Center, color = Color.Black)
-                }
-            },
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            showSuccessLogOut.value = true
+                        },
+                        modifier = Modifier.width(130.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF8E210B),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Cerrar sesión", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { showConfirmLogOut.value = false },
+                        modifier = Modifier.width(130.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        border = BorderStroke(1.dp, Color.Black),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text("Cancelar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                },
+                title = {
                     Text(
-                        "ADVERTENCIA",
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF8E210B),
-                        fontSize = 24.sp
+                        "¿Estás seguro que deseas cerrar sesión?",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                },
+                text = {
                     Text(
-                        "Estás a punto de eliminar una cuenta de estado activo. Todos tus datos guardados serán eliminados permanentemente. Esta acción no se puede deshacer.",
-                        textAlign = TextAlign.Center, color = Color.Black
+                        "Tendrás que volver a iniciar sesión para realizar cualquier actividad.",
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
                     )
                 }
-            }
-        )
-    }
-    if (showBlockedDeleteAccountDialog.value) {
-        AlertDialog(
-            containerColor = Color.White,
-            onDismissRequest = { showBlockedDeleteAccountDialog.value = false },
-            confirmButton = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) { Button(
-                    onClick = { showBlockedDeleteAccountDialog.value = false },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8E210B),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Entendido", fontWeight = FontWeight.Bold)
-                }
-                }
-            },
-            title = {
-                Text(
-                    "No puedes eliminar tu cuenta",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    color = Color.Black
-                )
-            },
-            text = {
-                Text(
-                    "Para eliminar tu cuenta primero debes eliminar tu emprendimiento. Dirígete a la sección 'Eliminar negocio' en tu perfil.",
-                    textAlign = TextAlign.Center,
-                    color = Color.Black
-                )
-            },
-
             )
-    }
+        }
 
-    if (showConfirmDeleteEmprendimiento.value) {
-        AlertDialog(
-            containerColor = Color.White,
-            onDismissRequest = { showConfirmDeleteEmprendimiento.value = false },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showConfirmDeleteEmprendimiento.value = false
-                        profileViewModel.deleteMiEmprendimiento() {
-                            rootNavController.navigate(HomeScreenNavigation) {
-                                popUpTo(0) { inclusive = true }
+        if (showConfirmDeleteAccount.value) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { showConfirmDeleteAccount.value = false },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showConfirmDeleteAccount.value = false
+                            profileViewModel.deleteAccount {
+                                rootNavController.navigate(RegistroNavigation) {
+                                    popUpTo(0) { inclusive = true }
+                                }
                             }
-                        }                    },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E210B), contentColor = Color.White)
-                ) {
-                    Text("Eliminar", fontWeight = FontWeight.Bold)
+                        },
+                        modifier = Modifier.width(130.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF8E210B),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Eliminar", fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            showConfirmDeleteAccount.value = false
+                        },
+                        modifier = Modifier.width(130.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        border = BorderStroke(1.dp, Color.Black),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text("Cancelar", fontWeight = FontWeight.Bold)
+                    }
+                },
+                title = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Eliminar cuenta",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color.Black
+                        )
+                    }
+                },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            "ADVERTENCIA",
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF8E210B),
+                            fontSize = 24.sp
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            "Estás a punto de eliminar una cuenta de estado activo. Todos tus datos guardados serán eliminados permanentemente. Esta acción no se puede deshacer.",
+                            textAlign = TextAlign.Center, color = Color.Black
+                        )
+                    }
                 }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        showConfirmDeleteEmprendimiento.value = false
-                    },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    border = BorderStroke(1.dp, Color.Black),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
-                ) {
-                    Text("Cancelar", fontWeight = FontWeight.Bold)
-                }
-            },
-            title = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Eliminar emprendimiento", fontWeight = FontWeight.Bold, fontSize = 24.sp, textAlign = TextAlign.Center, color = Color.Black)
-                }
-            },
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            )
+        }
+        if (showBlockedDeleteAccountDialog.value) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { showBlockedDeleteAccountDialog.value = false },
+                confirmButton = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            onClick = { showBlockedDeleteAccountDialog.value = false },
+                            modifier = Modifier.width(130.dp),
+                            shape = RoundedCornerShape(0.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF8E210B),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text("Entendido", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                },
+                title = {
                     Text(
-                        "ADVERTENCIA",
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF8E210B),
-                        fontSize = 24.sp
+                        "No puedes eliminar tu cuenta",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                },
+                text = {
                     Text(
-                        "Estás a punto de eliminar un emprendimiento de estado activo. Todos la información y datos almacenados serán eliminados permanentemente. Esta acción no se puede deshacer.",
-                        textAlign = TextAlign.Center, color = Color.Black
+                        "Para eliminar tu cuenta primero debes eliminar tu emprendimiento. Dirígete a la sección 'Eliminar negocio' en tu perfil.",
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
                     )
-                }
-            }
-        )
-    }
+                },
 
+                )
+        }
+
+        if (hasProductos) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { profileViewModel.resetHasProductos() },
+                confirmButton = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            onClick = { profileViewModel.resetHasProductos() },
+                            modifier = Modifier.width(130.dp),
+                            shape = RoundedCornerShape(0.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF8E210B),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text("Entendido", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                },
+                title = {
+                    Text(
+                        "No puedes eliminar tu negocio",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
+                    )
+                },
+                text = {
+                    Text(
+                        "Para eliminar tu negocio primero debes eliminar todos los productos asociados.",
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
+                    )
+                }
+            )
+        }
+
+
+        if (showConfirmDeleteEmprendimiento.value) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { showConfirmDeleteEmprendimiento.value = false },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showConfirmDeleteEmprendimiento.value = false
+                            profileViewModel.deleteMiEmprendimiento()
+                        },
+                        modifier = Modifier.width(130.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF8E210B),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Eliminar", fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            showConfirmDeleteEmprendimiento.value = false
+                        },
+                        modifier = Modifier.width(130.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        border = BorderStroke(1.dp, Color.Black),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text("Cancelar", fontWeight = FontWeight.Bold)
+                    }
+                },
+                title = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Eliminar emprendimiento",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color.Black
+                        )
+                    }
+                },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            "ADVERTENCIA",
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF8E210B),
+                            fontSize = 24.sp
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            "Estás a punto de eliminar un emprendimiento de estado activo. Todos la información y datos almacenados serán eliminados permanentemente. Esta acción no se puede deshacer.",
+                            textAlign = TextAlign.Center, color = Color.Black
+                        )
+                    }
+                }
+            )
+        }
+    }
 }
