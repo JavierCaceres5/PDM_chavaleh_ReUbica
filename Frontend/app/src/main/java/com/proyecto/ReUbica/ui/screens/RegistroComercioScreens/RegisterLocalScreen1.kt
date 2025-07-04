@@ -26,7 +26,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -41,21 +40,15 @@ import coil.compose.rememberAsyncImagePainter
 import com.proyecto.ReUbica.R
 import com.proyecto.ReUbica.ui.layouts.StepTopBar
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen2Navigation
-import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
+import androidx.compose.ui.platform.LocalContext
+import com.proyecto.ReUbica.utils.getRealPathFromUri
 
 @Composable
-
-fun RegisterLocalScreen1(navController: NavHostController, viewModel: RegistroComercioViewModel) {
-
-    RegisterLocalScreen1Content(
-        registroComercio = viewModel,
-
 fun RegisterLocalScreen1(navController: NavHostController, viewModelComercio: RegistroComercioViewModel, viewModelProducto: CreateProductoViewModel) {
 
     RegisterLocalScreen1Content(
         registroComercio = viewModelComercio,
         createProducto = viewModelProducto,
-
         onNext = { navController.navigate(RegisterLocalScreen2Navigation) },
         onBack = { navController.popBackStack() }
     )
@@ -63,7 +56,6 @@ fun RegisterLocalScreen1(navController: NavHostController, viewModelComercio: Re
 
 @Composable
 fun RegisterLocalScreen1Content(
-
     createProducto: CreateProductoViewModel,
     registroComercio: RegistroComercioViewModel,
     onNext: () -> Unit = {},
@@ -112,21 +104,25 @@ fun RegisterLocalScreen1Content(
 
     val emprendimiento by registroComercio.emprendimiento.collectAsState()
 
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
     var expandedTipo by remember { mutableStateOf(false) }
     var expandedCategoria by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
     var descripcionInvalida by remember { mutableStateOf(false) }
 
+
     val context = LocalContext.current
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val logoPath = emprendimiento.logo
 
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-        imageUri = it
-        registroComercio.setValues("logo", it?.toString() ?: "")
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            imageUri = uri
+            val realPath = getRealPathFromUri(context, uri)
+            registroComercio.setValues("logo", realPath)
+        }
     }
 
-    val profileViewModel: ProfileScreenViewModel = viewModel()
 
     val scrollState = rememberScrollState()
     val subcategorias = categoriasSecundarias[emprendimiento.categoriasPrincipales.firstOrNull()] ?: emptyList()
@@ -252,6 +248,13 @@ fun RegisterLocalScreen1Content(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
+                } else if (!logoPath.isNullOrBlank()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(logoPath),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
@@ -264,6 +267,7 @@ fun RegisterLocalScreen1Content(
                     }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -303,7 +307,6 @@ fun RegisterLocalScreen1Content(
                 }
             }
 
-
             Button(
                 onClick = {
 
@@ -342,7 +345,6 @@ fun RegisterLocalScreen1Content(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
-
 }
 
 @Composable

@@ -1,7 +1,6 @@
 package com.proyecto.ReUbica.ui.screens.CartaProductos
 
 import android.app.Application
-
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -51,10 +50,8 @@ import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.repository.ProductoRepository
 import com.proyecto.ReUbica.ui.navigations.RegisterLocalScreen3Navigation
 import com.proyecto.ReUbica.utils.ViewModelFactory
-
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-
 
 @Composable
 fun CartaProductosScreen(
@@ -87,10 +84,10 @@ fun CartaProductosScreen(
     var imagenEditada by remember { mutableStateOf("") }
     var nuevaImagenUri by remember { mutableStateOf<Uri?>(null) }
 
+// Picker:
     val pickImageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { nuevaImagenUri = it }
     }
-
     LaunchedEffect(Unit) {
         viewModel.cargarProductos()
     }
@@ -147,8 +144,7 @@ fun CartaProductosScreen(
                 .padding(start = 16.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { navController.navigate(RegisterLocalScreen3Navigation.withArgs(true))
-            }) {
+            IconButton(onClick = { navController.navigate(RegisterLocalScreen3Navigation) }) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = "Agregar",
@@ -209,7 +205,6 @@ fun CartaProductosScreen(
             }
         }
     }
-
     if (showDialogDelete && confirmEliminando != null) {
         AlertDialog(
             containerColor = Color.White,
@@ -222,7 +217,7 @@ fun CartaProductosScreen(
                     onClick = {
                         showDialogDelete = false
                         confirmEliminando?.let {
-                            viewModel.eliminarProducto(it.id.toString())
+                            viewModel.eliminarProducto(it.id.toString())  // <-- AQUÍ
                         }
                         confirmEliminando = null
                     },
@@ -262,9 +257,7 @@ fun CartaProductosScreen(
             onDismissRequest = {
                 showDialogEditar = false
                 productoParaEditar = null
-
                 nuevaImagenUri = null
-
             },
             title = {
                 Text(
@@ -305,10 +298,9 @@ fun CartaProductosScreen(
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     Spacer(modifier = Modifier.height(16.dp))
 
-
+                    // Imagen actual o nueva
                     if (nuevaImagenUri != null) {
                         AsyncImage(
                             model = nuevaImagenUri,
@@ -333,7 +325,6 @@ fun CartaProductosScreen(
                     ) {
                         Text("Cambiar imagen", color = Color(0xFF49724C))
                     }
-
                 }
             },
             confirmButton = {
@@ -346,17 +337,11 @@ fun CartaProductosScreen(
                                 nombre = nombreEditado,
                                 descripcion = descripcionEditada,
                                 precio = precioEditado.toDoubleOrNull() ?: 0.0,
-
                                 nuevaImagenUri = nuevaImagenUri
                             )
                         }
                         productoParaEditar = null
-                        nuevaImagenUri = null
-
-                            )
-                        }
-                        productoParaEditar = null
-
+                        nuevaImagenUri = null // <- Limpia selección al guardar
                     },
                     modifier = Modifier
                         .width(130.dp)
@@ -374,10 +359,7 @@ fun CartaProductosScreen(
                     onClick = {
                         showDialogEditar = false
                         productoParaEditar = null
-
-                        nuevaImagenUri = null
-
-
+                        nuevaImagenUri = null // <- Limpia selección al cancelar
                     },
                     modifier = Modifier
                         .width(130.dp)
@@ -389,51 +371,6 @@ fun CartaProductosScreen(
         )
     }
 
-
-
-    if (showDialogDelete && confirmEliminando != null) {
-        AlertDialog(
-            containerColor = Color.White,
-            onDismissRequest = { showDialogDelete = false },
-            title = { Text("Confirmar eliminación", color = Color.Black, textAlign = TextAlign.Justify) },
-            text = { Text("¿Seguro que quieres eliminar el producto \"${confirmEliminando!!.nombre}\"?"
-                , color = Color.Black, textAlign = TextAlign.Justify ) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDialogDelete = false
-                        confirmEliminando?.let { viewModel.eliminarProducto(it.id.toString()) }
-                        confirmEliminando = null
-                    },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8E210B),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Aceptar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDialogDelete = false
-                        confirmEliminando = null
-                    },
-                    modifier = Modifier.width(130.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    border = BorderStroke(1.dp, Color.Black),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    )
-                ) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
 
 
 }
@@ -482,7 +419,7 @@ fun ProductoItem(
                 color = Color.Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
-                )
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 

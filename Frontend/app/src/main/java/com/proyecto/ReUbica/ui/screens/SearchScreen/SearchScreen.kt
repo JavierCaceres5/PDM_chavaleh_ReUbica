@@ -123,7 +123,6 @@ fun SearchScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
