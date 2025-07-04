@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.repository.ProductoRepository
+import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.producto.UpdateProductoRequest
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
 
     private val userSessionManager = UserSessionManager(application.applicationContext)
     private val productoRepository = ProductoRepository()
+    private val repository = EmprendimientoRepository()
 
     private val _productos = MutableStateFlow<List<ProductoModel>>(emptyList())
     val productos = _productos.asStateFlow()
@@ -43,7 +45,7 @@ class CartaProductosViewModel(application: Application) : AndroidViewModel(appli
 
             try {
                 val token = userSessionManager.getToken()
-                val emprendimientoID = userSessionManager.getEmprendimientoID()
+                val emprendimientoID = repository.getMiEmprendimientoId(token.toString())
                 Log.d(TAG, "Token: $token")
                 Log.d(TAG, "EmprendimientoID: $emprendimientoID")
 

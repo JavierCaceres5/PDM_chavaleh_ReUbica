@@ -14,7 +14,6 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 class EmprendimientoRepository {
 
@@ -44,14 +43,12 @@ class EmprendimientoRepository {
             lat = data.latitud.toString().toBody(),
             lng = data.longitud.toString().toBody(),
             logo = logoPart
-
         )
     }
 
     suspend fun searchByName(token: String, nombre: String): Response<List<EmprendimientoModel>> {
         return api.getEmprendimientosByNombre("Bearer $token", nombre)
     }
-
 
     suspend fun searchByCategory(categoria: String): Response<List<EmprendimientoModel>> {
         return api.getEmprendimientosByCategoria(categoria)
@@ -65,6 +62,20 @@ class EmprendimientoRepository {
         return api.getMiEmprendimiento("Bearer $token")
     }
 
+    suspend fun getMiEmprendimientoId(token: String): String? {
+        return try {
+            val response = getMiEmprendimiento(token)
+            if (response.isSuccessful) {
+                response.body()?.id?.toString()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     suspend fun updateEmprendimiento(token: String, updateData: UpdateEmprendimientoRequest): Response<Unit> {
         return api.updateEmprendimiento("Bearer $token", updateData)
     }
@@ -74,11 +85,10 @@ class EmprendimientoRepository {
     }
 
     suspend fun updateEmprendimientoLogo(token: String, filePath: String): Response<Any> {
-        val file = java.io.File(filePath)
+        val file = File(filePath)
         val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), file)
         val logo = MultipartBody.Part.createFormData("logo", file.name, requestFile)
         return api.updateEmprendimientoLogo("Bearer $token", logo)
     }
-
 
 }

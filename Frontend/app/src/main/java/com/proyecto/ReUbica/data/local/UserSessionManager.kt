@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.auth0.android.jwt.JWT
 import com.google.gson.Gson
 import com.proyecto.ReUbica.data.model.user.UserProfile
+import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -106,5 +107,6 @@ class UserSessionManager(private val context: Context) {
         val perfilActualizado = perfilActual.copy(user_role = nuevoRol)
         saveUserSession(updatedToken, perfilActualizado)
     }
+
 
 }
