@@ -21,8 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.google.gson.Gson
 import com.proyecto.ReUbica.ui.Components.RestaurantCard
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoModel
+import com.proyecto.ReUbica.ui.navigations.ComercioNavigation
 
 @Composable
 fun FavoriteScreen(
@@ -131,10 +133,38 @@ fun FavoriteScreen(
                                 favoritosViewModel.toggleFavorito(favorito.id.toString())
                             },
                             onVerTiendaClick = {
+                                val gson = Gson()
+                                val redesJsonString = favorito.redes_sociales?.let { redes ->
+                                    gson.toJson(
+                                        mapOf(
+                                            "Instagram" to (redes.Instagram ?: ""),
+                                            "Facebook" to (redes.Facebook ?: ""),
+                                            "TikTok" to (redes.TikTok ?: ""),
+                                            "Twitter" to (redes.Twitter ?: "")
+                                        ).filterValues { it.isNotBlank() }
+                                    )
+                                } ?: ""
+
                                 navController.navigate(
-                                    "comercio/${favorito.nombre}"
+                                    ComercioNavigation(
+                                        id = favorito.id.toString(),
+                                        nombre = favorito.nombre ?: "Sin nombre",
+                                        descripcion = favorito.descripcion ?: "Sin descripción",
+                                        categoriasPrincipales = favorito.categoriasPrincipales ?: emptyList(),
+                                        direccion = favorito.direccion ?: "Sin dirección",
+                                        latitud = favorito.latitud ?: 0.0,
+                                        longitud = favorito.longitud ?: 0.0,
+                                        categoriasSecundarias = favorito.categoriasSecundarias ?: emptyList(),
+                                        logo = favorito.logo ?: "",
+                                        emprendimientoPhone = favorito.emprendimientoPhone ?: "",
+                                        redessociales = redesJsonString,
+                                        userID = favorito.userID.toString(),
+                                        createdat = favorito.created_at ?: "",
+                                        updatedat = favorito.updated_at ?: ""
+                                    )
                                 )
                             }
+
                         )
                     }
                 }
