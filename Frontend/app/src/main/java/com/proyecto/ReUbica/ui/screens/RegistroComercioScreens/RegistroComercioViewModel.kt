@@ -10,7 +10,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyecto.ReUbica.data.local.UserSessionManager
 import com.proyecto.ReUbica.data.model.emprendimiento.EmprendimientoCreateRequest
 import com.proyecto.ReUbica.data.model.emprendimiento.RedesSociales
+import com.proyecto.ReUbica.data.model.producto.ProductoModel
 import com.proyecto.ReUbica.data.repository.EmprendimientoRepository
+import com.proyecto.ReUbica.data.repository.ProductoRepository
 import com.proyecto.ReUbica.ui.screens.ProfileScreen.ProfileScreenViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +23,7 @@ class RegistroComercioViewModel : ViewModel() {
 
     private lateinit var userSessionManager: UserSessionManager
     private val repository = EmprendimientoRepository()
+    private val productoRepository = ProductoRepository()
 
     private val _emprendimientoId = MutableStateFlow<UUID?>(null)
     val emprendimientoId = _emprendimientoId.asStateFlow()
@@ -93,6 +96,23 @@ class RegistroComercioViewModel : ViewModel() {
             else -> redesActuales
         }
         _emprendimiento.value = _emprendimiento.value.copy(redes_sociales = nuevasRedes)
+    }
+
+    suspend fun obtenerProductosDelEmprendimiento(): List<ProductoModel> {
+        if (!::userSessionManager.isInitialized) return emptyList()
+        val token = userSessionManager.getToken() ?: return emptyList()
+        val idEmprendimiento = _emprendimientoId.value ?: return emptyList()
+
+        return try {
+            val response = productoRepository.getProductosByEmprendimiento(token, idEmprendimiento.toString())
+            if (response.isSuccessful) {
+                response.body() ?: emptyList()
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     fun createEmprendimiento() {

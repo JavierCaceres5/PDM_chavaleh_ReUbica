@@ -78,10 +78,17 @@ fun RegisterLocalScreen3Content(
     var showError by remember { mutableStateOf(false) }
     var descripcionInvalida by remember { mutableStateOf(false) }
 
-    var errorNombre by remember { mutableStateOf<String?>(null) }
-    var errorGeneral by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val isSuccess by createProducto.success.collectAsState()
+    var productosCargados by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val productosExistentes = registroComercio.obtenerProductosDelEmprendimiento()
+        createProducto.setProductosExistentes(productosExistentes)
+        productosCargados = true
+        println("Productos cargados después de obtenerlos: $productosCargados")
+    }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
@@ -92,8 +99,7 @@ fun RegisterLocalScreen3Content(
 
     LaunchedEffect(isSuccess) {
         if (isSuccess) {
-            errorNombre = null
-            errorGeneral = null
+            errorMessage = null
             showDialog = true
             createProducto.clearProducto()
             createProducto.setImage(null)
@@ -149,11 +155,7 @@ fun RegisterLocalScreen3Content(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            errorNombre?.let {
-                ErrorMessageBox(message = it, modifier = Modifier.fillMaxWidth())
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            errorGeneral?.let {
+            errorMessage?.let {
                 ErrorMessageBox(message = it, modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -282,20 +284,27 @@ fun RegisterLocalScreen3Content(
             ) {
                 Button(
                     onClick = {
-                        errorNombre = null
-                        errorGeneral = null
+                        errorMessage = null
                         showError = false
                         descripcionInvalida = false
 
                         val nombreValido = producto.nombre.matches(Regex("^[A-Za-záéíóúÁÉÍÓÚñÑ ]+\$"))
-                        val descripcionValida = producto.descripcion.length <= 150
                         val precioValido = producto.precio > 0.0
 
                         if (producto.nombre.isBlank() || producto.descripcion.isBlank() || !precioValido || imagenUri == null) {
-                            errorGeneral = "Por favor, complete todos los campos antes de continuar."
+                            errorMessage = "Por favor, complete todos los campos antes de continuar."
+                            println("Error: $errorMessage")
                         } else if (!nombreValido) {
-                            errorNombre = "El nombre del producto solo puede contener letras y espacios."
-                        }  else {
+                            errorMessage = "El nombre del producto solo puede contener letras y espacios."
+                            println("Error: $errorMessage")
+                        } else if (!productosCargados) {
+                            errorMessage = "Espere a que se carguen los productos."
+                            println("Error: $errorMessage")
+                        } else if (createProducto.nombreProductoExiste(producto.nombre)) {
+                            errorMessage = "Ya existe un producto con este nombre en tu emprendimiento."
+                            println("Error: $errorMessage")
+                        } else {
+                            errorMessage = null
                             coroutineScope.launch {
                                 createProducto.crearProducto(context)
                             }
